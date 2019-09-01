@@ -829,6 +829,10 @@ Module_Status LogVar(char* logName, logVarType_t type, uint32_t source, char* Co
 				if(logVars[i].type == 0)
 				{		
 					logVars[i].type = type;
+					if(type > 3) {
+					if ((source < FLASH_BASE || source > (FLASH_BASE+FLASH_SIZE)) && (source < SRAM_BASE || source > (SRAM_BASE+SRAM_SIZE)) && (source < PERIPH_BASE || source > (PERIPH_BASE+PERIPH_SIZE)))
+								return H1BR6_ERR_WrongAddress;}
+					
 					logVars[i].source = source;
 					logVars[i].logIndex = j;
 					logVars[i].varLabel = ColumnLabel;
@@ -1253,6 +1257,7 @@ portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	static const int8_t *pcLogDoesNotExist = ( int8_t * ) "Variable was not added to log. Log does not exist\r\n";
 	static const int8_t *pcMemoryFull = ( int8_t * ) "Variable was not added to log. Internal memory full\r\n";
 	static const int8_t *pcMaxLogVars = ( int8_t * ) "Variable was not added to log. Maximum number of logged variables reached\r\n";
+	static const int8_t *pcWrongAddress = ( int8_t * ) "Variable was not added to log. Wrong in Address\r\n\t Adress must be start with 0x2 'SRAM' , 0x4 'Peripheral' or 0x08 'Flash'\r\n";
 	
 	/* Remove compile time warnings about unused parameters, and check the
 	write buffer is not NULL.  NOTE - for simplicity, this example assumes the
@@ -1311,8 +1316,6 @@ portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 		source = ( uint8_t ) atol( ( char * ) pcParameterString4+1 );
 	else if (!strncmp((const char *)pcParameterString4, "0x", 2)) {
 		source = strtoul(( const char * ) pcParameterString4, NULL, 16);
-		if ((source < FLASH_BASE || source > (FLASH_BASE+FLASH_SIZE)) && (source < SRAM_BASE || source > (SRAM_BASE+SRAM_SIZE)))
-			result = H1BR6_ERR_WrongParams;
 	} else
 		result = H1BR6_ERR_WrongParams;
 	
@@ -1343,7 +1346,9 @@ portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcMemoryFull);
 	} else if (result ==  H1BR6_ERR_MaxLogVars) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcMaxLogVars);
-	}
+	} else if (result == H1BR6_ERR_WrongAddress) {
+		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcWrongAddress);
+	} 
 	
 	/* There is no more data to return after this single string, so return
 	pdFALSE. */

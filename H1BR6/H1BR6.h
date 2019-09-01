@@ -155,6 +155,7 @@ typedef enum
 	H1BR6_ERR_LogDoesNotExist,
 	H1BR6_ERR_LogIsNotActive,
 	H1BR6_ERR_MemoryFull,
+	H1BR6_ERR_WrongAddress,
 	H1BR6_ERROR = 255
 } Module_Status;
 
