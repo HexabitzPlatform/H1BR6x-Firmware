@@ -73,6 +73,17 @@ void HardFault_Handler(void)
 	for(;;) {};  
 }
 
+/**
+* @brief This function handles Hard Fault error callback.
+*/
+void Default_Handler(void)
+{
+	/* Loop here */
+	HAL_NVIC_SystemReset();
+	//for(;;) {};  
+}
+
+
 /******************************************************************************/
 /* STM32F0xx Peripheral Interrupt Handlers                                    */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
