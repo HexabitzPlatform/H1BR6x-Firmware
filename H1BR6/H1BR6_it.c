@@ -44,9 +44,9 @@
 extern uint8_t UARTRxBuf[NumOfPorts][MSG_RX_BUF_SIZE];
 //extern uint8_t UARTTxBuf[3][MSG_TX_BUF_SIZE];
 extern uint8_t UARTRxBufIndex[NumOfPorts];
+extern TIM_HandleTypeDef htim16;
 
 /* External function prototypes ----------------------------------------------*/
-
 
 
 
@@ -91,6 +91,22 @@ void Default_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f0xx.s).                    */
 /******************************************************************************/
+/**
+* @brief This function handles Timer 16 global interrupt 
+*/
+void TIM16_IRQHandler(void)
+{
+	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+
+  HAL_TIM_IRQHandler(&htim16);
+	
+	/* If lHigherPriorityTaskWoken is now equal to pdTRUE, then a context
+	switch should be performed before the interrupt exists.  That ensures the
+	unblocked (higher priority) task is returned to immediately. */
+	portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );	
+
+	
+}
 
 /**
 * @brief This function handles USART1 global interrupt / USART1 wake-up interrupt through EXTI line 25.

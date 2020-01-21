@@ -13,6 +13,7 @@
 			>> DMA1 Ch1, DMA1 Ch3, DMA2 Ch3 for port-to-port streaming.
 			>> SPI1 for uSD
 			>> PB0 for uSD detect
+			>> TIM16 to audio WAVE file timing
 			
 */
 	
@@ -29,9 +30,30 @@ UART_HandleTypeDef huart5;
 /* Module exported parameters ------------------------------------------------*/
 module_param_t modParam[NUM_MODULE_PARAMS] = {{.paramPtr=NULL, .paramFormat=FMT_FLOAT, .paramName=""}};
 
+TIM_HandleTypeDef htim16;
+
+/*=================================================================================*/
+/*========================= CONSTANTS ==============================================*/
+/*=================================================================================*/
+const uint8_t numberMap[3] = {1, 10, 100};
+const char logHeaderText1[] = "Datalog created by BOS V%d.%d.%d on %s\n";
+const char logHeaderText2[] = "Log type: Rate @ %.2f Hz\n\n";
+const char logHeaderText3[] = "Log type: Events\n\n";
+const char logHeaderTimeDate[] = "%s %s\n";
+const char Start_Mark = 0xff;
+
+#define MAX_WAVE_NAME_LENTH 30
+#define WAV_SCAN_MODE 			1
+#define WAV_STREAM_MODE		 	2
+#define LOG_MODE		 				0
+#define WAVE_DATA_OFFSET		44
+
+char Const_WAVE_NAME[MAX_WAVE_NAME_LENTH];
+
 /*=================================================================================*/
 /*========================= Private variables  ====================================*/
 /*=================================================================================*/
+uint8_t SD_MODE = 0;
 log_t logs[MAX_LOGS] = {0};
 logVar_t logVars[MAX_LOG_VARS] = {0};
 uint32_t compareValue[MAX_LOG_VARS]; 
@@ -52,15 +74,53 @@ uint8_t temp_uint8 = 0;
 bool enableSequential = false;
 bool enableTimeDateHeader = false;
 
+/* WAVE file parameters */
+uint8_t wavebuff[44];
+UINT Number_br;
+FIL _path_pointer;
 
-/*=================================================================================*/
-/*========================= CONSTANT ==============================================*/
-/*=================================================================================*/
-const uint8_t numberMap[3] = {1, 10, 100};
-const char logHeaderText1[] = "Datalog created by BOS V%d.%d.%d on %s\n";
-const char logHeaderText2[] = "Log type: Rate @ %.2f Hz\n\n";
-const char logHeaderText3[] = "Log type: Events\n\n";
-const char logHeaderTimeDate[] = "%s %s\n";
+struct /* WAVE FILE Header information struct - 44 bytes */
+{
+/*the "RIFF" chnk descriptor */
+char CHUNKID[4];  						//4 byte
+uint32_t CHUNKSIZE; 					//4 byte
+char FORMAT[4];							 	//4 byte
+/*the "fmt" sub-chunk */
+char SUBCHhUNK1ID[4]; 				//4 byte
+uint32_t SUBCHUNK1SIZE; 			//4 byte
+uint16_t AUDIOFMT; 						//2 byte
+uint16_t NO_CHANNEL; 					//2 byte
+uint32_t SAMPLERATE; 					//4 byte
+uint32_t BYTERATE; 						//4 byte
+uint16_t BLOCKALIGN; 					//2 byte
+uint16_t BITPERSAMPLE;			 	//2 byte
+/*the "data" sub-chunk */
+char SUBCHUNK2ID[4]; 					//4 byte
+uint32_t SUBCHUNK2SIZE; 			//4 byte
+	
+}WAVEFIL;
+
+uint32_t WAVE_bytes;
+uint32_t READ_WAVE_BYTES=WAVE_DATA_OFFSET;		// WAVE header size in bytes
+uint8_t SCALE_FAC=1;
+uint8_t SCALE_SHIFT=0;
+int16_t I;
+uint8_t temp_H07R3_ID;
+uint8_t temp_H07R3_DST;
+//played wave name
+char* WAVE_NAME;
+//get wave file size
+uint32_t WAVE_SIZE;
+//calculate number of Byte in Block Sample align
+uint8_t NO_BYTE_SAMPLE ;	
+//calculate wave byte rate time wait in us 
+uint16_t SAMPLETIME ;
+//define origrn path pointer for f_close
+FIL _wave_pointer;
+//define wave BLOCKALIGN buffer
+uint8_t WaveAlignBuff[500];			// NO_BYTE_SAMPLE
+//define wave sample buffer
+//uint8_t WaveSampleBuff[1000];		// WAVEFIL.BLOCKALIGN
 
 /*=================================================================================*/
 /*========================= Private function prototypes ===========================*/
@@ -182,7 +242,7 @@ void Module_Init(void)
 	
 	/* This module needs more time to process buttons */
 	needToDelayButtonStateReset = true;
-
+	
 	/* Create the logging task */
 	xTaskCreate(LogTask, (const char *) "LogTask", (2*configMINIMAL_STACK_SIZE), NULL, osPriorityNormal-osPriorityIdle, &LogTaskHandle);				
 }
@@ -194,10 +254,34 @@ void Module_Init(void)
 Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src, uint8_t dst, uint8_t shift)
 {
 	Module_Status result = H1BR6_OK;
+	uint8_t templn;
 	
 	switch (code)
 	{
-
+		case CODE_H1BR6_READ_WAVE :
+				//1st parameter H07R3x ID, 2nd parameter stream dst Port
+				temp_H07R3_ID = cMessage[port-1][shift];
+				temp_H07R3_DST = cMessage[port-1][shift+1];		// Note this is not used
+				SD_MODE = WAV_STREAM_MODE;			
+		break;
+		
+		case CODE_H1BR6_SCAN_WAVE :
+		  templn = messageLength[port-1]-shift-1;		
+			for (uint8_t i=0 ; i<templn ; i++)
+			{
+				Const_WAVE_NAME[i] = (char) cMessage[port-1][shift+1+i];
+			}
+			Const_WAVE_NAME[templn] = '.';
+			Const_WAVE_NAME[templn+1] = 'w';
+			Const_WAVE_NAME[templn+2] = 'a';
+			Const_WAVE_NAME[templn+3] = 'v';
+			Const_WAVE_NAME[templn+4] = 0;
+			//1st parameter H07R3x ID, and for WAV name for the latest parameters
+			WAVE_NAME = (char *) &Const_WAVE_NAME[0];
+			temp_H07R3_ID = cMessage[port-1][shift];
+			SD_MODE = WAV_SCAN_MODE;
+		break;
+			
 		default:
 			result = H1BR6_ERR_UnknownMessage;
 			break;
@@ -289,7 +373,7 @@ void LogTask(void * argument)
   volatile uint8_t i,j;
   volatile uint32_t u32lTick = 0;
   volatile uint32_t u32lRate = 0;
-	
+
 	/* Initialize the micro SD card */
 	MicroSD_Init();
 	
@@ -303,176 +387,190 @@ void LogTask(void * argument)
 //      eventResult |= CheckLogVarEvent(i);
 //    }
 		
-		/* Check all active logs */
-		for( j=0 ; j<MAX_LOGS ; j++)
+		switch (SD_MODE)
 		{
-      u32lTick = HAL_GetTick()-logs[j].t0;
-      u32lRate = configTICK_RATE_HZ/logs[j].rate;
-			
-			if ( u32lTick >= u32lRate )
-				++logs[j].sampleCount;				// Advance one sample
-			
-			if ( (activeLogs >> j) & 0x01 )
-			{			
-				/* Open this log file if it's closed (and close open one) */
-				OpenThisLog(j, &MyFile);
-        
-				memset(lineBuffer, 0, sizeof(lineBuffer));
-        /* Check all registered variables for this log */
-        for( i=0 ; i<MAX_LOG_VARS ; i++)
-        {
-          if (logVars[i].type && (logVars[i].logIndex == j))
-          {
-            /* Check for rate or event */
-            if ( ((RATE == logs[j].type) && (u32lTick >= u32lRate)) || CheckLogVarEvent(i) )
-            {					
-              if (newLine)
-              {
-                newLine = 0;										// Event index written once per line     
-								
-                /* Write index */
-                if (logs[j].indexColumnFormat == FMT_TIME)
-                {
-                  GetTimeDate();
-                  sprintf(lineBuffer, "\n%02d:%02d:%02d-%03d", BOS.time.hours, BOS.time.minutes, BOS.time.seconds, BOS.time.msec);
-                }
-                else if (logs[j].indexColumnFormat == FMT_SAMPLE)
-                {
-                  sprintf(lineBuffer, "\n%d", logs[j].sampleCount);
-                }								
-              }
-            
-              /* Write delimiter */
-              switch(logs[j].delimiterFormat)
-              {
-                case FMT_SPACE:
-                  strcat(lineBuffer, " ");
-                  break;
-                case FMT_TAB:
-                  strcat(lineBuffer, "\t");
-                  break;
-                case FMT_COMMA:
-                  strcat(lineBuffer, ",");
-                  break;
-                default:
-                  break;
-              }
-              
-              /* Write variable value */
-              switch (logVars[i].type)
-              {
-                case PORT_DIGITAL:
-                  //sprintf( ( char * ) buffer, "%d", HAL_GPIO_ReadPin());
-                  //f_write(&MyFile, buffer, 1, (void *)&byteswritten);	
-                  break;
-                
-                case PORT_BUTTON:
-                  switch (button[logVars[i].source].state)
-                  {
-                    case OFF:	strcat(lineBuffer, "OFF"); break; 
-                    case ON:	strcat(lineBuffer, "ON"); break; 
-                    case OPEN:	strcat(lineBuffer, "OPEN"); break; 
-                    case CLOSED:	strcat(lineBuffer, "CLOSED"); break; 
-                    case CLICKED:	strcat(lineBuffer, "CLICKED"); break; 
-                    case DBL_CLICKED:	strcat(lineBuffer, "DBL_CLICKED"); break; 
-                    case PRESSED:	strcat(lineBuffer, "PRESSED"); break; 
-                    case RELEASED:	strcat(lineBuffer, "RELEASED"); break; 
-                    case PRESSED_FOR_X1_SEC:
-											if (button[logVars[i].source].pressedX1Sec)
-												sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX1Sec);
-                      break;
-                    case PRESSED_FOR_X2_SEC: 
-											if (button[logVars[i].source].pressedX2Sec)
-												sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX2Sec);
-                      break;
-                    case PRESSED_FOR_X3_SEC: 
-											if (button[logVars[i].source].pressedX3Sec)
-												sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX3Sec); 
-                      break;
-                    case RELEASED_FOR_Y1_SEC:	
-											if (button[logVars[i].source].releasedY1Sec)
-												sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY1Sec); 
-                      break;
-                    case RELEASED_FOR_Y2_SEC:	
-											if (button[logVars[i].source].releasedY2Sec)
-												sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY2Sec); 
-                      break;
-                    case RELEASED_FOR_Y3_SEC:	
-											if (button[logVars[i].source].releasedY3Sec)
-												sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY3Sec); 
-                      break;
-                    case NONE: 
-                      if (logs[j].type == RATE) 
-                      {
-                        strcat(lineBuffer, "NORMAL");
-                      }												
-                      break;								
-                    default: 
-                      break;
-                  }
-                  /* Reset button state */
-                  if (NONE != button[logVars[i].source].state)	
-                  {
-                    resetButtonState = 1;
-                  }
-                  break;
-                
-                case PORT_DATA:
-                  
-                  break;
-                
-                case MEMORY_DATA_UINT8: 
-                  sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint8_t *)logVars[i].source);
-                  break;
-
-                case MEMORY_DATA_INT8: 
-                  sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int8_t *)logVars[i].source); 
-                  break;
-
-                case MEMORY_DATA_UINT16: 
-                  sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint16_t *)logVars[i].source); 
-                  break;
-
-                case MEMORY_DATA_INT16: 
-                  sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int16_t *)logVars[i].source); 
-                  break;
-
-                case MEMORY_DATA_UINT32: 
-                  sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint32_t *)logVars[i].source); 
-                  break;
-
-                case MEMORY_DATA_INT32: 
-                  sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int32_t *)logVars[i].source); 
-                  break;
-
-                case MEMORY_DATA_FLOAT: 
-                  sprintf((char *)lineBuffer, "%s%f", (char *)lineBuffer, *(__IO float *)logVars[i].source);
-                  break;
-                
-                default:			
-                  break;
-              }
-            }
-          }			
-        }
-				/* Write the lineBuffer into log file */
-				if (0 == newLine)
+			case WAV_SCAN_MODE:	
+						ScanWaveFile(WAVE_NAME, temp_H07R3_ID);
+						SD_MODE = LOG_MODE;
+						break;
+			case WAV_STREAM_MODE:
+						StreamWaveToModule(WAVE_NAME, temp_H07R3_ID);
+						SD_MODE = LOG_MODE;
+						break;
+			case LOG_MODE:
+				/* Check all active logs */
+				for( j=0 ; j<MAX_LOGS ; j++)
 				{
-					f_write(&MyFile, lineBuffer, strlen((const char *)lineBuffer), (void *)&byteswritten);
-					newLine = 1;            /* Start a new line entry */
-				}					
-				f_close(&MyFile);
-				/* Reset the rate timer */	
-        if (u32lTick >= u32lRate)
-        {
-					logs[j].t0 = HAL_GetTick();
-        }
-			}	
-			else	
-      {
-        continue;
-      }
-    }
+					u32lTick = HAL_GetTick()-logs[j].t0;
+					u32lRate = configTICK_RATE_HZ/logs[j].rate;
+					
+					if ( u32lTick >= u32lRate )
+						++logs[j].sampleCount;				// Advance one sample
+					
+					if ( (activeLogs >> j) & 0x01 )
+					{			
+						/* Open this log file if it's closed (and close open one) */
+						OpenThisLog(j, &MyFile);
+						
+						memset(lineBuffer, 0, sizeof(lineBuffer));
+						/* Check all registered variables for this log */
+						for( i=0 ; i<MAX_LOG_VARS ; i++)
+						{
+							if (logVars[i].type && (logVars[i].logIndex == j))
+							{
+								/* Check for rate or event */
+								if ( ((RATE == logs[j].type) && (u32lTick >= u32lRate)) || CheckLogVarEvent(i) )
+								{					
+									if (newLine)
+									{
+										newLine = 0;										// Event index written once per line     
+										
+										/* Write index */
+										if (logs[j].indexColumnFormat == FMT_TIME)
+										{
+											GetTimeDate();
+											sprintf(lineBuffer, "\n%02d:%02d:%02d-%03d", BOS.time.hours, BOS.time.minutes, BOS.time.seconds, BOS.time.msec);
+										}
+										else if (logs[j].indexColumnFormat == FMT_SAMPLE)
+										{
+											sprintf(lineBuffer, "\n%d", logs[j].sampleCount);
+										}								
+									}
+								
+									/* Write delimiter */
+									switch(logs[j].delimiterFormat)
+									{
+										case FMT_SPACE:
+											strcat(lineBuffer, " ");
+											break;
+										case FMT_TAB:
+											strcat(lineBuffer, "\t");
+											break;
+										case FMT_COMMA:
+											strcat(lineBuffer, ",");
+											break;
+										default:
+											break;
+									}
+									
+									/* Write variable value */
+									switch (logVars[i].type)
+									{
+										case PORT_DIGITAL:
+											//sprintf( ( char * ) buffer, "%d", HAL_GPIO_ReadPin());
+											//f_write(&MyFile, buffer, 1, (void *)&byteswritten);	
+											break;
+										
+										case PORT_BUTTON:
+											switch (button[logVars[i].source].state)
+											{
+												case OFF:	strcat(lineBuffer, "OFF"); break; 
+												case ON:	strcat(lineBuffer, "ON"); break; 
+												case OPEN:	strcat(lineBuffer, "OPEN"); break; 
+												case CLOSED:	strcat(lineBuffer, "CLOSED"); break; 
+												case CLICKED:	strcat(lineBuffer, "CLICKED"); break; 
+												case DBL_CLICKED:	strcat(lineBuffer, "DBL_CLICKED"); break; 
+												case PRESSED:	strcat(lineBuffer, "PRESSED"); break; 
+												case RELEASED:	strcat(lineBuffer, "RELEASED"); break; 
+												case PRESSED_FOR_X1_SEC:
+													if (button[logVars[i].source].pressedX1Sec)
+														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX1Sec);
+													break;
+												case PRESSED_FOR_X2_SEC: 
+													if (button[logVars[i].source].pressedX2Sec)
+														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX2Sec);
+													break;
+												case PRESSED_FOR_X3_SEC: 
+													if (button[logVars[i].source].pressedX3Sec)
+														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX3Sec); 
+													break;
+												case RELEASED_FOR_Y1_SEC:	
+													if (button[logVars[i].source].releasedY1Sec)
+														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY1Sec); 
+													break;
+												case RELEASED_FOR_Y2_SEC:	
+													if (button[logVars[i].source].releasedY2Sec)
+														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY2Sec); 
+													break;
+												case RELEASED_FOR_Y3_SEC:	
+													if (button[logVars[i].source].releasedY3Sec)
+														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY3Sec); 
+													break;
+												case NONE: 
+													if (logs[j].type == RATE) 
+													{
+														strcat(lineBuffer, "NORMAL");
+													}												
+													break;								
+												default: 
+													break;
+											}
+											/* Reset button state */
+											if (NONE != button[logVars[i].source].state)	
+											{
+												resetButtonState = 1;
+											}
+											break;
+										
+										case PORT_DATA:
+											
+											break;
+										
+										case MEMORY_DATA_UINT8: 
+											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint8_t *)logVars[i].source);
+											break;
+
+										case MEMORY_DATA_INT8: 
+											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int8_t *)logVars[i].source); 
+											break;
+
+										case MEMORY_DATA_UINT16: 
+											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint16_t *)logVars[i].source); 
+											break;
+
+										case MEMORY_DATA_INT16: 
+											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int16_t *)logVars[i].source); 
+											break;
+
+										case MEMORY_DATA_UINT32: 
+											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint32_t *)logVars[i].source); 
+											break;
+
+										case MEMORY_DATA_INT32: 
+											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int32_t *)logVars[i].source); 
+											break;
+
+										case MEMORY_DATA_FLOAT: 
+											sprintf((char *)lineBuffer, "%s%f", (char *)lineBuffer, *(__IO float *)logVars[i].source);
+											break;
+										
+										default:			
+											break;
+									}
+								}
+							}			
+						}
+						/* Write the lineBuffer into log file */
+						if (0 == newLine)
+						{
+							f_write(&MyFile, lineBuffer, strlen((const char *)lineBuffer), (void *)&byteswritten);
+							newLine = 1;            /* Start a new line entry */
+						}					
+						f_close(&MyFile);
+						/* Reset the rate timer */	
+						if (u32lTick >= u32lRate)
+						{
+							logs[j].t0 = HAL_GetTick();
+						}
+					}	
+					else	
+					{
+						continue;
+					}
+				}
+				break;
+		}
+		
     /* Reset button state */
     if (resetButtonState)	
     {
@@ -589,6 +687,218 @@ Module_Status OpenThisLog(uint16_t logindex, FIL *objFile)
 		return H1BR6_ERROR;	
 	return H1BR6_OK;
 } 
+
+/*-----------------------------------------------------------*/
+
+/**
+	READ_WAVE_FILE_HEADER
+				Read Wave file .wav header information 
+				this func called by StreamWaveToModule
+* @param Wave_Path : Wave full file name
+*/
+WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path)
+{
+	//try to open wave file
+	if (f_open (&_path_pointer,Wave_Path,FA_READ)==FR_OK)
+	{
+				//read header from wave file
+				if(f_read ( &_path_pointer,  &wavebuff, 44,  &Number_br)!=FR_OK)
+				{
+					//close wave file	
+					f_close (&_path_pointer);
+					return WAVE_FILE_READ_FAILD;
+				}	
+				//close wave file	
+				f_close (&_path_pointer);
+	}
+	else
+	{
+		f_close (&_path_pointer);
+		return	WAVE_FILE_OPEN_FAILD;
+	}
+
+
+	//GET CHUNK descriptor
+	for(uint8_t _i=0 ; _i<4 ; _i++)				
+	{
+	WAVEFIL.CHUNKID[_i] = wavebuff[_i];
+	WAVEFIL.FORMAT[_i] = wavebuff[_i+8];
+	WAVEFIL.SUBCHhUNK1ID[_i] = wavebuff[_i+12];
+	WAVEFIL.SUBCHUNK2ID[_i] = wavebuff[_i+36];
+	}
+			
+	//GET CHUNK SIZE	
+	WAVEFIL.CHUNKSIZE = (wavebuff[7]<<24)+(wavebuff[6]<<16)+(wavebuff[5]<<8)+wavebuff[4];
+	WAVEFIL.SUBCHUNK1SIZE = (wavebuff[19]<<24)+(wavebuff[18]<<16)+(wavebuff[17]<<8)+wavebuff[16];
+	WAVEFIL.SUBCHUNK2SIZE = (wavebuff[43]<<24)+(wavebuff[42]<<16)+(wavebuff[41]<<8)+wavebuff[40];
+	
+	//GET AUDIO descriptor		
+	WAVEFIL.AUDIOFMT = (wavebuff[21]<<8)+wavebuff[20];
+	WAVEFIL.NO_CHANNEL = (wavebuff[23]<<8)+wavebuff[22];
+	WAVEFIL.SAMPLERATE = (wavebuff[27]<<24)+(wavebuff[26]<<16)+(wavebuff[25]<<8)+wavebuff[24];
+	WAVEFIL.BYTERATE = (wavebuff[31]<<24)+(wavebuff[30]<<16)+(wavebuff[29]<<8)+wavebuff[28];
+	WAVEFIL.BLOCKALIGN = (wavebuff[33]<<8)+wavebuff[32];
+	WAVEFIL.BITPERSAMPLE = (wavebuff[35]<<8)+wavebuff[34];
+	
+	/* Test file header is correct */
+		if(WAVEFIL.CHUNKID[1] != 'R' && WAVEFIL.CHUNKID[1] != 'I' &&  WAVEFIL.CHUNKID[1] != 'F' &&  WAVEFIL.CHUNKID[1] != 'F')	
+				{return HEADER_CHUNK_FAULT;}
+		else if (WAVEFIL.FORMAT[1] != 'W' && WAVEFIL.FORMAT[1] != 'A' &&  WAVEFIL.FORMAT[1] != 'V' &&  WAVEFIL.FORMAT[1] != 'E')
+				{return HEADER_CHUNK_FAULT;}
+		else if (WAVEFIL.SUBCHhUNK1ID[1] != 'f' && WAVEFIL.SUBCHhUNK1ID[1] != 'm' &&  WAVEFIL.SUBCHhUNK1ID[1] != 't' &&  WAVEFIL.SUBCHhUNK1ID[1] != 0x20)
+				{return HEADER_CHUNK_FAULT;}
+		else if (WAVEFIL.SUBCHUNK2ID[1] != 'd' && WAVEFIL.SUBCHUNK2ID[1] != 'a' &&  WAVEFIL.SUBCHUNK2ID[1] != 't' &&  WAVEFIL.SUBCHUNK2ID[1] != 'a')
+				{return HEADER_CHUNK_FAULT;}
+		else if (WAVEFIL.AUDIOFMT != 1)  // Audio Format != PCM
+				{return HEADER_CHUNK_FAULT;}
+		else if (WAVEFIL.NO_CHANNEL > 2)  // Number of audio channel more than 2 channel
+				{return HEADER_CHUNK_FAULT;}
+		else if (WAVEFIL.SUBCHUNK1SIZE != 0x10)  // chunk size 2 error must be 16 byte
+				{return HEADER_CHUNK_FAULT;}
+		else if (WAVEFIL.BITPERSAMPLE > 16 ) 		// bit per sample more than 16 bit
+				{return BITPERSAMPLE_ERR;}
+		else 
+				{
+				//get wave file size in samples and bytes
+				WAVE_SIZE	=	WAVEFIL.SUBCHUNK2SIZE + READ_WAVE_BYTES;
+				WAVE_bytes	= WAVEFIL.SUBCHUNK2SIZE/((WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL);
+				//calculate number of Byte in Block Sample align
+				NO_BYTE_SAMPLE =	WAVEFIL.BLOCKALIGN*(WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL;	
+				//calculate wave byte rate time wait in us 
+				SAMPLETIME = (1000000/WAVEFIL.SAMPLERATE)-20;
+				return HEADER_CHUNK_OK; 
+					
+				}
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+	StreamWaveToPort
+				Stream Wave file sound samples thru uart
+				this func called by StreamWaveToModule
+* @param Wave_Path : Wave full file name
+* @param _port : H1BR6x stramming port
+*/
+WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
+{
+	  READ_WAVE_BYTES=44;
+		SCALE_FAC=1;
+		SCALE_SHIFT=0;
+				
+//		WAVEFIL.BITPERSAMPLE = 8;
+		if (WAVEFIL.NO_CHANNEL == 1 && WAVEFIL.BITPERSAMPLE == 8)
+				{SCALE_FAC=1;SCALE_SHIFT=0;}				//read sample channel
+		else if (WAVEFIL.NO_CHANNEL == 1 && WAVEFIL.BITPERSAMPLE == 16)
+				{SCALE_FAC=2;SCALE_SHIFT=0;} 		//read sample MSB from channel
+		else if (WAVEFIL.NO_CHANNEL == 2 && WAVEFIL.BITPERSAMPLE == 8)
+				{SCALE_FAC=2;SCALE_SHIFT=1;}			//read sample from right channel
+		else if (WAVEFIL.NO_CHANNEL == 2 && WAVEFIL.BITPERSAMPLE == 16)
+				{SCALE_FAC=4;SCALE_SHIFT=2;}			//read sample from MSB right channel
+		else {return HEADER_CHUNK_FAULT;}
+
+		
+		if (f_open (&_path_pointer,Wave_Path,FA_READ)!=FR_OK) {
+			f_close(&_path_pointer);
+			return	WAVE_FILE_OPEN_FAILD;
+		} else {
+			_wave_pointer=_path_pointer;
+		}
+		
+		__TIM16_CLK_ENABLE();	
+
+		/* Peripheral configuration */	
+		htim16.Instance = TIM16;
+		htim16.Init.Prescaler = 0;
+		htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
+		htim16.Init.Period = (uint16_t)((SystemCoreClock/WAVEFIL.SAMPLERATE)-1);
+		HAL_TIM_Base_Init(&htim16);
+		HAL_NVIC_SetPriority(TIM16_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(TIM16_IRQn);
+		HAL_TIM_Base_Start_IT(&htim16);
+		portENTER_CRITICAL();
+		
+		do
+		{		
+
+			f_lseek (&_path_pointer,READ_WAVE_BYTES);
+			f_read (&_path_pointer, &WaveAlignBuff, 500,  &Number_br);
+			
+			for(uint8_t Align=0 ; Align<WAVEFIL.BLOCKALIGN ;Align++)
+			{		
+				//stream to port 'send one sample from port'	
+				for( I=0 ; I<500 ;I++)
+			{
+				writePxMutex(_port,(char *) &WaveAlignBuff[I],1,0,0);
+				Delay_us(SAMPLETIME);
+			}
+				while (__HAL_TIM_GET_FLAG(&htim16, TIM_FLAG_UPDATE) == false){};
+			}					
+			READ_WAVE_BYTES +=500;
+			
+		} while(READ_WAVE_BYTES <= WAVE_SIZE);
+  	portEXIT_CRITICAL();
+		f_close (&_wave_pointer);
+		HAL_TIM_Base_Stop(&htim16);
+		Delay_ms(20);
+		// Reset size variables for next transfer
+		WAVE_bytes = 0;
+		WAVE_SIZE = 0;
+		
+		return STREAM_WAVE_OK;
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+	ScanWaveFile
+				scan for Wave file sound and send responce to H07R3x 
+				this func called by message parser
+* @param Wave_Full_Name : Wave full file name
+* @param H07R3x_ID : H07R3 module ID
+*/
+WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
+{
+	Delay_ms(10);		// Add a little delay to allow card to be initialized on startup
+	
+	WAVE_STATE result;
+	result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
+	
+	//send responce to H07R3x
+	if(result == HEADER_CHUNK_OK)
+	{
+		//send wave file Data size in bytes
+		messageParams[0]=(uint8_t) (WAVE_bytes>>24);
+		messageParams[1]=(uint8_t) (WAVE_bytes>>16);
+		messageParams[2]=(uint8_t) (WAVE_bytes>>8);
+		messageParams[3]=(uint8_t)  WAVE_bytes;
+		//send wave file sample rate
+		messageParams[4]=(uint8_t) (WAVEFIL.SAMPLERATE>>24);
+		messageParams[5]=(uint8_t) (WAVEFIL.SAMPLERATE>>16);
+		messageParams[6]=(uint8_t) (WAVEFIL.SAMPLERATE>>8);
+		messageParams[7]=(uint8_t)  WAVEFIL.SAMPLERATE;
+	}
+	else
+	{
+		//send error param
+		messageParams[0]=(uint8_t) 0xFF;
+		messageParams[1]=(uint8_t) 0xFF;
+		messageParams[2]=(uint8_t) 0xFF;
+		messageParams[3]=(uint8_t) 0xFF;
+		//send error param
+		messageParams[4]=(uint8_t) 0xFF;
+		messageParams[5]=(uint8_t) 0xFF;
+		messageParams[6]=(uint8_t) 0xFF;
+		messageParams[7]=(uint8_t) 0xFF;
+	}
+	IND_blink(100);
+	SendMessageToModule(H07R3x_ID, CODE_H07R3_SCAN_WAVE_RESPONSE,8);
+	
+	return result;
+}
+
+/*-----------------------------------------------------------*/
+
 
 /* -----------------------------------------------------------------------
 	|																APIs	 																 	|
@@ -1016,6 +1326,50 @@ Module_Status DeleteLog(char* logName, options_t options)
 }
 
 /*-----------------------------------------------------------*/
+
+/**
+	StreamWaveToModule
+				Stream Wave file sound samples to specified module
+				this API called by message parser when receiving CODE_H1BR6_READ_WAVE.
+				Make sure destination module is configured in PlayWaveFromPort mode.
+* @param Wave_Path : WAVE file name  with extension
+* @param H07R3x_ID : distant H07R3 module ID
+*/
+
+WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID)
+{
+	Delay_ms(1);		// Add a little delay to allow card to be initialized on startup
+	
+	if ( Wave_Full_Name != NULL )
+	{
+			uint8_t port;
+		
+			if (!WAVE_bytes)		// Read file header if it was not scanned before
+			{
+				WAVE_STATE result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
+
+				if(result != HEADER_CHUNK_OK)	return WAVE_FILE_READ_FAILD;
+		
+				// calculate number of bytes to be streamed
+				WAVE_bytes	= WAVEFIL.SUBCHUNK2SIZE/((WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL);
+			}
+		
+			// Find best output port for destination module 
+			port = FindRoute(myID, H07R3x_ID); 
+		
+			// Start a single-cast DMA stream across the array.	
+			if ( StartScastDMAStream(0, myID, 0, H07R3x_ID, FORWARD, WAVE_bytes, 0xFFFFFFFF, 0) != BOS_OK )
+					{return STREAM_WAVE_FAILD;}
+			//Delay_ms(100);
+			//IND_blink(100);	
+					
+			return (StreamWaveToPort(Wave_Full_Name, port));
+	}
+	return WAVE_FILE_READ_FAILD;
+}
+
+/*-----------------------------------------------------------*/
+
 /* -----------------------------------------------------------------------
 	|															Commands																 	|
    ----------------------------------------------------------------------- 
