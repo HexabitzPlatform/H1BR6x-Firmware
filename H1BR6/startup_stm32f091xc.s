@@ -39,7 +39,7 @@
 ;
 ;*******************************************************************************	
 ;
-;		MODIFIED by Hexabitz for BitzOS (BOS) V0.1.6 - Copyright (C) 2017-2019 Hexabitz
+;		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.0 - Copyright (C) 2017-2019 Hexabitz
 ;    All rights reserved
 ;
 
@@ -202,6 +202,7 @@ SysTick_Handler PROC
 
 Default_Handler PROC
 
+				EXPORT  Default_Handler                [WEAK]
                 EXPORT  WWDG_IRQHandler                [WEAK]
                 EXPORT  PVD_VDDIO2_IRQHandler          [WEAK]
                 EXPORT  RTC_IRQHandler                 [WEAK]
@@ -267,6 +268,10 @@ USART2_IRQHandler
 USART3_8_IRQHandler
 CEC_CAN_IRQHandler
 
+				
+				LDR     R0, =Default_Handler
+                BX      R0
+				
                 B       .
 
                 ENDP
