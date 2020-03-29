@@ -121,7 +121,8 @@ FIL _wave_pointer;
 uint8_t WaveAlignBuff[500];			// NO_BYTE_SAMPLE
 //define wave sample buffer
 //uint8_t WaveSampleBuff[1000];		// WAVEFIL.BLOCKALIGN
-
+uint8_t f_mount_ok=0 ;	
+ 
 /*=================================================================================*/
 /*========================= Private function prototypes ===========================*/
 /*=================================================================================*/	
@@ -332,6 +333,7 @@ uint8_t GetPort(UART_HandleTypeDef *huart)
 */
 Module_Status MicroSD_Init(void)
 {	
+  
 	SD_CardInfo CardInfo;
 
 	/* Initialize the SPI and the SD card */
@@ -356,6 +358,7 @@ Module_Status MicroSD_Init(void)
 				/* SD card malfunction. Replace or re-insert the card and reboot */
 				while(1) { RTOS_IND_blink(500); Delay_ms(500); }	
 			}
+        f_mount_ok=1;
 		}
 	}
 	
@@ -380,13 +383,7 @@ void LogTask(void * argument)
 	/* Infinite loop */
 	for(;;)
 	{
-    //eventResult = 0;
-    /* check for events across all logged variables */
-//    for (i=0; i <MAX_LOG_VARS; i++)
-//    {
-//      eventResult |= CheckLogVarEvent(i);
-//    }
-		
+
 		switch (SD_MODE)
 		{
 			case WAV_SCAN_MODE:	
@@ -820,8 +817,7 @@ WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
 		
 		do
 		{		
-
-			f_lseek (&_path_pointer,READ_WAVE_BYTES);
+      f_lseek (&_path_pointer,READ_WAVE_BYTES);
 			f_read (&_path_pointer, &WaveAlignBuff, 500,  &Number_br);
 			
 			for(uint8_t Align=0 ; Align<WAVEFIL.BLOCKALIGN ;Align++)
@@ -915,8 +911,9 @@ WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
 */
 Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterFormat_t delimiterFormat, indexColumnFormat_t indexColumnFormat,\
 	char* indexColumnLabel)
-{
-	FRESULT res; 
+{ 
+  while(f_mount_ok==0){Delay_us(10);}
+  FRESULT res; 
 	uint8_t i=0;
 	uint8_t countFile = 0;
 	char *pChar = NULL;

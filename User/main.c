@@ -42,7 +42,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-
 /* Private function prototypes -----------------------------------------------*/
 
 
@@ -90,6 +89,7 @@ int main(void)
 void UserTask(void * argument)
 {
 
+	
   /* Infinite loop */
   for(;;)
   {
