@@ -32,7 +32,7 @@
   */
 	
 /*
-		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.0 - Copyright (C) 2017-2019 Hexabitz
+		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.1 - Copyright (C) 2017-2020 Hexabitz
     All rights reserved
 */
 
@@ -41,7 +41,6 @@
 
 
 /* Private variables ---------------------------------------------------------*/
-
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -90,6 +89,7 @@ int main(void)
 void UserTask(void * argument)
 {
 
+	
   /* Infinite loop */
   for(;;)
   {

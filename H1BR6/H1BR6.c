@@ -1,5 +1,5 @@
 /*
-    BitzOS (BOS) V0.2.0 - Copyright (C) 2017-2019 Hexabitz
+    BitzOS (BOS) V0.2.1 - Copyright (C) 2017-2020 Hexabitz
     All rights reserved
 
     File Name     : H1BR6.c
@@ -121,7 +121,8 @@ FIL _wave_pointer;
 uint8_t WaveAlignBuff[500];			// NO_BYTE_SAMPLE
 //define wave sample buffer
 //uint8_t WaveSampleBuff[1000];		// WAVEFIL.BLOCKALIGN
-
+uint8_t f_mount_ok=0 ;	
+ 
 /*=================================================================================*/
 /*========================= Private function prototypes ===========================*/
 /*=================================================================================*/	
@@ -332,6 +333,7 @@ uint8_t GetPort(UART_HandleTypeDef *huart)
 */
 Module_Status MicroSD_Init(void)
 {	
+  
 	SD_CardInfo CardInfo;
 
 	/* Initialize the SPI and the SD card */
@@ -356,6 +358,7 @@ Module_Status MicroSD_Init(void)
 				/* SD card malfunction. Replace or re-insert the card and reboot */
 				while(1) { RTOS_IND_blink(500); Delay_ms(500); }	
 			}
+        f_mount_ok=1;
 		}
 	}
 	
@@ -380,13 +383,7 @@ void LogTask(void * argument)
 	/* Infinite loop */
 	for(;;)
 	{
-    //eventResult = 0;
-    /* check for events across all logged variables */
-//    for (i=0; i <MAX_LOG_VARS; i++)
-//    {
-//      eventResult |= CheckLogVarEvent(i);
-//    }
-		
+
 		switch (SD_MODE)
 		{
 			case WAV_SCAN_MODE:	
@@ -670,7 +667,8 @@ uint8_t CheckLogVarEvent(uint16_t varIndex)
 				logindex: Log array index.
 */
 Module_Status OpenThisLog(uint16_t logindex, FIL *objFile)
-{
+{ 
+  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
 	FRESULT res; 
 	/* Append log name with extension */
 	if ((0U != logs[logindex].file_extension) && (true == enableSequential))
@@ -698,6 +696,8 @@ Module_Status OpenThisLog(uint16_t logindex, FIL *objFile)
 */
 WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path)
 {
+  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
+
 	//try to open wave file
 	if (f_open (&_path_pointer,Wave_Path,FA_READ)==FR_OK)
 	{
@@ -820,8 +820,7 @@ WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
 		
 		do
 		{		
-
-			f_lseek (&_path_pointer,READ_WAVE_BYTES);
+      f_lseek (&_path_pointer,READ_WAVE_BYTES);
 			f_read (&_path_pointer, &WaveAlignBuff, 500,  &Number_br);
 			
 			for(uint8_t Align=0 ; Align<WAVEFIL.BLOCKALIGN ;Align++)
@@ -859,7 +858,7 @@ WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
 */
 WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
 {
-	Delay_ms(10);		// Add a little delay to allow card to be initialized on startup
+	  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
 	
 	WAVE_STATE result;
 	result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
@@ -915,8 +914,9 @@ WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
 */
 Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterFormat_t delimiterFormat, indexColumnFormat_t indexColumnFormat,\
 	char* indexColumnLabel)
-{
-	FRESULT res; 
+{ 
+  while(f_mount_ok==0){Delay_us(10);}  // Add a flag to allow card to be initialized on startup
+  FRESULT res; 
 	uint8_t i=0;
 	uint8_t countFile = 0;
 	char *pChar = NULL;
@@ -1338,7 +1338,7 @@ Module_Status DeleteLog(char* logName, options_t options)
 
 WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID)
 {
-	Delay_ms(1);		// Add a little delay to allow card to be initialized on startup
+	while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
 	
 	if ( Wave_Full_Name != NULL )
 	{
