@@ -667,7 +667,8 @@ uint8_t CheckLogVarEvent(uint16_t varIndex)
 				logindex: Log array index.
 */
 Module_Status OpenThisLog(uint16_t logindex, FIL *objFile)
-{
+{ 
+  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
 	FRESULT res; 
 	/* Append log name with extension */
 	if ((0U != logs[logindex].file_extension) && (true == enableSequential))
@@ -695,6 +696,8 @@ Module_Status OpenThisLog(uint16_t logindex, FIL *objFile)
 */
 WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path)
 {
+  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
+
 	//try to open wave file
 	if (f_open (&_path_pointer,Wave_Path,FA_READ)==FR_OK)
 	{
@@ -855,7 +858,7 @@ WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
 */
 WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
 {
-	Delay_ms(10);		// Add a little delay to allow card to be initialized on startup
+	  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
 	
 	WAVE_STATE result;
 	result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
@@ -912,7 +915,7 @@ WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
 Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterFormat_t delimiterFormat, indexColumnFormat_t indexColumnFormat,\
 	char* indexColumnLabel)
 { 
-  while(f_mount_ok==0){Delay_us(10);}
+  while(f_mount_ok==0){Delay_us(10);}  // Add a flag to allow card to be initialized on startup
   FRESULT res; 
 	uint8_t i=0;
 	uint8_t countFile = 0;
@@ -1335,7 +1338,7 @@ Module_Status DeleteLog(char* logName, options_t options)
 
 WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID)
 {
-	Delay_ms(1);		// Add a little delay to allow card to be initialized on startup
+	while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
 	
 	if ( Wave_Full_Name != NULL )
 	{
