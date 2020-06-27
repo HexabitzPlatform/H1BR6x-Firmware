@@ -77,12 +77,12 @@ void HardFault_Handler(void)
 /**
 * @brief This function handles Hard Fault error callback.
 */
-void Default_Handler(void)
-{
-	/* Loop here */
-	HAL_NVIC_SystemReset();
-	//for(;;) {};  
-}
+//void Default_Handler(void)
+//{
+//	/* Loop here */
+//	HAL_NVIC_SystemReset();
+//	//for(;;) {};
+//}
 
 
 /******************************************************************************/
