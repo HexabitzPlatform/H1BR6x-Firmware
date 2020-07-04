@@ -1,5 +1,5 @@
 /*
-    BitzOS (BOS) V0.2.1 - Copyright (C) 2017-2020 Hexabitz
+    BitzOS (BOS) V0.2.2 - Copyright (C) 2017-2020 Hexabitz
     All rights reserved
 
     File Name     : H1BR6.c
@@ -680,7 +680,7 @@ Module_Status OpenThisLog(uint16_t logindex, FIL *objFile)
 		sprintf((char *)tempName, "%s%s", logs[logindex].name, ".TXT");
 	}
 	/* Open this log */			
-	res = f_open(objFile, tempName, FA_OPEN_APPEND | FA_WRITE | FA_READ);
+	res = f_open(objFile, tempName, FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
 	if (res != FR_OK)	
 		return H1BR6_ERROR;	
 	return H1BR6_OK;
