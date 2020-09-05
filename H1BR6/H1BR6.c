@@ -680,7 +680,7 @@ Module_Status OpenThisLog(uint16_t logindex, FIL *objFile)
 		sprintf((char *)tempName, "%s%s", logs[logindex].name, ".TXT");
 	}
 	/* Open this log */			
-	res = f_open(objFile, tempName, FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
+	res = f_open(objFile, tempName, FA_OPEN_APPEND | FA_WRITE | FA_READ);
 	if (res != FR_OK)	
 		return H1BR6_ERROR;	
 	return H1BR6_OK;

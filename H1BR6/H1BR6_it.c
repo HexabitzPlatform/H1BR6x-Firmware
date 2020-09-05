@@ -73,9 +73,7 @@ void HardFault_Handler(void)
 	/* Loop here */
 	for(;;) {};  
 }
-
-/**
-* @brief This function handles Hard Fault error callback.
+/* @brief This function handles Hard Fault error callback.
 */
 //void Default_Handler(void)
 //{
@@ -83,7 +81,6 @@ void HardFault_Handler(void)
 //	HAL_NVIC_SystemReset();
 //	//for(;;) {};
 //}
-
 
 /******************************************************************************/
 /* STM32F0xx Peripheral Interrupt Handlers                                    */
@@ -290,6 +287,7 @@ void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *pcTaskName 
 	/* Run time stack overflow checking is performed if
 	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
+
 	taskDISABLE_INTERRUPTS();
 	for( ;; );
 }
