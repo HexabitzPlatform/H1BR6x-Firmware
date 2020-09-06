@@ -32,7 +32,7 @@
   */
 	
 /*
-		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.1 - Copyright (C) 2017-2020 Hexabitz
+		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.2 - Copyright (C) 2017-2020 Hexabitz
     All rights reserved
 */
 
@@ -70,7 +70,7 @@ int main(void)
 
   /* Start scheduler */
   osKernelStart();
-  
+
   /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
@@ -89,7 +89,7 @@ int main(void)
 void UserTask(void * argument)
 {
 
-	
+
   /* Infinite loop */
   for(;;)
   {

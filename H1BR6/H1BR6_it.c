@@ -32,7 +32,7 @@
   */
 	
 /*
-		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.1 - Copyright (C) 2017-2020 Hexabitz
+		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.2 - Copyright (C) 2017-2020 Hexabitz
     All rights reserved
 */
 
@@ -73,17 +73,14 @@ void HardFault_Handler(void)
 	/* Loop here */
 	for(;;) {};  
 }
-
-/**
-* @brief This function handles Hard Fault error callback.
+/* @brief This function handles Hard Fault error callback.
 */
-void Default_Handler(void)
-{
-	/* Loop here */
-	HAL_NVIC_SystemReset();
-	//for(;;) {};  
-}
-
+//void Default_Handler(void)
+//{
+//	/* Loop here */
+//	HAL_NVIC_SystemReset();
+//	//for(;;) {};
+//}
 
 /******************************************************************************/
 /* STM32F0xx Peripheral Interrupt Handlers                                    */
@@ -290,6 +287,7 @@ void vApplicationStackOverflowHook( xTaskHandle pxTask, signed char *pcTaskName 
 	/* Run time stack overflow checking is performed if
 	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
+
 	taskDISABLE_INTERRUPTS();
 	for( ;; );
 }
