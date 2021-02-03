@@ -39,7 +39,7 @@
 ;
 ;*******************************************************************************	
 ;
-;		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.0 - Copyright (C) 2017-2019 Hexabitz
+;		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.4 - Copyright (C) 2017-2021 Hexabitz
 ;    All rights reserved
 ;
 
@@ -60,7 +60,7 @@ __initial_sp
 ;   <o>  Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
-Heap_Size       EQU     0x00000500
+Heap_Size       EQU     0x00000200
 
                 AREA    HEAP, NOINIT, READWRITE, ALIGN=3
 __heap_base
@@ -202,7 +202,6 @@ SysTick_Handler PROC
 
 Default_Handler PROC
 
-				EXPORT  Default_Handler                [WEAK]
                 EXPORT  WWDG_IRQHandler                [WEAK]
                 EXPORT  PVD_VDDIO2_IRQHandler          [WEAK]
                 EXPORT  RTC_IRQHandler                 [WEAK]
@@ -268,10 +267,6 @@ USART2_IRQHandler
 USART3_8_IRQHandler
 CEC_CAN_IRQHandler
 
-				
-				LDR     R0, =Default_Handler
-                BX      R0
-				
                 B       .
 
                 ENDP
