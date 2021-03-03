@@ -1,5 +1,5 @@
 /*
-    BitzOS (BOS) V0.2.4 - Copyright (C) 2016 Hexabitz
+    BitzOS (BOS) V0.2.4 - Copyright (C) 2017-2021 Hexabitz
     All rights reserved
 
     File Name     : topology_1.h
@@ -36,8 +36,8 @@ static uint16_t array[__N][7] = {
 	#define	_P2pol_normal	1
 	#define	_P3pol_normal	1
 	#define	_P4pol_normal	1
-	#define	_P4pol_normal	1
-	#define	_P4pol_normal	1
+	#define	_P5pol_normal	1
+	#define	_P6pol_normal	1
 #endif
 
 #if ( _module == 2 )
@@ -46,8 +46,8 @@ static uint16_t array[__N][7] = {
 	#define	_P2pol_normal	1
 	#define	_P3pol_normal	1
 	#define	_P4pol_normal	1
-	#define	_P4pol_reversed	1
-	#define	_P4pol_normal	1
+	#define	_P5pol_reversed	1
+	#define	_P6pol_normal	1
 
 #endif
 
