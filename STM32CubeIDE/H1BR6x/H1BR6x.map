@@ -4055,7 +4055,7 @@ LOAD c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
 .iplt           0x000000000801aa0c        0x0
  .iplt          0x000000000801aa0c        0x0 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp/crtbegin.o
 
-.rodata         0x000000000801aa10     0x3a28
+.rodata         0x000000000801aa10     0x3a38
                 0x000000000801aa10                . = ALIGN (0x4)
  *(.rodata)
  .rodata        0x000000000801aa10        0xe BOS\BOS_CLIcommands.o
@@ -4120,354 +4120,356 @@ LOAD c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
  .rodata.defaultCommand.str1.1
                 0x000000000801b8b6       0x83 BOS\BOS_CLIcommands.o
  .rodata.setCommand.str1.1
-                0x000000000801b939      0x1a8 BOS\BOS_CLIcommands.o
+                0x000000000801b939      0x1ab BOS\BOS_CLIcommands.o
                                         0x1b5 (size before relaxing)
  .rodata.removebuttonCommand.str1.1
-                0x000000000801bae1       0x27 BOS\BOS_CLIcommands.o
+                0x000000000801bae4       0x27 BOS\BOS_CLIcommands.o
  .rodata.addbuttonCommand.str1.1
-                0x000000000801bb08       0x60 BOS\BOS_CLIcommands.o
+                0x000000000801bb0b       0x60 BOS\BOS_CLIcommands.o
  .rodata.scastCommand.str1.1
-                0x000000000801bb68       0xa6 BOS\BOS_CLIcommands.o
+                0x000000000801bb6b       0xa6 BOS\BOS_CLIcommands.o
  .rodata.infoCommand.str1.1
-                0x000000000801bc0e       0x70 BOS\BOS_CLIcommands.o
+                0x000000000801bc11       0x70 BOS\BOS_CLIcommands.o
                                          0x72 (size before relaxing)
  .rodata.groupCommand.str1.1
-                0x000000000801bc7e      0x143 BOS\BOS_CLIcommands.o
+                0x000000000801bc81      0x143 BOS\BOS_CLIcommands.o
  .rodata.bootloaderUpdateCommand.str1.1
-                0x000000000801bdc1       0x24 BOS\BOS_CLIcommands.o
+                0x000000000801bdc4       0x24 BOS\BOS_CLIcommands.o
  .rodata.pingCommand.str1.1
-                0x000000000801bde5       0x2d BOS\BOS_CLIcommands.o
+                0x000000000801bde8       0x2d BOS\BOS_CLIcommands.o
  .rodata.flashsizeCommand.str1.1
-                0x000000000801be12       0x1e BOS\BOS_CLIcommands.o
+                0x000000000801be15       0x1e BOS\BOS_CLIcommands.o
  .rodata.actSnipCommand.str1.1
-                0x000000000801be30       0x38 BOS\BOS_CLIcommands.o
+                0x000000000801be33       0x38 BOS\BOS_CLIcommands.o
  .rodata.uuidCommand.str1.1
-                0x000000000801be68       0x15 BOS\BOS_CLIcommands.o
+                0x000000000801be6b       0x15 BOS\BOS_CLIcommands.o
                                          0x18 (size before relaxing)
  .rodata.idcodeCommand.str1.1
-                0x000000000801be7d       0x64 BOS\BOS_CLIcommands.o
+                0x000000000801be80       0x64 BOS\BOS_CLIcommands.o
  .rodata.timeCommand.str1.1
-                0x000000000801bee1       0x55 BOS\BOS_CLIcommands.o
+                0x000000000801bee4       0x55 BOS\BOS_CLIcommands.o
  .rodata.dateCommand.str1.1
-                0x000000000801bf36       0x15 BOS\BOS_CLIcommands.o
+                0x000000000801bf39       0x15 BOS\BOS_CLIcommands.o
  .rodata.nameCommand.str1.1
-                0x000000000801bf4b       0x18 BOS\BOS_CLIcommands.o
+                0x000000000801bf4e       0x18 BOS\BOS_CLIcommands.o
  .rodata.prvRunTimeStatsCommand.str1.1
-                0x000000000801bf63       0x51 BOS\BOS_CLIcommands.o
+                0x000000000801bf66       0x51 BOS\BOS_CLIcommands.o
  .rodata.prvTaskStatsCommand.str1.1
-                0x000000000801bfb4       0x5b BOS\BOS_CLIcommands.o
+                0x000000000801bfb7       0x5b BOS\BOS_CLIcommands.o
  .rodata.pauseSnipCommand.str1.1
-                0x000000000801c00f       0x35 BOS\BOS_CLIcommands.o
+                0x000000000801c012       0x35 BOS\BOS_CLIcommands.o
  .rodata.str1.1
-                0x000000000801c044      0xcff BOS\BOS_CLIcommands.o
+                0x000000000801c047      0xcff BOS\BOS_CLIcommands.o
                                         0xd16 (size before relaxing)
- *fill*         0x000000000801cd43        0x1 
+ *fill*         0x000000000801cd46        0x2 
  .rodata.actSnipCommandDefinition
-                0x000000000801cd44       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cd48       0x10 BOS\BOS_CLIcommands.o
  .rodata.addbuttonCommandDefinition
-                0x000000000801cd54       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cd58       0x10 BOS\BOS_CLIcommands.o
  .rodata.bootloaderUpdateCommandDefinition
-                0x000000000801cd64       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cd68       0x10 BOS\BOS_CLIcommands.o
  .rodata.bridgeCommandDefinition
-                0x000000000801cd74       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cd78       0x10 BOS\BOS_CLIcommands.o
  .rodata.dateCommandDefinition
-                0x000000000801cd84       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cd88       0x10 BOS\BOS_CLIcommands.o
  .rodata.defaultCommandDefinition
-                0x000000000801cd94       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cd98       0x10 BOS\BOS_CLIcommands.o
  .rodata.delSnipCommandDefinition
-                0x000000000801cda4       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cda8       0x10 BOS\BOS_CLIcommands.o
  .rodata.exploreCommandDefinition
-                0x000000000801cdb4       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cdb8       0x10 BOS\BOS_CLIcommands.o
  .rodata.flashsizeCommandDefinition
-                0x000000000801cdc4       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cdc8       0x10 BOS\BOS_CLIcommands.o
  .rodata.getCommandDefinition
-                0x000000000801cdd4       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cdd8       0x10 BOS\BOS_CLIcommands.o
  .rodata.groupCommandDefinition
-                0x000000000801cde4       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cde8       0x10 BOS\BOS_CLIcommands.o
  .rodata.idcodeCommandDefinition
-                0x000000000801cdf4       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cdf8       0x10 BOS\BOS_CLIcommands.o
  .rodata.infoCommandDefinition
-                0x000000000801ce04       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ce08       0x10 BOS\BOS_CLIcommands.o
  .rodata.mathStr
-                0x000000000801ce14       0x12 BOS\BOS_CLIcommands.o
-                0x000000000801ce14                mathStr
- *fill*         0x000000000801ce26        0x2 
+                0x000000000801ce18       0x12 BOS\BOS_CLIcommands.o
+                0x000000000801ce18                mathStr
+ *fill*         0x000000000801ce2a        0x2 
  .rodata.nameCommandDefinition
-                0x000000000801ce28       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ce2c       0x10 BOS\BOS_CLIcommands.o
  .rodata.pauseSnipCommandDefinition
-                0x000000000801ce38       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ce3c       0x10 BOS\BOS_CLIcommands.o
  .rodata.pingCommandDefinition
-                0x000000000801ce48       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ce4c       0x10 BOS\BOS_CLIcommands.o
  .rodata.prvRunTimeStatsCommandDefinition
-                0x000000000801ce58       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ce5c       0x10 BOS\BOS_CLIcommands.o
  .rodata.prvTaskStatsCommandDefinition
-                0x000000000801ce68       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ce6c       0x10 BOS\BOS_CLIcommands.o
  .rodata.removebuttonCommandDefinition
-                0x000000000801ce78       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ce7c       0x10 BOS\BOS_CLIcommands.o
  .rodata.resetCommandDefinition
-                0x000000000801ce88       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ce8c       0x10 BOS\BOS_CLIcommands.o
  .rodata.scastCommandDefinition
-                0x000000000801ce98       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ce9c       0x10 BOS\BOS_CLIcommands.o
  .rodata.setBaudrateCommandDefinition
-                0x000000000801cea8       0x10 BOS\BOS_CLIcommands.o
-                0x000000000801cea8                setBaudrateCommandDefinition
+                0x000000000801ceac       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ceac                setBaudrateCommandDefinition
  .rodata.setCommandDefinition
-                0x000000000801ceb8       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cebc       0x10 BOS\BOS_CLIcommands.o
  .rodata.snipCommandDefinition
-                0x000000000801cec8       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cecc       0x10 BOS\BOS_CLIcommands.o
  .rodata.statusCommandDefinition
-                0x000000000801ced8       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cedc       0x10 BOS\BOS_CLIcommands.o
  .rodata.testportCommandDefinition
-                0x000000000801cee8       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801ceec       0x10 BOS\BOS_CLIcommands.o
  .rodata.timeCommandDefinition
-                0x000000000801cef8       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cefc       0x10 BOS\BOS_CLIcommands.o
  .rodata.unbridgeCommandDefinition
-                0x000000000801cf08       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cf0c       0x10 BOS\BOS_CLIcommands.o
  .rodata.uuidCommandDefinition
-                0x000000000801cf18       0x10 BOS\BOS_CLIcommands.o
+                0x000000000801cf1c       0x10 BOS\BOS_CLIcommands.o
  .rodata.MX_FREERTOS_Init.str1.1
-                0x000000000801cf28       0x5b BOS\BOS_freertos.o
+                0x000000000801cf2c       0x5b BOS\BOS_freertos.o
  .rodata.SetupDMAStreams.str1.1
-                0x000000000801cf83        0xc BOS\BOS_messaging.o
+                0x000000000801cf87        0xc BOS\BOS_messaging.o
  .rodata.PxMessagingTask.str1.1
-                0x000000000801cf8f       0x2d BOS\BOS_msgparser.o
+                0x000000000801cf93       0x2d BOS\BOS_msgparser.o
  .rodata.deleteLogCommand.str1.1
-                0x000000000801cf8f       0x8f H1BR6\H1BR6.o
+                0x000000000801cf93       0x8f H1BR6\H1BR6.o
                                          0x93 (size before relaxing)
  .rodata.demoCommand.str1.1
-                0x000000000801d01e       0x6c H1BR6\H1BR6.o
+                0x000000000801d022       0x6c H1BR6\H1BR6.o
  .rodata.startCommand.part.0.str1.1
-                0x000000000801d08a       0x6c H1BR6\H1BR6.o
+                0x000000000801d08e       0x6c H1BR6\H1BR6.o
                                          0x15 (size before relaxing)
  .rodata.Module_Init.str1.1
-                0x000000000801d08a        0x8 H1BR6\H1BR6.o
+                0x000000000801d08e        0x8 H1BR6\H1BR6.o
  .rodata.OpenThisLog.str1.1
-                0x000000000801d092       0x12 H1BR6\H1BR6.o
+                0x000000000801d096       0x12 H1BR6\H1BR6.o
  .rodata.CreateLog.str1.1
-                0x000000000801d0a4        0x6 H1BR6\H1BR6.o
+                0x000000000801d0a8        0x6 H1BR6\H1BR6.o
  .rodata.addLogCommand.str1.1
-                0x000000000801d0aa      0x120 H1BR6\H1BR6.o
+                0x000000000801d0ae      0x120 H1BR6\H1BR6.o
                                         0x12f (size before relaxing)
  .rodata.LogVar.str1.1
-                0x000000000801d1ca        0x2 H1BR6\H1BR6.o
+                0x000000000801d1ce        0x2 H1BR6\H1BR6.o
                                           0x6 (size before relaxing)
  .rodata.logVarCommand.str1.1
-                0x000000000801d1cc      0x185 H1BR6\H1BR6.o
+                0x000000000801d1d0      0x185 H1BR6\H1BR6.o
                                         0x1a2 (size before relaxing)
  .rodata.StartLog.str1.1
-                0x000000000801d351        0x3 H1BR6\H1BR6.o
+                0x000000000801d355        0x3 H1BR6\H1BR6.o
  .rodata.startCommand.str1.1
-                0x000000000801d351       0x15 H1BR6\H1BR6.o
+                0x000000000801d355       0x15 H1BR6\H1BR6.o
  .rodata.stopCommand.str1.1
-                0x000000000801d366       0x29 H1BR6\H1BR6.o
+                0x000000000801d36a       0x29 H1BR6\H1BR6.o
  .rodata.pauseCommand.str1.1
-                0x000000000801d38f       0x14 H1BR6\H1BR6.o
+                0x000000000801d393       0x14 H1BR6\H1BR6.o
  .rodata.resumeCommand.str1.1
-                0x000000000801d3a3       0x15 H1BR6\H1BR6.o
+                0x000000000801d3a7       0x15 H1BR6\H1BR6.o
  .rodata.LogTask.str1.1
-                0x000000000801d3b8       0x8a H1BR6\H1BR6.o
+                0x000000000801d3bc       0x8a H1BR6\H1BR6.o
                                          0x92 (size before relaxing)
  .rodata.str1.1
-                0x000000000801d442      0x488 H1BR6\H1BR6.o
+                0x000000000801d446      0x488 H1BR6\H1BR6.o
                                         0x489 (size before relaxing)
- *fill*         0x000000000801d8ca        0x2 
+ *fill*         0x000000000801d8ce        0x2 
  .rodata.addLogCommandDefinition
-                0x000000000801d8cc       0x10 H1BR6\H1BR6.o
-                0x000000000801d8cc                addLogCommandDefinition
+                0x000000000801d8d0       0x10 H1BR6\H1BR6.o
+                0x000000000801d8d0                addLogCommandDefinition
  .rodata.deleteLogCommandDefinition
-                0x000000000801d8dc       0x10 H1BR6\H1BR6.o
-                0x000000000801d8dc                deleteLogCommandDefinition
+                0x000000000801d8e0       0x10 H1BR6\H1BR6.o
+                0x000000000801d8e0                deleteLogCommandDefinition
  .rodata.demoCommandDefinition
-                0x000000000801d8ec       0x10 H1BR6\H1BR6.o
-                0x000000000801d8ec                demoCommandDefinition
+                0x000000000801d8f0       0x10 H1BR6\H1BR6.o
+                0x000000000801d8f0                demoCommandDefinition
  .rodata.logHeaderText1
-                0x000000000801d8fc       0x28 H1BR6\H1BR6.o
-                0x000000000801d8fc                logHeaderText1
+                0x000000000801d900       0x28 H1BR6\H1BR6.o
+                0x000000000801d900                logHeaderText1
  .rodata.logHeaderText2
-                0x000000000801d924       0x1b H1BR6\H1BR6.o
-                0x000000000801d924                logHeaderText2
+                0x000000000801d928       0x1b H1BR6\H1BR6.o
+                0x000000000801d928                logHeaderText2
  .rodata.logHeaderText3
-                0x000000000801d93f       0x13 H1BR6\H1BR6.o
-                0x000000000801d93f                logHeaderText3
+                0x000000000801d943       0x13 H1BR6\H1BR6.o
+                0x000000000801d943                logHeaderText3
  .rodata.logHeaderTimeDate
-                0x000000000801d952        0x7 H1BR6\H1BR6.o
-                0x000000000801d952                logHeaderTimeDate
- *fill*         0x000000000801d959        0x3 
+                0x000000000801d956        0x7 H1BR6\H1BR6.o
+                0x000000000801d956                logHeaderTimeDate
+ *fill*         0x000000000801d95d        0x3 
  .rodata.logVarCommandDefinition
-                0x000000000801d95c       0x10 H1BR6\H1BR6.o
-                0x000000000801d95c                logVarCommandDefinition
+                0x000000000801d960       0x10 H1BR6\H1BR6.o
+                0x000000000801d960                logVarCommandDefinition
  .rodata.numberMap
-                0x000000000801d96c        0x3 H1BR6\H1BR6.o
-                0x000000000801d96c                numberMap
- *fill*         0x000000000801d96f        0x1 
+                0x000000000801d970        0x3 H1BR6\H1BR6.o
+                0x000000000801d970                numberMap
+ *fill*         0x000000000801d973        0x1 
  .rodata.pauseCommandDefinition
-                0x000000000801d970       0x10 H1BR6\H1BR6.o
-                0x000000000801d970                pauseCommandDefinition
+                0x000000000801d974       0x10 H1BR6\H1BR6.o
+                0x000000000801d974                pauseCommandDefinition
  .rodata.resumeCommandDefinition
-                0x000000000801d980       0x10 H1BR6\H1BR6.o
-                0x000000000801d980                resumeCommandDefinition
+                0x000000000801d984       0x10 H1BR6\H1BR6.o
+                0x000000000801d984                resumeCommandDefinition
  .rodata.startCommandDefinition
-                0x000000000801d990       0x10 H1BR6\H1BR6.o
-                0x000000000801d990                startCommandDefinition
+                0x000000000801d994       0x10 H1BR6\H1BR6.o
+                0x000000000801d994                startCommandDefinition
  .rodata.stopCommandDefinition
-                0x000000000801d9a0       0x10 H1BR6\H1BR6.o
-                0x000000000801d9a0                stopCommandDefinition
+                0x000000000801d9a4       0x10 H1BR6\H1BR6.o
+                0x000000000801d9a4                stopCommandDefinition
  .rodata.RTC_CalendarConfig.str1.1
-                0x000000000801d9b0       0x15 H1BR6\H1BR6_rtc.o
+                0x000000000801d9b4        0x9 H1BR6\H1BR6_rtc.o
+                                         0x15 (size before relaxing)
+ *fill*         0x000000000801d9bd        0x3 
  .rodata.CSWTCH.16
-                0x000000000801d9b0       0x14 H1BR6\H1BR6_uart.o
+                0x000000000801d9c0       0x14 H1BR6\H1BR6_uart.o
  .rodata.check_fs.str1.1
-                0x000000000801d9c4        0xa Thirdparty\Middleware\FatFs\source\ff.o
+                0x000000000801d9d4        0xa Thirdparty\Middleware\FatFs\source\ff.o
  .rodata.follow_path.str1.1
-                0x000000000801d9ce       0x10 Thirdparty\Middleware\FatFs\source\ff.o
- .rodata.ExCvt  0x000000000801d9de       0x80 Thirdparty\Middleware\FatFs\source\ff.o
+                0x000000000801d9de       0x10 Thirdparty\Middleware\FatFs\source\ff.o
+ .rodata.ExCvt  0x000000000801d9ee       0x80 Thirdparty\Middleware\FatFs\source\ff.o
  .rodata.LfnOfs
-                0x000000000801da5e        0xd Thirdparty\Middleware\FatFs\source\ff.o
- *fill*         0x000000000801da6b        0x1 
+                0x000000000801da6e        0xd Thirdparty\Middleware\FatFs\source\ff.o
+ *fill*         0x000000000801da7b        0x1 
  .rodata.cvt1.4977
-                0x000000000801da6c      0x1f2 Thirdparty\Middleware\FatFs\source\ffunicode.o
+                0x000000000801da7c      0x1f2 Thirdparty\Middleware\FatFs\source\ffunicode.o
  .rodata.cvt2.4978
-                0x000000000801dc5e       0xbc Thirdparty\Middleware\FatFs\source\ffunicode.o
- .rodata.uc437  0x000000000801dd1a      0x100 Thirdparty\Middleware\FatFs\source\ffunicode.o
+                0x000000000801dc6e       0xbc Thirdparty\Middleware\FatFs\source\ffunicode.o
+ .rodata.uc437  0x000000000801dd2a      0x100 Thirdparty\Middleware\FatFs\source\ffunicode.o
  .rodata.FreeRTOS_CLIProcessCommand.str1.1
-                0x000000000801de1a       0xa8 Thirdparty\Middleware\FreeRTOS\Source\FreeRTOS_CLI.o
+                0x000000000801de2a       0xa8 Thirdparty\Middleware\FreeRTOS\Source\FreeRTOS_CLI.o
  .rodata.prvHelpCommand.str1.1
-                0x000000000801dec2        0x7 Thirdparty\Middleware\FreeRTOS\Source\FreeRTOS_CLI.o
+                0x000000000801ded2        0x7 Thirdparty\Middleware\FreeRTOS\Source\FreeRTOS_CLI.o
  .rodata.str1.1
-                0x000000000801dec2       0x80 Thirdparty\Middleware\FreeRTOS\Source\FreeRTOS_CLI.o
- *fill*         0x000000000801df42        0x2 
+                0x000000000801ded2       0x80 Thirdparty\Middleware\FreeRTOS\Source\FreeRTOS_CLI.o
+ *fill*         0x000000000801df52        0x2 
  .rodata.xHelpCommand
-                0x000000000801df44       0x10 Thirdparty\Middleware\FreeRTOS\Source\FreeRTOS_CLI.o
+                0x000000000801df54       0x10 Thirdparty\Middleware\FreeRTOS\Source\FreeRTOS_CLI.o
  .rodata.vTaskStartScheduler.str1.1
-                0x000000000801df54        0x5 Thirdparty\Middleware\FreeRTOS\Source\tasks.o
+                0x000000000801df64        0x5 Thirdparty\Middleware\FreeRTOS\Source\tasks.o
  .rodata.vTaskList.str1.1
-                0x000000000801df59        0xf Thirdparty\Middleware\FreeRTOS\Source\tasks.o
+                0x000000000801df69        0xf Thirdparty\Middleware\FreeRTOS\Source\tasks.o
  .rodata.vTaskGetRunTimeStats.str1.1
-                0x000000000801df68       0x18 Thirdparty\Middleware\FreeRTOS\Source\tasks.o
+                0x000000000801df78       0x18 Thirdparty\Middleware\FreeRTOS\Source\tasks.o
  .rodata.CSWTCH.242
-                0x000000000801df80        0x4 Thirdparty\Middleware\FreeRTOS\Source\tasks.o
+                0x000000000801df90        0x4 Thirdparty\Middleware\FreeRTOS\Source\tasks.o
  .rodata.ucExpectedStackBytes.5630
-                0x000000000801df84       0x14 Thirdparty\Middleware\FreeRTOS\Source\tasks.o
+                0x000000000801df94       0x14 Thirdparty\Middleware\FreeRTOS\Source\tasks.o
  .rodata.prvCheckForValidListAndQueue.str1.1
-                0x000000000801df98        0x5 Thirdparty\Middleware\FreeRTOS\Source\timers.o
+                0x000000000801dfa8        0x5 Thirdparty\Middleware\FreeRTOS\Source\timers.o
  .rodata.xTimerCreateTimerTask.str1.1
-                0x000000000801df9d        0x8 Thirdparty\Middleware\FreeRTOS\Source\timers.o
+                0x000000000801dfad        0x8 Thirdparty\Middleware\FreeRTOS\Source\timers.o
  .rodata.HAL_RCC_GetSysClockFreq.str1.1
-                0x000000000801dfa5       0x22 Thirdparty\STM32F0xx_HAL_Driver\Src\stm32f0xx_hal_rcc.o
+                0x000000000801dfb5       0x22 Thirdparty\STM32F0xx_HAL_Driver\Src\stm32f0xx_hal_rcc.o
  .rodata.aAPBAHBPrescTable
-                0x000000000801dfc7       0x10 Thirdparty\STM32F0xx_HAL_Driver\Src\stm32f0xx_hal_rcc.o
-                0x000000000801dfc7                aAPBAHBPrescTable
+                0x000000000801dfd7       0x10 Thirdparty\STM32F0xx_HAL_Driver\Src\stm32f0xx_hal_rcc.o
+                0x000000000801dfd7                aAPBAHBPrescTable
  .rodata.CSWTCH.32
-                0x000000000801dfd7        0x3 Thirdparty\STM32F0xx_HAL_Driver\Src\stm32f0xx_hal_uart.o
+                0x000000000801dfe7        0x3 Thirdparty\STM32F0xx_HAL_Driver\Src\stm32f0xx_hal_uart.o
  .rodata._ctype_
-                0x000000000801dfda      0x101 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-ctype_.o)
-                0x000000000801dfda                _ctype_
- *fill*         0x000000000801e0db        0x1 
+                0x000000000801dfea      0x101 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-ctype_.o)
+                0x000000000801dfea                _ctype_
+ *fill*         0x000000000801e0eb        0x1 
  .rodata._global_impure_ptr
-                0x000000000801e0dc        0x4 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-impure.o)
-                0x000000000801e0dc                _global_impure_ptr
+                0x000000000801e0ec        0x4 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-impure.o)
+                0x000000000801e0ec                _global_impure_ptr
  .rodata._strtod_l.str1.1
-                0x000000000801e0e0       0x22 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-strtod.o)
+                0x000000000801e0f0       0x22 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-strtod.o)
                                           0xd (size before relaxing)
  .rodata.fpi.6197
-                0x000000000801e0e0       0x14 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-strtod.o)
+                0x000000000801e0f0       0x14 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-strtod.o)
  .rodata.fpinan.6233
-                0x000000000801e0f4       0x14 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-strtod.o)
+                0x000000000801e104       0x14 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-strtod.o)
  .rodata.tinytens
-                0x000000000801e108       0x28 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-strtod.o)
+                0x000000000801e118       0x28 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-strtod.o)
  .rodata._svfprintf_r.str1.1
-                0x000000000801e130       0x32 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-svfprintf.o)
+                0x000000000801e140       0x32 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-svfprintf.o)
                                          0x34 (size before relaxing)
  .rodata.blanks.7335
-                0x000000000801e162       0x10 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-svfprintf.o)
- .rodata.zeroes.7336
                 0x000000000801e172       0x10 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-svfprintf.o)
+ .rodata.zeroes.7336
+                0x000000000801e182       0x10 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-svfprintf.o)
  .rodata._dtoa_r.str1.1
-                0x000000000801e182       0x7d c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-dtoa.o)
+                0x000000000801e192       0x7d c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-dtoa.o)
                                          0x7f (size before relaxing)
  .rodata.__gethex.str1.1
-                0x000000000801e1ff       0x67 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-gdtoa-gethex.o)
+                0x000000000801e20f       0x67 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-gdtoa-gethex.o)
                                          0x78 (size before relaxing)
  .rodata.str1.1
-                0x000000000801e266       0x67 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-lnumeric.o)
+                0x000000000801e276       0x67 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-lnumeric.o)
                                           0x3 (size before relaxing)
- *fill*         0x000000000801e266        0x2 
+ *fill*         0x000000000801e276        0x2 
  .rodata._C_numeric_locale
-                0x000000000801e268        0xc c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-lnumeric.o)
-                0x000000000801e268                _C_numeric_locale
+                0x000000000801e278        0xc c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-lnumeric.o)
+                0x000000000801e278                _C_numeric_locale
  .rodata._setlocale_r.str1.1
-                0x000000000801e274        0x6 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-locale.o)
+                0x000000000801e284        0x6 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-locale.o)
                                           0x9 (size before relaxing)
  .rodata.str1.1
-                0x000000000801e27a        0x2 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-locale.o)
+                0x000000000801e28a        0x2 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-locale.o)
  .rodata.__multadd.str1.1
-                0x000000000801e27a       0x60 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-mprec.o)
+                0x000000000801e28a       0x60 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-mprec.o)
                                          0x71 (size before relaxing)
- *fill*         0x000000000801e2da        0x6 
+ *fill*         0x000000000801e2ea        0x6 
  .rodata.__mprec_bigtens
-                0x000000000801e2e0       0x28 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-mprec.o)
-                0x000000000801e2e0                __mprec_bigtens
+                0x000000000801e2f0       0x28 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-mprec.o)
+                0x000000000801e2f0                __mprec_bigtens
  .rodata.__mprec_tens
-                0x000000000801e308       0xc8 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-mprec.o)
-                0x000000000801e308                __mprec_tens
+                0x000000000801e318       0xc8 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-mprec.o)
+                0x000000000801e318                __mprec_tens
  .rodata.p05.6123
-                0x000000000801e3d0        0xc c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-mprec.o)
+                0x000000000801e3e0        0xc c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-mprec.o)
  .rodata.__assert_func.str1.1
-                0x000000000801e3dc       0x3c c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-assert.o)
+                0x000000000801e3ec       0x3c c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-assert.o)
                                          0x3d (size before relaxing)
  .rodata._vfiprintf_r.str1.1
-                0x000000000801e418       0x22 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-vfiprintf.o)
+                0x000000000801e428       0x22 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-vfiprintf.o)
  .rodata.blanks.7328
-                0x000000000801e418       0x10 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-vfiprintf.o)
- .rodata.zeroes.7329
                 0x000000000801e428       0x10 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-vfiprintf.o)
-                0x000000000801e43c                . = ALIGN (0x4)
+ .rodata.zeroes.7329
+                0x000000000801e438       0x10 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-vfiprintf.o)
+                0x000000000801e44c                . = ALIGN (0x4)
 
-.ARM.extab      0x000000000801e438        0x0
-                0x000000000801e438                . = ALIGN (0x4)
+.ARM.extab      0x000000000801e448        0x0
+                0x000000000801e448                . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x000000000801e438                . = ALIGN (0x4)
+                0x000000000801e448                . = ALIGN (0x4)
 
-.ARM            0x000000000801e438        0x8
-                0x000000000801e438                . = ALIGN (0x4)
-                0x000000000801e438                __exidx_start = .
+.ARM            0x000000000801e448        0x8
+                0x000000000801e448                . = ALIGN (0x4)
+                0x000000000801e448                __exidx_start = .
  *(.ARM.exidx*)
- .ARM.exidx     0x000000000801e438        0x8 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp\libgcc.a(_udivmoddi4.o)
-                0x000000000801e440                __exidx_end = .
-                0x000000000801e440                . = ALIGN (0x4)
+ .ARM.exidx     0x000000000801e448        0x8 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp\libgcc.a(_udivmoddi4.o)
+                0x000000000801e450                __exidx_end = .
+                0x000000000801e450                . = ALIGN (0x4)
 
-.rel.dyn        0x000000000801e440        0x0
- .rel.iplt      0x000000000801e440        0x0 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp/crtbegin.o
+.rel.dyn        0x000000000801e450        0x0
+ .rel.iplt      0x000000000801e450        0x0 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp/crtbegin.o
 
-.preinit_array  0x000000000801e440        0x0
-                0x000000000801e440                . = ALIGN (0x4)
-                0x000000000801e440                PROVIDE (__preinit_array_start = .)
+.preinit_array  0x000000000801e450        0x0
+                0x000000000801e450                . = ALIGN (0x4)
+                0x000000000801e450                PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x000000000801e440                PROVIDE (__preinit_array_end = .)
-                0x000000000801e440                . = ALIGN (0x4)
+                0x000000000801e450                PROVIDE (__preinit_array_end = .)
+                0x000000000801e450                . = ALIGN (0x4)
 
-.init_array     0x000000000801e440        0x8
-                0x000000000801e440                . = ALIGN (0x4)
-                0x000000000801e440                PROVIDE (__init_array_start = .)
+.init_array     0x000000000801e450        0x8
+                0x000000000801e450                . = ALIGN (0x4)
+                0x000000000801e450                PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  .init_array.00000
-                0x000000000801e440        0x4 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-__call_atexit.o)
+                0x000000000801e450        0x4 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc.a(lib_a-__call_atexit.o)
  *(.init_array*)
- .init_array    0x000000000801e444        0x4 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp/crtbegin.o
-                0x000000000801e448                PROVIDE (__init_array_end = .)
-                0x000000000801e448                . = ALIGN (0x4)
+ .init_array    0x000000000801e454        0x4 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp/crtbegin.o
+                0x000000000801e458                PROVIDE (__init_array_end = .)
+                0x000000000801e458                . = ALIGN (0x4)
 
-.fini_array     0x000000000801e448        0x4
-                0x000000000801e448                . = ALIGN (0x4)
-                0x000000000801e448                PROVIDE (__fini_array_start = .)
+.fini_array     0x000000000801e458        0x4
+                0x000000000801e458                . = ALIGN (0x4)
+                0x000000000801e458                PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x000000000801e448        0x4 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp/crtbegin.o
-                0x000000000801e44c                PROVIDE (__fini_array_end = .)
-                0x000000000801e44c                . = ALIGN (0x4)
-                0x000000000801e44c                _sidata = LOADADDR (.data)
+ .fini_array    0x000000000801e458        0x4 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp/crtbegin.o
+                0x000000000801e45c                PROVIDE (__fini_array_end = .)
+                0x000000000801e45c                . = ALIGN (0x4)
+                0x000000000801e45c                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000      0xa84 load address 0x000000000801e44c
+.data           0x0000000020000000      0xa84 load address 0x000000000801e45c
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data)
@@ -4569,11 +4571,11 @@ LOAD c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x0000000020000a84                . = ALIGN (0x4)
                 0x0000000020000a84                _edata = .
 
-.igot.plt       0x0000000020000a84        0x0 load address 0x000000000801eed0
+.igot.plt       0x0000000020000a84        0x0 load address 0x000000000801eee0
  .igot.plt      0x0000000020000a84        0x0 c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.9-2020-q2-update.win32_1.5.0.202011040924/tools/bin/../lib/gcc/arm-none-eabi/9.3.1/thumb/v6-m/nofp/crtbegin.o
                 0x0000000020000a84                . = ALIGN (0x4)
 
-.bss            0x0000000020000a88     0x6c78 load address 0x000000000801eed0
+.bss            0x0000000020000a88     0x6c78 load address 0x000000000801eee0
                 0x0000000020000a88                _sbss = .
                 0x0000000020000a88                __bss_start__ = _sbss
  *(.bss)
@@ -5038,7 +5040,7 @@ LOAD c:/st/stm32cubeide_1.2.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x0000000020007700                __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x0000000020007700      0x600 load address 0x000000000801eed0
+                0x0000000020007700      0x600 load address 0x000000000801eee0
                 0x0000000020007700                . = ALIGN (0x8)
                 0x0000000020007700                PROVIDE (end = .)
                 [!provide]                        PROVIDE (_end = .)

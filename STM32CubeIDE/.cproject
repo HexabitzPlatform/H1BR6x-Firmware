@@ -185,29 +185,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="Thirdparty/Middleware/FatFs/drivers|Thirdparty/Middleware/FatFs/source|Thirdparty/Middleware/FreeRTOS/Source/portable/GCC|Thirdparty/CMSIS/Device/ST/STM32F0xx/Source/Templates|Thirdparty/CMSIS/RTOS/Template|Thirdparty/STM32F0xx_HAL_Driver/Src|Thirdparty/Middleware/FreeRTOS/Source/CMSIS_RTOS|Thirdparty/Middleware/FreeRTOS/Source/portable/GCC/ARM_CM0|Thirdparty/Middleware/FreeRTOS/Source/portable/MemMang|BOS|H1BR6|User" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BOS"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="H1BR6"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Thirdparty/CMSIS/Device/ST/STM32F0xx/Source/Templates"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Thirdparty/CMSIS/RTOS/Template"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Thirdparty/Middleware/FatFs/drivers"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Thirdparty/Middleware/FatFs/source"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Thirdparty/Middleware/FreeRTOS/Source/CMSIS_RTOS"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Thirdparty/Middleware/FreeRTOS/Source/portable/GCC"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Thirdparty/Middleware/FreeRTOS/Source/portable/MemMang"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Thirdparty/STM32F0xx_HAL_Driver/Src"/>
-                        						
-                        <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="User"/>
+                        <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
                         					
                     </sourceEntries>
                     				
