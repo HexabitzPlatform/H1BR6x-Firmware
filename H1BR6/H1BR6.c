@@ -1,5 +1,5 @@
 /*
-    BitzOS (BOS) V0.2.4 - Copyright (C) 2017-2021 Hexabitz
+    BitzOS (BOS) V0.2.5 - Copyright (C) 2017-2021 Hexabitz
     All rights reserved
 
     File Name     : H1BR6.c
@@ -82,6 +82,13 @@ bool enableTimeDateHeader = false;
 uint8_t wavebuff[44];
 UINT Number_br;
 FIL _path_pointer;
+
+
+static uint8_t newLine = 1;
+static uint8_t resetButtonState = 0;
+volatile uint8_t i,j;
+volatile uint32_t u32lTick = 0;
+volatile uint32_t u32lRate = 0;
 
 struct /* WAVE FILE Header information struct - 44 bytes */
 {
@@ -251,47 +258,47 @@ const CLI_Command_Definition_t resumeCommandDefinition =
 	
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct;
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-  RCC_PeriphCLKInitTypeDef PeriphClkInit;
+	RCC_OscInitTypeDef RCC_OscInitStruct;
+	RCC_ClkInitTypeDef RCC_ClkInitStruct;
+	RCC_PeriphCLKInitTypeDef PeriphClkInit;
 
 	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = 16;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
-  RCC_OscInitStruct.PLL.PREDIV = RCC_PREDIV_DIV1;
-  HAL_RCC_OscConfig(&RCC_OscInitStruct);
+	RCC_OscInitStruct.HSICalibrationValue =16;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+	RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
+	RCC_OscInitStruct.PLL.PREDIV = RCC_PREDIV_DIV1;
+	HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-  RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1);
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1);
+	RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1);
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+	HAL_RCC_ClockConfig(&RCC_ClkInitStruct,FLASH_LATENCY_1);
 
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_USART3;
-  PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK1;
-  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  PeriphClkInit.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
-  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
+	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1 | RCC_PERIPHCLK_USART2 | RCC_PERIPHCLK_USART3;
+	PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK1;
+	PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+	PeriphClkInit.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
+	HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 	
 	__HAL_RCC_PWR_CLK_ENABLE();
-  HAL_PWR_EnableBkUpAccess();
+	HAL_PWR_EnableBkUpAccess();
 	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_HSE_DIV32;
+	PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_HSE_DIV32;
 	HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
-
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 	
+	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
-	__SYSCFG_CLK_ENABLE();
+	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+	__SYSCFG_CLK_ENABLE()
+	;
+
+	/* SysTick_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(SysTick_IRQn,0,0);
 	
 }
 
@@ -407,7 +414,7 @@ uint8_t ClearROtopology(void)
 
 /* --- H1BR6 module initialization. 
 */
-void Module_Init(void)
+void Module_Peripheral_Init(void)
 {
 	/* Init global variables */
 	enableSequential = true;
@@ -424,7 +431,7 @@ void Module_Init(void)
 	needToDelayButtonStateReset = true;
 	
 	/* Create the logging task */
-	xTaskCreate(LogTask, (const char *) "LogTask", (2*configMINIMAL_STACK_SIZE), NULL, osPriorityNormal-osPriorityIdle, &LogTaskHandle);				
+	xTaskCreate(LogTask, (const char *) "LogTask", (2*configMINIMAL_STACK_SIZE), NULL, osPriorityNormal-osPriorityIdle, &LogTaskHandle);
 }
 
 /*-----------------------------------------------------------*/
@@ -484,6 +491,10 @@ void RegisterModuleCLICommands(void)
 	FreeRTOS_CLIRegisterCommand( &stopCommandDefinition );
 	FreeRTOS_CLIRegisterCommand( &pauseCommandDefinition );
 	FreeRTOS_CLIRegisterCommand( &resumeCommandDefinition );
+}
+
+void ExecuteMonitor(void){
+
 }
 
 /*-----------------------------------------------------------*/
@@ -550,15 +561,9 @@ Module_Status MicroSD_Init(void)
 void LogTask(void * argument)
 {	
   //uint8_t eventResult = 0;
-	static uint8_t newLine = 1;
-	static uint8_t resetButtonState = 0;
-  volatile uint8_t i,j;
-  volatile uint32_t u32lTick = 0;
-  volatile uint32_t u32lRate = 0;
 
 	/* Initialize the micro SD card */
 	MicroSD_Init();
-	
 	/* Infinite loop */
 	for(;;)
 	{
@@ -1094,7 +1099,7 @@ WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
 Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterFormat_t delimiterFormat, indexColumnFormat_t indexColumnFormat,\
 	char* indexColumnLabel)
 { 
-  while(f_mount_ok==0){Delay_us(10);}  // Add a flag to allow card to be initialized on startup
+  while(f_mount_ok==0){Delay_ms_no_rtos(1);}  // Add a flag to allow card to be initialized on startup
   FRESULT res; 
 	uint8_t i=0;
 	uint8_t countFile = 0;
@@ -1181,6 +1186,7 @@ Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterForm
 			sprintf((char *)tempName, "%s%s", logName, ".TXT");
 			/* Check if file exists on disk */
 			res = f_open(&tempFile, tempName, FA_CREATE_NEW | FA_WRITE | FA_READ);
+			// f_sync (&tempFile);
 			if ((false == enableSequential) && (res == FR_EXIST))
 			{
 				return H1BR6_ERR_LogNameExists;		
@@ -1256,24 +1262,29 @@ Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterForm
 			char *buffer = malloc(100);
 			memset (buffer, 0x00, 100);
 			sprintf(buffer, logHeaderText1, _firmMajor, _firmMinor, _firmPatch, modulePNstring[myPN]);
+		//	f_sync (&tempFile);
 			res = f_write(&tempFile, buffer, strlen(buffer), (void *)&byteswritten);
 			if (enableTimeDateHeader)
 			{
 				GetTimeDate();
 				sprintf(buffer, logHeaderTimeDate, GetDateString(), GetTimeString());
+			//	f_sync (&tempFile);
 				res = f_write(&tempFile, buffer, strlen(buffer), (void *)&byteswritten);
 			}
 			if(type == RATE) 
 			{
 				sprintf(buffer, logHeaderText2, rate);
+				//f_sync (&tempFile);
 				res = f_write(&tempFile, buffer, strlen(buffer), (void *)&byteswritten);
 			} 
 			else if (type == EVENT) 
 			{
+			//	f_sync (&tempFile);
 				res = f_write(&tempFile, logHeaderText3, strlen(logHeaderText3), (void *)&byteswritten);	
 			}
 			
 			/* Write index label */
+			//f_sync (&tempFile);
 			res = f_write(&tempFile, indexColumnLabel, strlen(indexColumnLabel), (void *)&byteswritten);
 			
 			f_close(&tempFile);
@@ -1328,6 +1339,7 @@ Module_Status LogVar(char* logName, logVarType_t type, uint32_t source, char* Co
 					
 					/* Write delimiter */
 					OpenThisLog(j, &tempFile);
+					//f_sync (&tempFile);
 					if (logs[j].delimiterFormat == FMT_SPACE)
 						f_write(&tempFile, " ", 1, (void *)&byteswritten);
 					else if (logs[j].delimiterFormat == FMT_TAB)
@@ -1357,7 +1369,6 @@ Module_Status LogVar(char* logName, logVarType_t type, uint32_t source, char* Co
 Module_Status StartLog(char* logName)
 {
 	uint8_t j = 0;
-
 	/* Search for this log to make sure it exists */
 	for( j=0 ; j<MAX_LOGS ; j++)
 	{
@@ -1374,15 +1385,17 @@ Module_Status StartLog(char* logName)
 			activeLogs |= (0x01 << j);
 			logs[j].t0 = HAL_GetTick();
 			logs[j].sampleCount = 1;
+
 			OpenThisLog(j, &tempFile);
+			f_sync (&tempFile);
 			/* Write new line */
 			f_write(&tempFile, "\n\r", 2, (void *)&byteswritten);		
 			f_close(&tempFile);
 			
 			return H1BR6_OK;
 		}		
-	}
 
+	}
 	return H1BR6_ERR_LogDoesNotExist;	
 }
 

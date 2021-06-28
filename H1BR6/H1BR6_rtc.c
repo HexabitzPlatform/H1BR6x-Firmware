@@ -1,40 +1,12 @@
-/**
-  ******************************************************************************
-  *     File Name     : H01R0_rtc.c
-  *     Description   : Peripheral RTC setup source file.
-  ******************************************************************************
-  *
-  * COPYRIGHT(c) 2015 STMicroelectronics
-  *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-	
 /*
-		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.4 - Copyright (C) 2017-2021 Hexabitz
-    All rights reserved
-*/
+ BitzOS (BOS) V0.2.5 - Copyright (C) 2017-2021 Hexabitz
+ All rights reserved
+
+ File Name     : H01R0_rtc.c
+ Description   : Peripheral RTC setup source file.
+
+ */
+
 /* Includes ------------------------------------------------------------------*/
 #include "BOS.h"
 
@@ -63,12 +35,12 @@ BOS_Status RTC_Init(void)
 	
 	/* Configure the RTC 
 		f_ckspre = f_rtcclk / ((PREDIV_S+1) * (PREDIV_A+1))
-			- f_rtcclk is HSE 8 MHz / 32 = 250 kHz
-			- f_ckspre should be 1 Hz 
-			- PREDIV_A should be as high as possible to minimize power consumption
-					>> Choose PREDIV_A = 124 and PREDIV_S = 1999
+		- f_rtcclk is HSE 8 MHz / 32 = 250 kHz
+		- f_ckspre should be 1 Hz
+		- PREDIV_A should be as high as possible to minimize power consumption
+		>> Choose PREDIV_A = 124 and PREDIV_S = 1999
 	*/
-	RtcHandle.Instance = RTC; 
+  RtcHandle.Instance = RTC;
   RtcHandle.Init.HourFormat = RTC_HOURFORMAT_24;
   RtcHandle.Init.AsynchPrediv = 124;
   RtcHandle.Init.SynchPrediv = 1999;

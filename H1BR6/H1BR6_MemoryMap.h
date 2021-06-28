@@ -1,10 +1,11 @@
 /*
-    BitzOS (BOS) V0.2.4 - Copyright (C) 2017-2021 Hexabitz
-    All rights reserved
-		
-    File Name     : H1DR6_MemoryMap.h
-    Description   : Module MCU memory map header file.
-*/
+ BitzOS (BOS) V0.2.5 - Copyright (C) 2017-2021 Hexabitz
+ All rights reserved
+
+ File Name     : H1DR6_MemoryMap.h
+ Description   : Module MCU memory map header file.
+
+ */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef H1DR6_MEMORYMAP_H

@@ -1,10 +1,10 @@
 /*
-    BitzOS (BOS) V0.2.4 - Copyright (C) 2017-2021 Hexabitz
-    All rights reserved
+ BitzOS (BOS) V0.2.5 - Copyright (C) 2017-2021 Hexabitz
+ All rights reserved
 		
-    File Name     : H1BR6.c
-    Description   : Header file for module H1BR6.
-										SPI-based uSD driver with Fatfs. 
+ File Name     : H1BR6.c
+ Description   : Header file for module H1BR6.
+				 SPI-based uSD driver with Fatfs.
 */
 	
 /* Define to prevent recursive inclusion -------------------------------------*/
