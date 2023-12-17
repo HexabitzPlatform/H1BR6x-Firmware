@@ -3,7 +3,7 @@ H1BR6_uart.c:44:6:MX_USART2_UART_Init	1
 H1BR6_uart.c:66:6:MX_USART3_UART_Init	1
 H1BR6_uart.c:88:6:MX_USART4_UART_Init	1
 H1BR6_uart.c:110:6:MX_USART5_UART_Init	1
-H1BR6_uart.c:152:6:HAL_UART_MspInit	7
+H1BR6_uart.c:152:6:HAL_UART_MspInit	6
 H1BR6_uart.c:316:19:readPxMutex	5
 H1BR6_uart.c:335:19:writePxMutex	5
 H1BR6_uart.c:354:19:readPxITMutex	3

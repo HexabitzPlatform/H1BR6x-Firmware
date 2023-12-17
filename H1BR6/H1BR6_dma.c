@@ -172,10 +172,10 @@ void SetupMessagingRxDMAs(void){
 	if(portStatus[P5] == FREE)
 		DMA_MSG_RX_Setup(P5uart,&msgRxDMA[4]);
 #endif
-#ifndef _P6
-	if(portStatus[P6] == FREE)
-		DMA_MSG_RX_Setup(P6uart,&msgRxDMA[5]);
-#endif
+//#ifndef _P6
+//	if(portStatus[P6] == FREE)
+//		DMA_MSG_RX_Setup(P6uart,&msgRxDMA[5]);
+//#endif
 }
 
 /*-----------------------------------------------------------*/

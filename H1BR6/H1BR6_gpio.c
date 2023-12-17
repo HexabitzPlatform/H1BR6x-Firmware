@@ -144,14 +144,14 @@ BOS_Status GetPortGPIOs(uint8_t port,uint32_t *TX_Port,uint16_t *TX_Pin,uint32_t
 		*RX_Pin = USART5_RX_PIN;
 	}
 #endif
-#ifndef _Usart6
-	else if(huart == &huart6){
-		*TX_Port =(uint32_t ) USART6_TX_PORT;
-		*TX_Pin = USART6_TX_PIN;
-		*RX_Port =(uint32_t ) USART6_RX_PORT;
-		*RX_Pin = USART6_RX_PIN;
-	}
-#endif
+//#ifndef _Usart6
+//	else if(huart == &huart6){
+//		*TX_Port =(uint32_t ) USART6_TX_PORT;
+//		*TX_Pin = USART6_TX_PIN;
+//		*RX_Port =(uint32_t ) USART6_RX_PORT;
+//		*RX_Pin = USART6_RX_PIN;
+//	}
+//#endif
 #ifdef _Usart7
 	else if (huart == &huart7) 
 	{		

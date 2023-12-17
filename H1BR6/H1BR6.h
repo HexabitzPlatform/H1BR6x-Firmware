@@ -45,7 +45,7 @@
 #define _P3 
 #define _P4 
 #define _P5 
-#define _P6
+//#define _P6
 
 /* Define available USARTs */
 #define _Usart1 1
@@ -53,7 +53,7 @@
 #define _Usart3 1
 #define _Usart4 1
 #define _Usart5 1
-#define _Usart6	0
+//#define _Usart6	0
 
 
 /* Port-UART mapping */
@@ -63,7 +63,7 @@
 #define P3uart &huart3
 #define P4uart &huart1
 #define P5uart &huart5
-#define P6uart &huart6
+//#define P6uart &huart6
 
 
 /* Port Definitions */
@@ -97,11 +97,11 @@
 #define	USART5_RX_PORT		GPIOD
 #define	USART5_AF			GPIO_AF3_USART5
 
-#define	USART6_TX_PIN		GPIO_PIN_4
-#define	USART6_RX_PIN		GPIO_PIN_5
-#define	USART6_TX_PORT		GPIOA
-#define	USART6_RX_PORT		GPIOA
-#define	USART6_AF			GPIO_AF8_USART6
+//#define	USART6_TX_PIN		GPIO_PIN_4
+//#define	USART6_RX_PIN		GPIO_PIN_5
+//#define	USART6_TX_PORT		GPIOA
+//#define	USART6_RX_PORT		GPIOA
+//#define	USART6_AF			GPIO_AF8_USART6
 
 /* Module-specific Definitions */
 #define _IND_LED_PORT		GPIOB
@@ -213,7 +213,7 @@ extern void MX_USART2_UART_Init(void);
 extern void MX_USART3_UART_Init(void);
 extern void MX_USART4_UART_Init(void);
 extern void MX_USART5_UART_Init(void);
-extern void MX_USART6_UART_Init(void);
+//extern void MX_USART6_UART_Init(void);
 extern void SPI_GPIO_Init(void);
 extern void MX_SPI2_Init(void);
 extern void SystemClock_Config(void);
