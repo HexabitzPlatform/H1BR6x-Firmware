@@ -1,0 +1,17 @@
+fatfs_sd.c:30:13:SELECT	1
+fatfs_sd.c:36:13:DESELECT	1
+fatfs_sd.c:42:13:SPI_TxByte	2
+fatfs_sd.c:49:16:SPI_RxByte	2
+fatfs_sd.c:62:13:SPI_RxBytePtr	1
+fatfs_sd.c:68:16:SD_ReadyWait	3
+fatfs_sd.c:86:13:SD_PowerOn	5
+fatfs_sd.c:129:13:SD_PowerOff	1
+fatfs_sd.c:135:16:SD_CheckPower	1
+fatfs_sd.c:142:13:SD_RxDataBlock	5
+fatfs_sd.c:174:13:SD_TxDataBlock	8
+fatfs_sd.c:225:13:SD_SendCmd	7
+fatfs_sd.c:271:9:SD_disk_initialize	25
+fatfs_sd.c:374:9:SD_disk_status	2
+fatfs_sd.c:383:9:SD_disk_read	11
+fatfs_sd.c:427:9:SD_disk_write	14
+fatfs_sd.c:482:9:SD_disk_ioctl	26
