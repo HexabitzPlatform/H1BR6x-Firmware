@@ -1,4 +1,4 @@
-H1BR6_spi.c:4:7:SPI_GPIO_Init	1
-H1BR6_spi.c:24:7:MX_SPI2_Init	1
-H1BR6_spi.c:57:6:HAL_SPI_MspInit	2
-H1BR6_spi.c:101:6:HAL_SPI_MspDeInit	2
+..\..\H1BR6\H1BR6_spi.c:4:7:SPI_GPIO_Init	1
+..\..\H1BR6\H1BR6_spi.c:24:7:MX_SPI2_Init	1
+..\..\H1BR6\H1BR6_spi.c:57:6:HAL_SPI_MspInit	2
+..\..\H1BR6\H1BR6_spi.c:101:6:HAL_SPI_MspDeInit	2

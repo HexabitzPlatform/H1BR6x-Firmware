@@ -67,7 +67,7 @@ log_t logs[MAX_LOGS] = {0};
 logVar_t logVars[MAX_LOG_VARS] = {0};
 uint32_t compareValue[MAX_LOG_VARS];
 /* File system object for SD card logical drive */
-FATFS SDFatFs;
+//FATFS SDFatFs;
 /* SD card logical drive path */
 char SDPath[4];
 /* File objects */
@@ -84,9 +84,9 @@ bool enableSequential = true;
 bool enableTimeDateHeader = false;
 
 /* WAVE file parameters */
-uint8_t wavebuff[44];
-UINT Number_br;
-FIL _path_pointer;
+//uint8_t wavebuff[44];
+//UINT Number_br;
+//FIL _path_pointer;
 
 struct /* WAVE FILE Header information struct - 44 bytes */
 {
@@ -109,8 +109,8 @@ uint32_t SUBCHUNK2SIZE; 			//4 byte
 
 }WAVEFIL;
 FATFS fs;  // file system
-FIL fil; // File
-FILINFO fno;
+//FIL fil; // File
+//FILINFO fno;
 FRESULT fresult;  // result
 UINT br, bw;  // File read/write count
 char buffer[1024];
@@ -121,7 +121,7 @@ uint32_t total, free_space;
 /* WAVE file parameters */
 uint8_t wavebuff[44];
 UINT Number_br;
-FIL _path_pointer;
+//FIL _path_pointer;
 uint32_t WAVE_bytes;
 uint32_t READ_WAVE_BYTES=WAVE_DATA_OFFSET;		// WAVE header size in bytes
 uint8_t SCALE_FAC=1;
@@ -138,9 +138,9 @@ uint8_t NO_BYTE_SAMPLE ;
 //calculate wave byte rate time wait in us
 uint16_t SAMPLETIME ;
 //define origrn path pointer for f_close
-FIL _wave_pointer;
+//FIL _wave_pointer;
 //define wave BLOCKALIGN buffer
-uint8_t WaveAlignBuff[500];			// NO_BYTE_SAMPLE
+//uint8_t WaveAlignBuff[500];			// NO_BYTE_SAMPLE
 //define wave sample buffer
 //uint8_t WaveSampleBuff[1000];		// WAVEFIL.BLOCKALIGN
 uint8_t f_mount_ok=0 ;
@@ -945,142 +945,142 @@ WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path)
 // while(f_mount_ok==0){HAL_Delay(1);}		// Add a flag to allow card to be initialized on startup
 
 	//try to open wave file
-	if (f_open (&_path_pointer,Wave_Path,FA_READ)==FR_OK)
-	{
-				//read header from wave file
-				if(f_read (&_path_pointer,  &wavebuff, 44,  &Number_br)!=FR_OK)
-				{
-					//close wave file
-					f_close (&_path_pointer);
-					return WAVE_FILE_READ_FAILD;
-				}
-				//close wave file
-				f_close (&_path_pointer);
-	}
-	else
-	{
-		f_close (&_path_pointer);
-		//return	WAVE_FILE_OPEN_FAILD;
-	}
-
-
-	//GET CHUNK descriptor
-	for(uint8_t _i=0 ; _i<4 ; _i++)
-	{
-	WAVEFIL.CHUNKID[_i] = wavebuff[_i];
-	WAVEFIL.FORMAT[_i] = wavebuff[_i+8];
-	WAVEFIL.SUBCHhUNK1ID[_i] = wavebuff[_i+12];
-	WAVEFIL.SUBCHUNK2ID[_i] = wavebuff[_i+36];
-	}
-
-	//GET CHUNK SIZE
-	WAVEFIL.CHUNKSIZE = (wavebuff[7]<<24)+(wavebuff[6]<<16)+(wavebuff[5]<<8)+wavebuff[4];
-	WAVEFIL.SUBCHUNK1SIZE = (wavebuff[19]<<24)+(wavebuff[18]<<16)+(wavebuff[17]<<8)+wavebuff[16];
-	WAVEFIL.SUBCHUNK2SIZE = (wavebuff[43]<<24)+(wavebuff[42]<<16)+(wavebuff[41]<<8)+wavebuff[40];
-
-	//GET AUDIO descriptor
-	WAVEFIL.AUDIOFMT = (wavebuff[21]<<8)+wavebuff[20];
-	WAVEFIL.NO_CHANNEL = (wavebuff[23]<<8)+wavebuff[22];
-	WAVEFIL.SAMPLERATE = (wavebuff[27]<<24)+(wavebuff[26]<<16)+(wavebuff[25]<<8)+wavebuff[24];
-	WAVEFIL.BYTERATE = (wavebuff[31]<<24)+(wavebuff[30]<<16)+(wavebuff[29]<<8)+wavebuff[28];
-	WAVEFIL.BLOCKALIGN = (wavebuff[33]<<8)+wavebuff[32];
-	WAVEFIL.BITPERSAMPLE = (wavebuff[35]<<8)+wavebuff[34];
-
-	/* Test file header is correct */
-		if(WAVEFIL.CHUNKID[1] != 'R' && WAVEFIL.CHUNKID[1] != 'I' &&  WAVEFIL.CHUNKID[1] != 'F' &&  WAVEFIL.CHUNKID[1] != 'F')
-				{return HEADER_CHUNK_FAULT;}
-		else if (WAVEFIL.FORMAT[1] != 'W' && WAVEFIL.FORMAT[1] != 'A' &&  WAVEFIL.FORMAT[1] != 'V' &&  WAVEFIL.FORMAT[1] != 'E')
-				{return HEADER_CHUNK_FAULT;}
-		else if (WAVEFIL.SUBCHhUNK1ID[1] != 'f' && WAVEFIL.SUBCHhUNK1ID[1] != 'm' &&  WAVEFIL.SUBCHhUNK1ID[1] != 't' &&  WAVEFIL.SUBCHhUNK1ID[1] != 0x20)
-				{return HEADER_CHUNK_FAULT;}
-		else if (WAVEFIL.SUBCHUNK2ID[1] != 'd' && WAVEFIL.SUBCHUNK2ID[1] != 'a' &&  WAVEFIL.SUBCHUNK2ID[1] != 't' &&  WAVEFIL.SUBCHUNK2ID[1] != 'a')
-				{return HEADER_CHUNK_FAULT;}
-		else if (WAVEFIL.AUDIOFMT != 1)  // Audio Format != PCM
-				{return HEADER_CHUNK_FAULT;}
-		else if (WAVEFIL.NO_CHANNEL > 2)  // Number of audio channel more than 2 channel
-				{return HEADER_CHUNK_FAULT;}
-		else if (WAVEFIL.SUBCHUNK1SIZE != 0x10)  // chunk size 2 error must be 16 byte
-				{return HEADER_CHUNK_FAULT;}
-		else if (WAVEFIL.BITPERSAMPLE > 16 ) 		// bit per sample more than 16 bit
-				{return BITPERSAMPLE_ERR;}
-		else
-				{
-				//get wave file size in samples and bytes
-				WAVE_SIZE	=	WAVEFIL.SUBCHUNK2SIZE + READ_WAVE_BYTES;
-				WAVE_bytes	= WAVEFIL.SUBCHUNK2SIZE/((WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL);
-				//calculate number of Byte in Block Sample align
-				NO_BYTE_SAMPLE =	WAVEFIL.BLOCKALIGN*(WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL;
-				//calculate wave byte rate time wait in us
-				SAMPLETIME = (1000000/WAVEFIL.SAMPLERATE)-20;
-				return HEADER_CHUNK_OK;
-
-				}
+//	if (f_open (&_path_pointer,Wave_Path,FA_READ)==FR_OK)
+//	{
+//				//read header from wave file
+//				if(f_read (&_path_pointer,  &wavebuff, 44,  &Number_br)!=FR_OK)
+//				{
+//					//close wave file
+//					f_close (&_path_pointer);
+//					return WAVE_FILE_READ_FAILD;
+//				}
+//				//close wave file
+//				f_close (&_path_pointer);
+//	}
+//	else
+//	{
+//		f_close (&_path_pointer);
+//		//return	WAVE_FILE_OPEN_FAILD;
+//	}
+//
+//
+//	//GET CHUNK descriptor
+//	for(uint8_t _i=0 ; _i<4 ; _i++)
+//	{
+//	WAVEFIL.CHUNKID[_i] = wavebuff[_i];
+//	WAVEFIL.FORMAT[_i] = wavebuff[_i+8];
+//	WAVEFIL.SUBCHhUNK1ID[_i] = wavebuff[_i+12];
+//	WAVEFIL.SUBCHUNK2ID[_i] = wavebuff[_i+36];
+//	}
+//
+//	//GET CHUNK SIZE
+//	WAVEFIL.CHUNKSIZE = (wavebuff[7]<<24)+(wavebuff[6]<<16)+(wavebuff[5]<<8)+wavebuff[4];
+//	WAVEFIL.SUBCHUNK1SIZE = (wavebuff[19]<<24)+(wavebuff[18]<<16)+(wavebuff[17]<<8)+wavebuff[16];
+//	WAVEFIL.SUBCHUNK2SIZE = (wavebuff[43]<<24)+(wavebuff[42]<<16)+(wavebuff[41]<<8)+wavebuff[40];
+//
+//	//GET AUDIO descriptor
+//	WAVEFIL.AUDIOFMT = (wavebuff[21]<<8)+wavebuff[20];
+//	WAVEFIL.NO_CHANNEL = (wavebuff[23]<<8)+wavebuff[22];
+//	WAVEFIL.SAMPLERATE = (wavebuff[27]<<24)+(wavebuff[26]<<16)+(wavebuff[25]<<8)+wavebuff[24];
+//	WAVEFIL.BYTERATE = (wavebuff[31]<<24)+(wavebuff[30]<<16)+(wavebuff[29]<<8)+wavebuff[28];
+//	WAVEFIL.BLOCKALIGN = (wavebuff[33]<<8)+wavebuff[32];
+//	WAVEFIL.BITPERSAMPLE = (wavebuff[35]<<8)+wavebuff[34];
+//
+//	/* Test file header is correct */
+//		if(WAVEFIL.CHUNKID[1] != 'R' && WAVEFIL.CHUNKID[1] != 'I' &&  WAVEFIL.CHUNKID[1] != 'F' &&  WAVEFIL.CHUNKID[1] != 'F')
+//				{return HEADER_CHUNK_FAULT;}
+//		else if (WAVEFIL.FORMAT[1] != 'W' && WAVEFIL.FORMAT[1] != 'A' &&  WAVEFIL.FORMAT[1] != 'V' &&  WAVEFIL.FORMAT[1] != 'E')
+//				{return HEADER_CHUNK_FAULT;}
+//		else if (WAVEFIL.SUBCHhUNK1ID[1] != 'f' && WAVEFIL.SUBCHhUNK1ID[1] != 'm' &&  WAVEFIL.SUBCHhUNK1ID[1] != 't' &&  WAVEFIL.SUBCHhUNK1ID[1] != 0x20)
+//				{return HEADER_CHUNK_FAULT;}
+//		else if (WAVEFIL.SUBCHUNK2ID[1] != 'd' && WAVEFIL.SUBCHUNK2ID[1] != 'a' &&  WAVEFIL.SUBCHUNK2ID[1] != 't' &&  WAVEFIL.SUBCHUNK2ID[1] != 'a')
+//				{return HEADER_CHUNK_FAULT;}
+//		else if (WAVEFIL.AUDIOFMT != 1)  // Audio Format != PCM
+//				{return HEADER_CHUNK_FAULT;}
+//		else if (WAVEFIL.NO_CHANNEL > 2)  // Number of audio channel more than 2 channel
+//				{return HEADER_CHUNK_FAULT;}
+//		else if (WAVEFIL.SUBCHUNK1SIZE != 0x10)  // chunk size 2 error must be 16 byte
+//				{return HEADER_CHUNK_FAULT;}
+//		else if (WAVEFIL.BITPERSAMPLE > 16 ) 		// bit per sample more than 16 bit
+//				{return BITPERSAMPLE_ERR;}
+//		else
+//				{
+//				//get wave file size in samples and bytes
+//				WAVE_SIZE	=	WAVEFIL.SUBCHUNK2SIZE + READ_WAVE_BYTES;
+//				WAVE_bytes	= WAVEFIL.SUBCHUNK2SIZE/((WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL);
+//				//calculate number of Byte in Block Sample align
+//				NO_BYTE_SAMPLE =	WAVEFIL.BLOCKALIGN*(WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL;
+//				//calculate wave byte rate time wait in us
+//				SAMPLETIME = (1000000/WAVEFIL.SAMPLERATE)-20;
+//				return HEADER_CHUNK_OK;
+//
+//				}
 }
 WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
 {
-	    READ_WAVE_BYTES=44;
-		SCALE_FAC=1;
-		SCALE_SHIFT=0;
-
-//		WAVEFIL.BITPERSAMPLE = 8;
-		if (WAVEFIL.NO_CHANNEL == 1 && WAVEFIL.BITPERSAMPLE == 8)
-				{SCALE_FAC=1;SCALE_SHIFT=0;}				//read sample channel
-		else if (WAVEFIL.NO_CHANNEL == 1 && WAVEFIL.BITPERSAMPLE == 16)
-				{SCALE_FAC=2;SCALE_SHIFT=0;} 		//read sample MSB from channel
-		else if (WAVEFIL.NO_CHANNEL == 2 && WAVEFIL.BITPERSAMPLE == 8)
-				{SCALE_FAC=2;SCALE_SHIFT=1;}			//read sample from right channel
-		else if (WAVEFIL.NO_CHANNEL == 2 && WAVEFIL.BITPERSAMPLE == 16)
-				{SCALE_FAC=4;SCALE_SHIFT=2;}			//read sample from MSB right channel
-		else {return HEADER_CHUNK_FAULT;}
-
-
-		if (f_open (&_path_pointer,Wave_Path,FA_READ)!=FR_OK) {
-			f_close(&_path_pointer);
-			return	WAVE_FILE_OPEN_FAILD;
-		} else {
-			_wave_pointer=_path_pointer;
-		}
-
-		__TIM16_CLK_ENABLE();
-
-		/* Peripheral configuration */
-		htim15.Instance = TIM15;
-		htim15.Init.Prescaler = 0;
-		htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
-		htim15.Init.Period = (uint16_t)((SystemCoreClock/WAVEFIL.SAMPLERATE)-1);
-		HAL_TIM_Base_Init(&htim15);
-		HAL_NVIC_SetPriority(TIM15_IRQn, 1, 0);
-        HAL_NVIC_EnableIRQ(TIM15_IRQn);
-		HAL_TIM_Base_Start_IT(&htim15);
-		portENTER_CRITICAL();
-
-		do
-		{
-            f_lseek (&_path_pointer,READ_WAVE_BYTES);
-			f_read (&_path_pointer, &WaveAlignBuff, 500,  &Number_br);
-
-			for(uint8_t Align=0 ; Align<WAVEFIL.BLOCKALIGN ;Align++)
-			{
-				//stream to port 'send one sample from port'
-				for( I=0 ; I<500 ;I++)
-			{
-				    writePxMutex(_port,(char *) &WaveAlignBuff[I],1,0,0);
-					Delay_us(SAMPLETIME);
-			}
-				while (__HAL_TIM_GET_FLAG(&htim15, TIM_FLAG_UPDATE) == 0){};
-			}
-			READ_WAVE_BYTES +=500;
-
-		} while(READ_WAVE_BYTES <= WAVE_SIZE);
-     	portEXIT_CRITICAL();
-		f_close (&_wave_pointer);
-		HAL_TIM_Base_Stop(&htim15);
-		HAL_Delay(20);
-		// Reset size variables for next transfer
-		WAVE_bytes = 0;
-		WAVE_SIZE = 0;
-
-		return STREAM_WAVE_OK;
+//	    READ_WAVE_BYTES=44;
+//		SCALE_FAC=1;
+//		SCALE_SHIFT=0;
+//
+////		WAVEFIL.BITPERSAMPLE = 8;
+//		if (WAVEFIL.NO_CHANNEL == 1 && WAVEFIL.BITPERSAMPLE == 8)
+//				{SCALE_FAC=1;SCALE_SHIFT=0;}				//read sample channel
+//		else if (WAVEFIL.NO_CHANNEL == 1 && WAVEFIL.BITPERSAMPLE == 16)
+//				{SCALE_FAC=2;SCALE_SHIFT=0;} 		//read sample MSB from channel
+//		else if (WAVEFIL.NO_CHANNEL == 2 && WAVEFIL.BITPERSAMPLE == 8)
+//				{SCALE_FAC=2;SCALE_SHIFT=1;}			//read sample from right channel
+//		else if (WAVEFIL.NO_CHANNEL == 2 && WAVEFIL.BITPERSAMPLE == 16)
+//				{SCALE_FAC=4;SCALE_SHIFT=2;}			//read sample from MSB right channel
+//		else {return HEADER_CHUNK_FAULT;}
+//
+//
+//		if (f_open (&_path_pointer,Wave_Path,FA_READ)!=FR_OK) {
+//			f_close(&_path_pointer);
+//			return	WAVE_FILE_OPEN_FAILD;
+//		} else {
+//			_wave_pointer=_path_pointer;
+//		}
+//
+//		__TIM16_CLK_ENABLE();
+//
+//		/* Peripheral configuration */
+//		htim15.Instance = TIM15;
+//		htim15.Init.Prescaler = 0;
+//		htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
+//		htim15.Init.Period = (uint16_t)((SystemCoreClock/WAVEFIL.SAMPLERATE)-1);
+//		HAL_TIM_Base_Init(&htim15);
+//		HAL_NVIC_SetPriority(TIM15_IRQn, 1, 0);
+//        HAL_NVIC_EnableIRQ(TIM15_IRQn);
+//		HAL_TIM_Base_Start_IT(&htim15);
+//		portENTER_CRITICAL();
+//
+//		do
+//		{
+//            f_lseek (&_path_pointer,READ_WAVE_BYTES);
+//			f_read (&_path_pointer, &WaveAlignBuff, 500,  &Number_br);
+//
+//			for(uint8_t Align=0 ; Align<WAVEFIL.BLOCKALIGN ;Align++)
+//			{
+//				//stream to port 'send one sample from port'
+//				for( I=0 ; I<500 ;I++)
+//			{
+//				    writePxMutex(_port,(char *) &WaveAlignBuff[I],1,0,0);
+//					Delay_us(SAMPLETIME);
+//			}
+//				while (__HAL_TIM_GET_FLAG(&htim15, TIM_FLAG_UPDATE) == 0){};
+//			}
+//			READ_WAVE_BYTES +=500;
+//
+//		} while(READ_WAVE_BYTES <= WAVE_SIZE);
+//     	portEXIT_CRITICAL();
+//		f_close (&_wave_pointer);
+//		HAL_TIM_Base_Stop(&htim15);
+//		HAL_Delay(20);
+//		// Reset size variables for next transfer
+//		WAVE_bytes = 0;
+//		WAVE_SIZE = 0;
+//
+//		return STREAM_WAVE_OK;
 }
 
 /**
@@ -1092,42 +1092,42 @@ WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
 */
 WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
 {
-	  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
-
-	WAVE_STATE result;
-	result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
-
-	//send responce to H07R3x
-	if(result == HEADER_CHUNK_OK)
-	{
-		//send wave file Data size in bytes
-		messageParams[0]=(uint8_t) (WAVE_bytes>>24);
-		messageParams[1]=(uint8_t) (WAVE_bytes>>16);
-		messageParams[2]=(uint8_t) (WAVE_bytes>>8);
-		messageParams[3]=(uint8_t)  WAVE_bytes;
-		//send wave file sample rate
-		messageParams[4]=(uint8_t) (WAVEFIL.SAMPLERATE>>24);
-		messageParams[5]=(uint8_t) (WAVEFIL.SAMPLERATE>>16);
-		messageParams[6]=(uint8_t) (WAVEFIL.SAMPLERATE>>8);
-		messageParams[7]=(uint8_t)  WAVEFIL.SAMPLERATE;
-	}
-	else
-	{
-		//send error param
-		messageParams[0]=(uint8_t) 0xFF;
-		messageParams[1]=(uint8_t) 0xFF;
-		messageParams[2]=(uint8_t) 0xFF;
-		messageParams[3]=(uint8_t) 0xFF;
-		//send error param
-		messageParams[4]=(uint8_t) 0xFF;
-		messageParams[5]=(uint8_t) 0xFF;
-		messageParams[6]=(uint8_t) 0xFF;
-		messageParams[7]=(uint8_t) 0xFF;
-	}
-	IND_blink(100);
-	SendMessageToModule(H07R3x_ID, CODE_H07R3_SCAN_WAVE_RESPONSE,8);
-
-	return result;
+//	  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
+//
+//	WAVE_STATE result;
+//	result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
+//
+//	//send responce to H07R3x
+//	if(result == HEADER_CHUNK_OK)
+//	{
+//		//send wave file Data size in bytes
+//		messageParams[0]=(uint8_t) (WAVE_bytes>>24);
+//		messageParams[1]=(uint8_t) (WAVE_bytes>>16);
+//		messageParams[2]=(uint8_t) (WAVE_bytes>>8);
+//		messageParams[3]=(uint8_t)  WAVE_bytes;
+//		//send wave file sample rate
+//		messageParams[4]=(uint8_t) (WAVEFIL.SAMPLERATE>>24);
+//		messageParams[5]=(uint8_t) (WAVEFIL.SAMPLERATE>>16);
+//		messageParams[6]=(uint8_t) (WAVEFIL.SAMPLERATE>>8);
+//		messageParams[7]=(uint8_t)  WAVEFIL.SAMPLERATE;
+//	}
+//	else
+//	{
+//		//send error param
+//		messageParams[0]=(uint8_t) 0xFF;
+//		messageParams[1]=(uint8_t) 0xFF;
+//		messageParams[2]=(uint8_t) 0xFF;
+//		messageParams[3]=(uint8_t) 0xFF;
+//		//send error param
+//		messageParams[4]=(uint8_t) 0xFF;
+//		messageParams[5]=(uint8_t) 0xFF;
+//		messageParams[6]=(uint8_t) 0xFF;
+//		messageParams[7]=(uint8_t) 0xFF;
+//	}
+//	IND_blink(100);
+//	SendMessageToModule(H07R3x_ID, CODE_H07R3_SCAN_WAVE_RESPONSE,8);
+//
+//	return result;
 }
 
 /*-----------------------------------------------------------*/
@@ -1596,34 +1596,34 @@ Module_Status DeleteLog(char* logName, options_t options, char* fileExtension)
 
 WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID)
 {
-	while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
-
-	if ( Wave_Full_Name != NULL )
-	{
-			uint8_t port;
-
-			if (!WAVE_bytes)		// Read file header if it was not scanned before
-			{
-				WAVE_STATE result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
-
-				if(result != HEADER_CHUNK_OK)	return WAVE_FILE_READ_FAILD;
-
-				// calculate number of bytes to be streamed
-				WAVE_bytes	= WAVEFIL.SUBCHUNK2SIZE/((WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL);
-			}
-
-			// Find best output port for destination module
-			port = FindRoute(myID, H07R3x_ID);
-
-			// Start a single-cast DMA stream across the array.
-			if ( StartScastDMAStream(0, myID, 0, H07R3x_ID, FORWARD, WAVE_bytes, 0xFFFFFFFF, 0) != BOS_OK )
-					{return STREAM_WAVE_FAILD;}
-			//Delay_ms(100);
-			//IND_blink(100);
-
-			return (StreamWaveToPort(Wave_Full_Name, port));
-	}
-	return WAVE_FILE_READ_FAILD;
+//	while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
+//
+//	if ( Wave_Full_Name != NULL )
+//	{
+//			uint8_t port;
+//
+//			if (!WAVE_bytes)		// Read file header if it was not scanned before
+//			{
+//				WAVE_STATE result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
+//
+//				if(result != HEADER_CHUNK_OK)	return WAVE_FILE_READ_FAILD;
+//
+//				// calculate number of bytes to be streamed
+//				WAVE_bytes	= WAVEFIL.SUBCHUNK2SIZE/((WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL);
+//			}
+//
+//			// Find best output port for destination module
+//			port = FindRoute(myID, H07R3x_ID);
+//
+//			// Start a single-cast DMA stream across the array.
+//			if ( StartScastDMAStream(0, myID, 0, H07R3x_ID, FORWARD, WAVE_bytes, 0xFFFFFFFF, 0) != BOS_OK )
+//					{return STREAM_WAVE_FAILD;}
+//			//Delay_ms(100);
+//			//IND_blink(100);
+//
+//			return (StreamWaveToPort(Wave_Full_Name, port));
+//	}
+//	return WAVE_FILE_READ_FAILD;
 }
 
 /*-----------------------------------------------------------*/

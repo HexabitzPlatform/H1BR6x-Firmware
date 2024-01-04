@@ -1,4 +1,4 @@
-H1BR6_gpio.c:22:6:GPIO_Init	1
-H1BR6_gpio.c:35:6:IND_LED_Init	1
-H1BR6_gpio.c:50:9:IsFactoryReset	3
-H1BR6_gpio.c:101:12:GetPortGPIOs	6
+..\..\H1BR6\H1BR6_gpio.c:22:6:GPIO_Init	1
+..\..\H1BR6\H1BR6_gpio.c:35:6:IND_LED_Init	1
+..\..\H1BR6\H1BR6_gpio.c:50:9:IsFactoryReset	3
+..\..\H1BR6\H1BR6_gpio.c:101:12:GetPortGPIOs	6
