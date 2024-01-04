@@ -11,6 +11,6 @@
 ..\..\H1BR6\H1BR6_it.c:185:6:DMA1_Ch4_7_DMA2_Ch3_5_IRQHandler	6
 ..\..\H1BR6\H1BR6_it.c:210:6:HAL_UART_TxCpltCallback	2
 ..\..\H1BR6\H1BR6_it.c:223:6:HAL_UART_ErrorCallback	2
-..\..\H1BR6\H1BR6_it.c:242:6:HAL_UART_RxCpltCallback	18
-..\..\H1BR6\H1BR6_it.c:325:6:vApplicationStackOverflowHook	0
-..\..\H1BR6\H1BR6_it.c:347:6:vApplicationMallocFailedHook	0
+..\..\H1BR6\H1BR6_it.c:246:6:HAL_UART_RxCpltCallback	1
+..\..\H1BR6\H1BR6_it.c:329:6:vApplicationStackOverflowHook	0
+..\..\H1BR6\H1BR6_it.c:351:6:vApplicationMallocFailedHook	0
