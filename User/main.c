@@ -18,6 +18,7 @@ uint32_t counter00 = 0;
 
 int main(void){
 
+
 	Module_Init();		//Initialize Module &  BitzOS
 
 
@@ -32,18 +33,18 @@ int main(void){
 void UserTask(void *argument){
 
 
-	AddPortButton(MOMENTARY_NO, 3);								// Define a button connected to port P1
-		SetButtonEvents(3, 1, 0, 3, 0, 0, 0, 0, 0,1);		// Activate a click event and a pressed_for_x event for 3 seconds
-
-		// Create log and log button clicks
-		//if ( CreateLog("Click Logger", EVENT, 10, FMT_TAB, FMT_TIME, "Sample @ 10Hz") == H1BR6_OK )
-		if ( CreateLog("Click Logger", EVENT, 10, FMT_TAB, FMT_SAMPLE, "Sample @ 10Hz") == H1BR6_OK )
-		{
-			LogVar("Click Logger", PORT_BUTTON, P3, "Logger");
-			LogVar("Click Logger", MEMORY_DATA_UINT32, (uint32_t)&counter00, "counter00");
-			// Do not reset button state after writing the log since we need it to blink LED as well!
-			needToDelayButtonStateReset = true;
-		}
+//	AddPortButton(MOMENTARY_NO, 3);								// Define a button connected to port P1
+//		SetButtonEvents(3, 1, 0, 3, 0, 0, 0, 0, 0,1);		// Activate a click event and a pressed_for_x event for 3 seconds
+//
+//		// Create log and log button clicks
+//		//if ( CreateLog("Click Logger", EVENT, 10, FMT_TAB, FMT_TIME, "Sample @ 10Hz") == H1BR6_OK )
+//		if ( CreateLog("Click Logger", EVENT, 10, FMT_TAB, FMT_SAMPLE, "Sample @ 10Hz") == H1BR6_OK )
+//		{
+//			LogVar("Click Logger", PORT_BUTTON, P3, "Logger");
+//			LogVar("Click Logger", MEMORY_DATA_UINT32, (uint32_t)&counter00, "counter00");
+//			// Do not reset button state after writing the log since we need it to blink LED as well!
+//			needToDelayButtonStateReset = true;
+//		}
 	//SD_getSpace();
     //SD_writeString("file1.txt","Hello");
 	//void SD_writeVariable(char* FileName,uint8_t Variable);
@@ -53,9 +54,20 @@ void UserTask(void *argument){
   //  SD_removeFile("file2.TXT");
   // SD_unmount();
 	// put your code here, to run repeatedly.
+
 	while(1){
+		messageParams[0] = 0;
+		messageParams[1] = RED;
+		messageParams[2] = 75;
+		SendMessageToModule(2, CODE_H01R0_COLOR, 3);
+//		SendMessageToModule(2, CODE_PING, 0);
+
 	//	buttonClickedCallback(3);
 		//buttonPressedForXCallback(3, MOMENTARY_NO);
+//		IND_ON();
+//		Delay_ms(1000);
+//		IND_OFF();
+//				Delay_ms(1000);
 	}
 }
 void buttonClickedCallback(uint8_t port)
