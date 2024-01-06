@@ -107,7 +107,7 @@
 #define _IND_LED_PORT		GPIOB
 #define _IND_LED_PIN		GPIO_PIN_14
 
-#define MAX_LOGS					10
+#define MAX_LOGS			    10
 #define MAX_LOG_VARS			30
 #define MAX_DUPLICATE_FILE		((uint8_t)255U)
 #define MAX_NAME_LENGTH			((uint8_t)25U)
@@ -121,7 +121,7 @@
 /* H1BR6_Status Type Definition */
 typedef enum
 {
-  H1BR6_OK = 0,
+	H1BR6_OK = 0,
 	H1BR6_ERR_UnknownMessage = 1,
 	H1BR6_ERR_LogNameExists = 2,
 	H1BR6_ERR_WrongParams,

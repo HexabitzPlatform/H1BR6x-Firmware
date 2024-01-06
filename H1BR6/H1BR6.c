@@ -31,6 +31,7 @@ UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
+UART_HandleTypeDef huart6;
 
 
 /* Exported variables */
@@ -507,6 +508,24 @@ void Module_Peripheral_Init(void){
 	SPI_GPIO_Init();
 	MX_SPI2_Init();
 	MX_FATFS_Init();
+
+	  //Circulating DMA Channels ON All Module
+		  		 for(int i=1;i<=NumOfPorts;i++)
+		  			{
+		  			  if(GetUart(i)==&huart1)
+		  			           { index_dma[i-1]=&(DMA1_Channel1->CNDTR); }
+		  			  else if(GetUart(i)==&huart2)
+		  					   { index_dma[i-1]=&(DMA1_Channel2->CNDTR); }
+		  			  else if(GetUart(i)==&huart3)
+		  					   { index_dma[i-1]=&(DMA1_Channel3->CNDTR); }
+		  			  else if(GetUart(i)==&huart4)
+		  					   { index_dma[i-1]=&(DMA1_Channel4->CNDTR); }
+		  			  else if(GetUart(i)==&huart5)
+		  					   { index_dma[i-1]=&(DMA1_Channel5->CNDTR); }
+		  			  else if(GetUart(i)==&huart6)
+		  					   { index_dma[i-1]=&(DMA1_Channel6->CNDTR); }
+		  			}
+
 
 	/* Create module special task (if needed) */
 	    needToDelayButtonStateReset = true;
