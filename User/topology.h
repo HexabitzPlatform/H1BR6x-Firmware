@@ -25,13 +25,13 @@
 
 // Topology
 static uint16_t array[__N ][7] ={
-	{_H1BR6, 0, 0, 0, 0, _mod2 | P4,0}, 								 // Module 1
-	{_H01R0, 0, 0,0, _mod1 | P5, 0, 0},					    			 // Module 2
+	{_H1BR6, _mod2 | P1, 0, 0, 0, 0, 0}, 				     				 // Module 1
+	{_H01R0, _mod1 | P1, 0, 0, 0, 0, 0},					    			 // Module 2
 };
 
 // Configurations for duplex serial ports
 #if ( _module == 1 )
-	#define	H1BR6	1
+	#define	H1BR6	        1
 	#define	_P1pol_normal	1
 	#define	_P2pol_normal	1
 	#define	_P3pol_normal	1
@@ -42,11 +42,11 @@ static uint16_t array[__N ][7] ={
 
 #if ( _module == 2 )
 	#define	H01R0			1
-	#define	_P1pol_normal	1
+	#define	_P1pol_reversed	1
 	#define	_P2pol_normal	1
 	#define	_P3pol_normal	1
-	#define	_P4pol_reversed	1
-	#define	_P5pol_reversed	1
+	#define	_P4pol_normal	1
+	#define	_P5pol_normal	1
 	#define	_P6pol_normal	1
 
 #endif
