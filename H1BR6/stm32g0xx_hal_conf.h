@@ -1,22 +1,12 @@
-/**
-  ******************************************************************************
-  * @file    stm32g0xx_hal_conf.h
-  * @author  MCD Application Team
-  * @brief   HAL configuration template file.
+/*
+ BitzOS (BOS) V0.3.0 - Copyright (C) 2017-2024 Hexabitz
+ All rights reserved
+
+ File Name     : stm32g0xx_hal_conf.h
+ Description   : HAL configuration template file.
   *          This file should be copied to the application folder and renamed
   *          to stm32g0xx_hal_conf.h.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2018 STMicroelectronics. 
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef STM32G0xx_HAL_CONF_H

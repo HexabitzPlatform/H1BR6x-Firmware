@@ -1,3 +1,13 @@
+/*
+ BitzOS (BOS) V0.3.0 - Copyright (C) 2017-2024 Hexabitz
+ All rights reserved
+
+ File Name     : H1BR6_spi.c
+ Description   :
+  *
+ */
+
+
 #include "BOS.h"
 
 SPI_HandleTypeDef hspi2;

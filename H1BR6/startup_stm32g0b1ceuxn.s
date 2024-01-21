@@ -1,8 +1,9 @@
-/**
-  ******************************************************************************
-  * @file      startup_stm32g0b1xx.s
-  * @author    MCD Application Team
-  * @brief     STM32G0b1xx devices vector table GCC toolchain.
+/*
+ BitzOS (BOS) V0.3.0 - Copyright (C) 2017-2024 Hexabitz
+ All rights reserved
+
+ File Name     : startup_stm32g0b1ceuxn.s
+ Description   : STM32G0b1xx devices vector table GCC toolchain.
   *            This module performs:
   *                - Set the initial SP
   *                - Set the initial PC == Reset_Handler,
@@ -11,18 +12,8 @@
   *                  calls main()).
   *            After Reset the Cortex-M0+ processor is in Thread mode,
   *            priority is Privileged, and the Stack is set to Main.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2018-2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+
+ */
 
 .syntax unified
 .cpu cortex-m0plus
