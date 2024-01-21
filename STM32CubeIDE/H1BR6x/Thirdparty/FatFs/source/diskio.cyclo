@@ -1,0 +1,6 @@
+..\..\Thirdparty\FatFs\source\diskio.c:37:9:disk_status	1
+..\..\Thirdparty\FatFs\source\diskio.c:52:9:disk_initialize	2
+..\..\Thirdparty\FatFs\source\diskio.c:74:9:disk_read	1
+..\..\Thirdparty\FatFs\source\diskio.c:96:9:disk_write	1
+..\..\Thirdparty\FatFs\source\diskio.c:118:9:disk_ioctl	1
+..\..\Thirdparty\FatFs\source\diskio.c:136:14:get_fattime	1
