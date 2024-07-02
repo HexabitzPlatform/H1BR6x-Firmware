@@ -1,9 +1,0 @@
-..\..\H1BR6\H1BR6_eeprom.c:36:10:EE_Init	41
-..\..\H1BR6\H1BR6_eeprom.c:365:10:EE_ReadVariable	4
-..\..\H1BR6\H1BR6_eeprom.c:419:10:EE_WriteVariable	2
-..\..\H1BR6\H1BR6_eeprom.c:445:10:EE_Format	6
-..\..\H1BR6\H1BR6_eeprom.c:526:17:EE_FindValidPage	9
-..\..\H1BR6\H1BR6_eeprom.c:586:17:EE_VerifyPageFullWriteVariable	6
-..\..\H1BR6\H1BR6_eeprom.c:665:17:EE_PageTransfer	12
-..\..\H1BR6\H1BR6_eeprom.c:788:10:Flash_WriteVariable	2
-..\..\H1BR6\H1BR6_eeprom.c:814:12:EraseSector	3

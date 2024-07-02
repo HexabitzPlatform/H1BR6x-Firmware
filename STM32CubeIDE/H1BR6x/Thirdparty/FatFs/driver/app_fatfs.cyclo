@@ -1,8 +1,0 @@
-..\..\Thirdparty\FatFs\driver\app_fatfs.c:69:9:USER_initialize	1
-..\..\Thirdparty\FatFs\driver\app_fatfs.c:83:9:USER_status	1
-..\..\Thirdparty\FatFs\driver\app_fatfs.c:100:9:USER_read	1
-..\..\Thirdparty\FatFs\driver\app_fatfs.c:121:9:USER_write	1
-..\..\Thirdparty\FatFs\driver\app_fatfs.c:143:9:USER_ioctl	1
-..\..\Thirdparty\FatFs\driver\app_fatfs.c:200:9:MX_FATFS_Init	2
-..\..\Thirdparty\FatFs\driver\app_fatfs.c:221:9:MX_FATFS_Process	1
-..\..\Thirdparty\FatFs\driver\app_fatfs.c:235:7:get_fattime	1
