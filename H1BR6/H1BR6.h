@@ -143,7 +143,7 @@ typedef enum { FMT_SPACE = 1, FMT_TAB, FMT_COMMA } delimiterFormat_t;
 typedef enum { FMT_NONE = 0, FMT_SAMPLE, FMT_TIME } indexColumnFormat_t;
 typedef enum { DELETE_ALL = 0, KEEP_ON_DISK } options_t;
 //WAVE_STATE return values
-typedef enum		{WAVE_FILE_OK = 1,	HEADER_CHUNK_OK,HEADER_CHUNK_FAULT,WAVE_FILE_OPEN_FAILD,WAVE_FILE_READ_FAILD,STREAM_WAVE_OK,BITPERSAMPLE_ERR,STREAM_WAVE_FAILD	 = 0xff}WAVE_STATE;
+//typedef enum		{WAVE_FILE_OK = 1,	HEADER_CHUNK_OK,HEADER_CHUNK_FAULT,WAVE_FILE_OPEN_FAILD,WAVE_FILE_READ_FAILD,STREAM_WAVE_OK,BITPERSAMPLE_ERR,STREAM_WAVE_FAILD	 = 0xff}WAVE_STATE;
 
 
 /* Log Struct Type Definition */
@@ -175,7 +175,7 @@ logVar_t;
 
 
 /* WAVE file parameters */
-extern uint8_t wavebuff[44];
+//extern uint8_t wavebuff[44];
 extern UINT Number_br;
 //extern FIL _path_pointer;
 
@@ -191,7 +191,7 @@ extern UART_HandleTypeDef huart3;
 extern UART_HandleTypeDef huart4;
 extern UART_HandleTypeDef huart5;
 
-WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path);
+//WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path);
 //WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port);
 
 void send_uart(char *string);
@@ -231,8 +231,8 @@ extern Module_Status StopLog(char* logName);
 extern Module_Status PauseLog(char* logName);
 extern Module_Status ResumeLog(char* logName);
 extern Module_Status DeleteLog(char* logName, options_t options, char* fileExtension);
-extern WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID);
-extern WAVE_STATE ScanWaveFile(char* Wave_Full_Name, uint8_t H07R3x_ID);
+//extern WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID);
+//extern WAVE_STATE ScanWaveFile(char* Wave_Full_Name, uint8_t H07R3x_ID);
 
 
 void SetupPortForRemoteBootloaderUpdate(uint8_t port);

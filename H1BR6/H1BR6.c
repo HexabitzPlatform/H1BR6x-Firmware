@@ -959,8 +959,8 @@ Module_Status OpenThisLog(uint16_t logindex, FIL *objFile)
 }
 
 
-WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path)
-{
+//WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path)
+//{
 // while(f_mount_ok==0){HAL_Delay(1);}		// Add a flag to allow card to be initialized on startup
 
 	//try to open wave file
@@ -1034,9 +1034,9 @@ WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path)
 //				return HEADER_CHUNK_OK;
 //
 //				}
-}
-WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
-{
+//}
+//WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
+//{
 //	    READ_WAVE_BYTES=44;
 //		SCALE_FAC=1;
 //		SCALE_SHIFT=0;
@@ -1100,7 +1100,7 @@ WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
 //		WAVE_SIZE = 0;
 //
 //		return STREAM_WAVE_OK;
-}
+//}
 
 /**
 	ScanWaveFile
@@ -1109,8 +1109,8 @@ WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
 * @param Wave_Full_Name : Wave full file name
 * @param H07R3x_ID : H07R3 module ID
 */
-WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
-{
+//WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
+//{
 //	  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
 //
 //	WAVE_STATE result;
@@ -1147,7 +1147,7 @@ WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
 //	SendMessageToModule(H07R3x_ID, CODE_H07R3_SCAN_WAVE_RESPONSE,8);
 //
 //	return result;
-}
+//}
 
 /*-----------------------------------------------------------*/
 
@@ -1613,8 +1613,8 @@ Module_Status DeleteLog(char* logName, options_t options, char* fileExtension)
 * @param H07R3x_ID : distant H07R3 module ID
 */
 
-WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID)
-{
+//WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID)
+//{
 //	while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
 //
 //	if ( Wave_Full_Name != NULL )
@@ -1643,7 +1643,7 @@ WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID)
 //			return (StreamWaveToPort(Wave_Full_Name, port));
 //	}
 //	return WAVE_FILE_READ_FAILD;
-}
+//}
 
 /*-----------------------------------------------------------*/
 
