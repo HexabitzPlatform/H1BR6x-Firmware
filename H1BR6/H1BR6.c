@@ -72,7 +72,8 @@ uint32_t compareValue[MAX_LOG_VARS];
 /* SD card logical drive path */
 char SDPath[4];
 /* File objects */
-FIL MyFile, tempFile;
+FIL MyFile;
+FATFS fs;  // file system
 /* File write/read counts */
 uint32_t byteswritten, bytesread;
 char lineBuffer[100];
@@ -109,7 +110,7 @@ bool enableTimeDateHeader = false;
 //uint32_t SUBCHUNK2SIZE; 			//4 byte
 //
 //}WAVEFIL;
-FATFS fs;  // file system
+
 //FIL fil; // File
 //FILINFO fno;
 FRESULT fresult;  // result
@@ -1254,7 +1255,7 @@ Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterForm
 			/* Append log name with extension */
 			sprintf((char *)tempName, "%s%s", logName, ".TXT");
 			/* Check if file exists on disk */
-			res = f_open(&tempFile, tempName, FA_CREATE_NEW | FA_WRITE | FA_READ);
+			res = f_open(&MyFile, tempName, FA_CREATE_NEW | FA_WRITE | FA_READ);
 			if ((false == enableSequential) && (res == FR_EXIST))
 			{
 				return H1BR6_ERR_LogNameExists;
@@ -1288,7 +1289,7 @@ Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterForm
 						}
 						countFile++;
 					}
-					res = f_open(&tempFile, tempName, FA_CREATE_NEW | FA_WRITE | FA_READ);
+					res = f_open(&MyFile, tempName, FA_CREATE_NEW | FA_WRITE | FA_READ);
 				}while ((FR_EXIST == res) && (MAX_DUPLICATE_FILE > countFile));
 
 				if((MAX_DUPLICATE_FILE == countFile) && (FR_EXIST == res))
@@ -1331,27 +1332,27 @@ Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterForm
 			char *buffer = malloc(100);
 			memset (buffer, 0x00, 100);
 			sprintf(buffer, logHeaderText1, _firmMajor, _firmMinor, _firmPatch, modulePNstring[myPN]);
-			res = f_write(&tempFile, buffer, strlen(buffer), (void *)&byteswritten);
+			res = f_write(&MyFile, buffer, strlen(buffer), (void *)&byteswritten);
 			if (enableTimeDateHeader)
 			{
 				GetTimeDate();
 				sprintf(buffer, logHeaderTimeDate, GetDateString(), GetTimeString());
-				res = f_write(&tempFile, buffer, strlen(buffer), (void *)&byteswritten);
+				res = f_write(&MyFile, buffer, strlen(buffer), (void *)&byteswritten);
 			}
 			if(type == RATE)
 			{
 				sprintf(buffer, logHeaderText2, rate);
-				res = f_write(&tempFile, buffer, strlen(buffer), (void *)&byteswritten);
+				res = f_write(&MyFile, buffer, strlen(buffer), (void *)&byteswritten);
 			}
 			else if (type == EVENT)
 			{
-				res = f_write(&tempFile, logHeaderText3, strlen(logHeaderText3), (void *)&byteswritten);
+				res = f_write(&MyFile, logHeaderText3, strlen(logHeaderText3), (void *)&byteswritten);
 			}
 
 			/* Write index label */
-			res = f_write(&tempFile, indexColumnLabel, strlen(indexColumnLabel), (void *)&byteswritten);
+			res = f_write(&MyFile, indexColumnLabel, strlen(indexColumnLabel), (void *)&byteswritten);
 
-			f_close(&tempFile);
+			f_close(&MyFile);
 			free(buffer);
 
 			return H1BR6_OK;
@@ -1402,17 +1403,17 @@ Module_Status LogVar(char* logName, logVarType_t type, uint32_t source, char* Co
 					logVars[i].varLabel = ColumnLabel;
 
 					/* Write delimiter */
-					OpenThisLog(j, &tempFile);
+					OpenThisLog(j, &MyFile);
 					if (logs[j].delimiterFormat == FMT_SPACE)
-						f_write(&tempFile, " ", 1, (void *)&byteswritten);
+						f_write(&MyFile, " ", 1, (void *)&byteswritten);
 					else if (logs[j].delimiterFormat == FMT_TAB)
-						f_write(&tempFile, "\t", 1, (void *)&byteswritten);
+						f_write(&MyFile, "\t", 1, (void *)&byteswritten);
 					else if (logs[j].delimiterFormat == FMT_COMMA)
-						f_write(&tempFile, ",", 1, (void *)&byteswritten);
+						f_write(&MyFile, ",", 1, (void *)&byteswritten);
 					/* Write variable label */
-					f_write(&tempFile, ColumnLabel, strlen(ColumnLabel), (void *)&byteswritten);
+					f_write(&MyFile, ColumnLabel, strlen(ColumnLabel), (void *)&byteswritten);
 
-					f_close(&tempFile);
+					f_close(&MyFile);
 
 					return H1BR6_OK;
 				}
@@ -1449,10 +1450,10 @@ Module_Status StartLog(char* logName)
 			activeLogs |= (0x01 << j);
 			logs[j].t0 = HAL_GetTick();
 			logs[j].sampleCount = 1;
-			OpenThisLog(j, &tempFile);
+			OpenThisLog(j, &MyFile);
 			/* Write new line */
-			f_write(&tempFile, "\n\r", 2, (void *)&byteswritten);
-			f_close(&tempFile);
+			f_write(&MyFile, "\n\r", 2, (void *)&byteswritten);
+			f_close(&MyFile);
 
 			return H1BR6_OK;
 		}
@@ -1590,9 +1591,9 @@ Module_Status DeleteLog(char* logName, options_t options, char* fileExtension)
 		      {
 		        sprintf(fileName, "%s.%s", logName, fileExtension);  // Add file extension
 
-		        fresult = f_open(&tempFile, fileName, FA_WRITE | FA_OPEN_ALWAYS);
-		        fresult = f_truncate(&tempFile);
-		        f_close(&tempFile);
+		        fresult = f_open(&MyFile, fileName, FA_WRITE | FA_OPEN_ALWAYS);
+		        fresult = f_truncate(&MyFile);
+		        f_close(&MyFile);
 		        if (fresult == FR_OK)
 		          result = H1BR6_OK;
 		      }
@@ -1671,7 +1672,7 @@ portBASE_TYPE demoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
 	configASSERT( pcWriteBuffer );
 
 	/* Create a file */
-	res = f_open(&tempFile, "TestFile", FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
+	res = f_open(&MyFile, "TestFile", FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
 	if (res != FR_OK) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcFileMessage);
 		return pdFALSE;
@@ -1679,14 +1680,14 @@ portBASE_TYPE demoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
 	writePxMutex(PcPort, ( char * ) pcOpenMessage, strlen(( char * ) pcOpenMessage), 10, 10);
 
 	/* Verify read / write */
-	res = f_write(&tempFile, "HEXABITZ", 8, (void *)&byteswritten);
+	res = f_write(&MyFile, "HEXABITZ", 8, (void *)&byteswritten);
 	if (res != FR_OK) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcFileMessage);
 		return pdFALSE;
 	}
 	char tempStr[10] = {0};
-	res = f_lseek(&tempFile, 0);
-	res = f_read(&tempFile, tempStr, 8, (void *)&byteswritten);
+	res = f_lseek(&MyFile, 0);
+	res = f_read(&MyFile, tempStr, 8, (void *)&byteswritten);
 	if (res != FR_OK || strncmp(tempStr, "HEXABITZ", 8) != 0) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcFileMessage);
 		return pdFALSE;
@@ -1694,7 +1695,7 @@ portBASE_TYPE demoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
 	writePxMutex(PcPort, ( char * ) pcVerifyMessage, strlen(( char * ) pcVerifyMessage), 10, 10);
 
 	/* Close and delete the file */
-	res = f_close(&tempFile);
+	res = f_close(&MyFile);
 	res = f_unlink("TestFile");
 	if (res != FR_OK) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcFileMessage);
