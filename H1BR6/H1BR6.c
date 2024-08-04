@@ -89,26 +89,26 @@ bool enableTimeDateHeader = false;
 //UINT Number_br;
 //FIL _path_pointer;
 
-struct /* WAVE FILE Header information struct - 44 bytes */
-{
-/*the "RIFF" chnk descriptor */
-char CHUNKID[4];  						//4 byte
-uint32_t CHUNKSIZE; 					//4 byte
-char FORMAT[4];							 	//4 byte
-/*the "fmt" sub-chunk */
-char SUBCHhUNK1ID[4]; 				//4 byte
-uint32_t SUBCHUNK1SIZE; 			//4 byte
-uint16_t AUDIOFMT; 						//2 byte
-uint16_t NO_CHANNEL; 					//2 byte
-uint32_t SAMPLERATE; 					//4 byte
-uint32_t BYTERATE; 						//4 byte
-uint16_t BLOCKALIGN; 					//2 byte
-uint16_t BITPERSAMPLE;			 	//2 byte
-/*the "data" sub-chunk */
-char SUBCHUNK2ID[4]; 					//4 byte
-uint32_t SUBCHUNK2SIZE; 			//4 byte
-
-}WAVEFIL;
+//struct /* WAVE FILE Header information struct - 44 bytes */
+//{
+///*the "RIFF" chnk descriptor */
+//char CHUNKID[4];  						//4 byte
+//uint32_t CHUNKSIZE; 					//4 byte
+//char FORMAT[4];							 	//4 byte
+///*the "fmt" sub-chunk */
+//char SUBCHhUNK1ID[4]; 				//4 byte
+//uint32_t SUBCHUNK1SIZE; 			//4 byte
+//uint16_t AUDIOFMT; 						//2 byte
+//uint16_t NO_CHANNEL; 					//2 byte
+//uint32_t SAMPLERATE; 					//4 byte
+//uint32_t BYTERATE; 						//4 byte
+//uint16_t BLOCKALIGN; 					//2 byte
+//uint16_t BITPERSAMPLE;			 	//2 byte
+///*the "data" sub-chunk */
+//char SUBCHUNK2ID[4]; 					//4 byte
+//uint32_t SUBCHUNK2SIZE; 			//4 byte
+//
+//}WAVEFIL;
 FATFS fs;  // file system
 //FIL fil; // File
 //FILINFO fno;
@@ -120,7 +120,7 @@ FATFS *pfs;
 DWORD fre_clust;
 uint32_t total, free_space;
 /* WAVE file parameters */
-uint8_t wavebuff[44];
+//uint8_t wavebuff[44];
 UINT Number_br;
 //FIL _path_pointer;
 //uint32_t WAVE_bytes;
