@@ -1,5 +1,5 @@
 /*
- BitzOS (BOS) V0.3.5 - Copyright (C) 2017-2024 Hexabitz
+ BitzOS (BOS) V0.3.6 - Copyright (C) 2017-2024 Hexabitz
  All rights reserved
 
  File Name     : H0BR4.c
@@ -281,7 +281,7 @@ void SystemClock_Config(void){
 	  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
 	  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 	  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-	  RCC_OscInitStruct.PLL.PLLN = 12;
+	  RCC_OscInitStruct.PLL.PLLN = 16;
 	  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
 	  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
 	  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
