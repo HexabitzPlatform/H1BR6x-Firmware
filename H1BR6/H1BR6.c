@@ -52,13 +52,13 @@ const char logHeaderText3[] = "Log type: Events\n\n";
 const char logHeaderTimeDate[] = "%s %s\n";
 const char Start_Mark = 0xff;
 
-#define MAX_WAVE_NAME_LENTH 30
-#define WAV_SCAN_MODE 			1
-#define WAV_STREAM_MODE		 	2
+//#define MAX_WAVE_NAME_LENTH 30
+//#define WAV_SCAN_MODE 			1
+//#define WAV_STREAM_MODE		 	2
 #define LOG_MODE		 		0
-#define WAVE_DATA_OFFSET		44
+//#define WAVE_DATA_OFFSET		44
 
-char Const_WAVE_NAME[MAX_WAVE_NAME_LENTH];
+//char Const_WAVE_NAME[MAX_WAVE_NAME_LENTH];
 
 /*=================================================================================*/
 /*========================= Private variables  ====================================*/
@@ -123,17 +123,17 @@ uint32_t total, free_space;
 uint8_t wavebuff[44];
 UINT Number_br;
 //FIL _path_pointer;
-uint32_t WAVE_bytes;
-uint32_t READ_WAVE_BYTES=WAVE_DATA_OFFSET;		// WAVE header size in bytes
-uint8_t SCALE_FAC=1;
-uint8_t SCALE_SHIFT=0;
-int16_t I;
-uint8_t temp_H07R3_ID;
-uint8_t temp_H07R3_DST;
+//uint32_t WAVE_bytes;
+//uint32_t READ_WAVE_BYTES=WAVE_DATA_OFFSET;		// WAVE header size in bytes
+//uint8_t SCALE_FAC=1;
+//uint8_t SCALE_SHIFT=0;
+//int16_t I;
+//uint8_t temp_H07R3_ID;
+//uint8_t temp_H07R3_DST;
 //played wave name
-char* WAVE_NAME;
+//char* WAVE_NAME;
 //get wave file size
-uint32_t WAVE_SIZE;
+//uint32_t WAVE_SIZE;
 //calculate number of Byte in Block Sample align
 uint8_t NO_BYTE_SAMPLE ;
 //calculate wave byte rate time wait in us
@@ -538,40 +538,40 @@ void Module_Peripheral_Init(void){
 /* --- H0BR4 message processing task.
  */
 Module_Status Module_MessagingTask(uint16_t code,uint8_t port,uint8_t src,uint8_t dst,uint8_t shift){
-	Module_Status result =H1BR6_OK;
-	uint8_t templn;
-	switch (code)
-		{
-			case CODE_H1BR6_READ_WAVE :
-					//1st parameter H07R3x ID, 2nd parameter stream dst Port
-					temp_H07R3_ID = cMessage[port-1][shift];
-					temp_H07R3_DST = cMessage[port-1][shift+1];		// Note this is not used
-					SD_MODE = WAV_STREAM_MODE;
-			break;
-
-			case CODE_H1BR6_SCAN_WAVE :
-			  templn = messageLength[port-1]-shift-1;
-				for (uint8_t i=0 ; i<templn ; i++)
-				{
-					Const_WAVE_NAME[i] = (char) cMessage[port-1][shift+1+i];
-				}
-				Const_WAVE_NAME[templn] = '.';
-				Const_WAVE_NAME[templn+1] = 'w';
-				Const_WAVE_NAME[templn+2] = 'a';
-				Const_WAVE_NAME[templn+3] = 'v';
-				Const_WAVE_NAME[templn+4] = 0;
-				//1st parameter H07R3x ID, and for WAV name for the latest parameters
-				WAVE_NAME = (char *) &Const_WAVE_NAME[0];
-				temp_H07R3_ID = cMessage[port-1][shift];
-				SD_MODE = WAV_SCAN_MODE;
-			break;
-
-			default:
-				result = H1BR6_ERR_UnknownMessage;
-				break;
-		}
-
-		return result;
+//	Module_Status result =H1BR6_OK;
+//	uint8_t templn;
+//	switch (code)
+//		{
+//			case CODE_H1BR6_READ_WAVE :
+//					//1st parameter H07R3x ID, 2nd parameter stream dst Port
+//					temp_H07R3_ID = cMessage[port-1][shift];
+//					temp_H07R3_DST = cMessage[port-1][shift+1];		// Note this is not used
+//					SD_MODE = WAV_STREAM_MODE;
+//			break;
+//
+//			case CODE_H1BR6_SCAN_WAVE :
+//			  templn = messageLength[port-1]-shift-1;
+//				for (uint8_t i=0 ; i<templn ; i++)
+//				{
+//					Const_WAVE_NAME[i] = (char) cMessage[port-1][shift+1+i];
+//				}
+//				Const_WAVE_NAME[templn] = '.';
+//				Const_WAVE_NAME[templn+1] = 'w';
+//				Const_WAVE_NAME[templn+2] = 'a';
+//				Const_WAVE_NAME[templn+3] = 'v';
+//				Const_WAVE_NAME[templn+4] = 0;
+//				//1st parameter H07R3x ID, and for WAV name for the latest parameters
+//				WAVE_NAME = (char *) &Const_WAVE_NAME[0];
+//				temp_H07R3_ID = cMessage[port-1][shift];
+//				SD_MODE = WAV_SCAN_MODE;
+//			break;
+//
+//			default:
+//				result = H1BR6_ERR_UnknownMessage;
+//				break;
+//		}
+//
+//		return result;
 }
 
 /*-----------------------------------------------------------*/
@@ -657,14 +657,14 @@ void LogTask(void * argument)
 
 		switch (SD_MODE)
 		{
-			case WAV_SCAN_MODE:
-						ScanWaveFile(WAVE_NAME, temp_H07R3_ID);
-						SD_MODE = LOG_MODE;
-						break;
-			case WAV_STREAM_MODE:
-						StreamWaveToModule(WAVE_NAME, temp_H07R3_ID);
-						SD_MODE = LOG_MODE;
-						break;
+//			case WAV_SCAN_MODE:
+//						ScanWaveFile(WAVE_NAME, temp_H07R3_ID);
+//						SD_MODE = LOG_MODE;
+//						break;
+//			case WAV_STREAM_MODE:
+//						StreamWaveToModule(WAVE_NAME, temp_H07R3_ID);
+//						SD_MODE = LOG_MODE;
+//						break;
 			case LOG_MODE:
 				/* Check all active logs */
 				for( j=0 ; j<MAX_LOGS ; j++)
