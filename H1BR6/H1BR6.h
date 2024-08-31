@@ -153,7 +153,7 @@ typedef struct
 	uint8_t file_extension;
 	uint8_t current_extension;
 	logType_t type;
-	float rate;
+	volatile float rate;
 	delimiterFormat_t delimiterFormat;
 	indexColumnFormat_t indexColumnFormat;
 	char* indexColumnLabel;
