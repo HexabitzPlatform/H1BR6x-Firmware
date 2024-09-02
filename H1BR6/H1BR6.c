@@ -1370,7 +1370,7 @@ Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterForm
 				source: data source. Ports (P1-Px), buttons (B1-Bx) or memory location.
 				columnLabel: Column label text. Max 30 char.
 */
-Module_Status LogVar(char* logName, logVarType_t type, uint32_t source, char* ColumnLabel)
+Module_Status LogVar(char* logName, logVarType_t type, uint32_t *source, char* ColumnLabel)
 {
 	uint8_t i = 0, j = 0;
 

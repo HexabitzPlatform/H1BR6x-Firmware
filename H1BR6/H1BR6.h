@@ -225,7 +225,7 @@ extern void ExecuteMonitor(void);
  */
 extern Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterFormat_t delimiterFormat, indexColumnFormat_t indexColumnFormat,\
 	char* indexColumnLabel);
-extern Module_Status LogVar(char* logName, logVarType_t type, uint32_t source, char* ColumnLabel);
+extern Module_Status LogVar(char* logName, logVarType_t type, uint32_t *source, char* ColumnLabel);
 extern Module_Status StartLog(char* logName);
 extern Module_Status StopLog(char* logName);
 extern Module_Status PauseLog(char* logName);
