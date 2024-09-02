@@ -916,44 +916,43 @@ uint8_t CheckLogVarEvent(uint16_t varIndex)
 			break;
 
 		case MEMORY_DATA_UINT8:
-			if (*(__IO uint8_t *)logVars[varIndex].source != (uint8_t)compareValue[varIndex]) {
-				*(uint8_t*)&compareValue[varIndex] = *(__IO uint8_t *)logVars[varIndex].source;
+			if (*(__IO uint8_t *)&logVars[varIndex].source != (uint8_t)compareValue[varIndex]) {
+				*(uint8_t*)&compareValue[varIndex] = *(__IO uint8_t *)&logVars[varIndex].source;
 				return 1;
 			}
 			break;
 
 		case MEMORY_DATA_INT8:
-			if (*(__IO int8_t *)logVars[varIndex].source != (int8_t)compareValue[varIndex]) {
-				*(int8_t*)&compareValue[varIndex] = (int8_t)*(__IO int8_t *)logVars[varIndex].source;
+			if (*(__IO int8_t *)&logVars[varIndex].source != (int8_t)compareValue[varIndex]) {
+				*(int8_t*)&compareValue[varIndex] = (int8_t)*(__IO int8_t *)&logVars[varIndex].source;
 				return 1;
 			}
 			break;
 
 		case MEMORY_DATA_UINT16:
-			if ((uint16_t)*(__IO uint16_t *)logVars[varIndex].source != (uint16_t)compareValue[varIndex]) {
-				*(uint16_t*)&compareValue[varIndex] = (uint16_t)*(__IO uint16_t *)logVars[varIndex].source;
+			if ((uint16_t)*(__IO uint16_t *)&logVars[varIndex].source != (uint16_t)compareValue[varIndex]) {
+				*(uint16_t*)&compareValue[varIndex] = (uint16_t)*(__IO uint16_t *)&logVars[varIndex].source;
 				return 1;
 			}
 			break;
 
 		case MEMORY_DATA_INT16:
-			if ((int16_t)*(__IO uint16_t *)logVars[varIndex].source != (int16_t)compareValue[varIndex]) {
-				*(int16_t*)&compareValue[varIndex] = (int16_t)*(__IO uint16_t *)logVars[varIndex].source;
+			if ((int16_t)*(__IO uint16_t *)&logVars[varIndex].source != (int16_t)compareValue[varIndex]) {
+				*(int16_t*)&compareValue[varIndex] = (int16_t)*(__IO uint16_t *)&logVars[varIndex].source;
 				return 1;
 			}
 			break;
 
 		case MEMORY_DATA_UINT32:
-		case MEMORY_DATA_FLOAT:
-			if ((uint32_t)*(__IO uint32_t *)logVars[varIndex].source != (uint32_t)compareValue[varIndex]) {
-				compareValue[varIndex] = *(__IO uint32_t *)logVars[varIndex].source;
+			if ((uint32_t)*(__IO uint32_t *)&logVars[varIndex].source != (uint32_t)compareValue[varIndex]) {
+				compareValue[varIndex] = *(__IO uint32_t *)&logVars[varIndex].source;
 				return 1;
 			}
 			break;
 
 		case MEMORY_DATA_INT32:
-			if ((int32_t)*(__IO uint32_t *)logVars[varIndex].source != (int32_t)compareValue[varIndex]) {
-				compareValue[varIndex] = *(__IO uint32_t *)logVars[varIndex].source;
+			if ((int32_t)*(__IO uint32_t *)&logVars[varIndex].source != (int32_t)compareValue[varIndex]) {
+				compareValue[varIndex] = *(__IO uint32_t *)&logVars[varIndex].source;
 				return 1;
 			}
 			break;
