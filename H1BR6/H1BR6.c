@@ -824,27 +824,27 @@ void LogTask(void * argument)
 											break;
 
 										case MEMORY_DATA_UINT8:
-											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint8_t *)logVars[i].source);
+											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, logVars[i].source);
 											break;
 
 										case MEMORY_DATA_INT8:
-											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int8_t *)logVars[i].source);
+											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, logVars[i].source);
 											break;
 
 										case MEMORY_DATA_UINT16:
-											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint16_t *)logVars[i].source);
+											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, logVars[i].source);
 											break;
 
 										case MEMORY_DATA_INT16:
-											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int16_t *)logVars[i].source);
+											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, logVars[i].source);
 											break;
 
 										case MEMORY_DATA_UINT32:
-											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint32_t *)logVars[i].source);
+											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, logVars[i].source);
 											break;
 
 										case MEMORY_DATA_INT32:
-											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int32_t *)logVars[i].source);
+											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, logVars[i].source);
 											break;
 
 										case MEMORY_DATA_FLOAT:
