@@ -169,7 +169,8 @@ typedef struct
 	uint8_t logIndex;
 	logVarType_t type;
 	char* varLabel;
-	uint32_t source;
+	volatile uint32_t source;
+	volatile uint32_t  *tempVar ;
 }
 logVar_t;
 
