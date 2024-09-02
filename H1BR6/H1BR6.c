@@ -687,6 +687,44 @@ void LogTask(void * argument)
 						{
 							if (logVars[i].type && (logVars[i].logIndex == j))
 							{
+								switch (logVars[i].type){
+
+								case PORT_BUTTON:
+									logVars[i].source = *(__IO uint8_t *)logVars[i].tempVar;
+									break;
+
+								case MEMORY_DATA_UINT8:
+									logVars[i].source = *(__IO uint8_t *)logVars[i].tempVar;
+									break;
+
+								case MEMORY_DATA_INT8:
+									logVars[i].source = *(__IO int8_t *)logVars[i].tempVar;
+									break;
+
+								case MEMORY_DATA_UINT16:
+									logVars[i].source = *(__IO uint16_t *)logVars[i].tempVar;
+									break;
+
+								case MEMORY_DATA_INT16:
+									logVars[i].source = *(__IO int16_t *)logVars[i].tempVar;
+									break;
+
+								case MEMORY_DATA_UINT32:
+									logVars[i].source = *(__IO uint32_t *)logVars[i].tempVar;
+									break;
+
+								case MEMORY_DATA_INT32:
+									logVars[i].source = *(__IO int32_t *)logVars[i].tempVar;
+									break;
+
+								case MEMORY_DATA_FLOAT:
+
+									break;
+
+								default:
+									break;
+								}
+
 								/* Check for rate or event */
 								if ( ((RATE == logs[j].type) && (u32lTick >= u32lRate)) || CheckLogVarEvent(i) )
 								{
