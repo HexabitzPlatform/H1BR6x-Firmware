@@ -690,7 +690,7 @@ void LogTask(void * argument)
 								switch (logVars[i].type){
 
 								case PORT_BUTTON:
-									logVars[i].source = *(__IO uint8_t *)logVars[i].tempVar;
+
 									break;
 
 								case MEMORY_DATA_UINT8:
@@ -1434,8 +1434,12 @@ Module_Status LogVar(char* logName, logVarType_t type, uint32_t *source, char* C
 					if(type > 3) {
 					if (!(source < FLASH_BASE || source > (FLASH_BASE+FLASH_SIZE)) && (source < SRAM_BASE || source > (SRAM_BASE+SRAM_SIZE)) && (source < PERIPH_BASE || source > (PERIPH_BASE+PERIPH_SIZE)))
 								return H1BR6_ERR_WrongAddress;}
-
-					logVars[i].tempVar = source;
+					if(type > 3){
+						logVars[i].tempVar = source;
+					}
+					else{
+						logVars[i].source  = (uint32_t)source;
+					}
 					logVars[i].logIndex = j;
 					logVars[i].varLabel = ColumnLabel;
 
