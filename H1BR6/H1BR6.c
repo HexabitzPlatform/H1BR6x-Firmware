@@ -718,7 +718,7 @@ void LogTask(void * argument)
 									break;
 
 								case MEMORY_DATA_FLOAT:
-
+									logVars[i].sourceFloat =*(float* )logVars[i].tempVar;
 									break;
 
 								default:
@@ -848,7 +848,7 @@ void LogTask(void * argument)
 											break;
 
 										case MEMORY_DATA_FLOAT:
-											sprintf((char *)lineBuffer, "%s%f", (char *)lineBuffer, *(__IO float *)logVars[i].source);
+											sprintf((char *)lineBuffer, "%s%f", (char *)lineBuffer, logVars[i].sourceFloat);
 											break;
 
 										default:
@@ -956,13 +956,13 @@ uint8_t CheckLogVarEvent(uint16_t varIndex)
 				return 1;
 			}
 			break;
-
-		/*case MEMORY_DATA_FLOAT:
-			if (*(__IO uint32_t *)logVars[varIndex].source != (uint32_t)compareValue[varIndex]) {
-				compareValue[varIndex] = *(__IO uint32_t *)logVars[varIndex].source;
+//Notice here that the float was casted to uint32_t because we do not care about the value, we only need to compare
+	    case MEMORY_DATA_FLOAT:
+			if (*(__IO uint32_t *)&logVars[varIndex].sourceFloat != *(__IO uint32_t *)&compareValue[varIndex]) {
+				*(__IO uint32_t *)&compareValue[varIndex] = *(__IO uint32_t *)&logVars[varIndex].sourceFloat;
 				return 1;
 			}
-			break;*/
+			break;
 
 		default:
 			break;

@@ -170,7 +170,8 @@ typedef struct
 	logVarType_t type;
 	char* varLabel;
 	volatile uint32_t source;
-	volatile uint32_t  *tempVar ;
+	volatile uint32_t  *tempVar;
+	volatile float sourceFloat ;
 }
 logVar_t;
 
