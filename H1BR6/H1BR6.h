@@ -132,6 +132,8 @@ typedef enum
 	H1BR6_ERR_LogIsNotActive,
 	H1BR6_ERR_MemoryFull,
 	H1BR6_ERR_WrongAddress,
+	H1BR6_ERR_FileNameExists,
+	H1BR6_ERR_FileDoesNotExist,
 	H1BR6_ERROR = 255
 } Module_Status;
 
@@ -233,6 +235,7 @@ extern Module_Status StopLog(char* logName);
 extern Module_Status PauseLog(char* logName);
 extern Module_Status ResumeLog(char* logName);
 extern Module_Status DeleteLog(char* logName, options_t options, char* fileExtension);
+extern Module_Status CreateFile (char *fileName, char *fileExtension );
 //extern WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID);
 //extern WAVE_STATE ScanWaveFile(char* Wave_Full_Name, uint8_t H07R3x_ID);
 

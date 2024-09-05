@@ -67,6 +67,7 @@ uint8_t SD_MODE = 0;
 log_t logs[MAX_LOGS] = {0};
 logVar_t logVars[MAX_LOG_VARS] = {0};
 uint32_t compareValue[MAX_LOG_VARS];
+volatile uint8_t couFile = 0 ;
 /* File system object for SD card logical drive */
 //FATFS SDFatFs;
 /* SD card logical drive path */
@@ -1642,6 +1643,55 @@ Module_Status DeleteLog(char* logName, options_t options, char* fileExtension)
 
 
 		  return result;
+}
+/***********************************************************************************/
+/*
+* brief: Creates a new file with the specified name and extension.
+* param1: fileName - The name of the file to be created.
+* param2: fileExtension - The extension of the file to be created.
+* retval: Module_Status
+ */
+Module_Status CreateFile (char *fileName, char *fileExtension )
+{
+	FRESULT res;
+	FILINFO fno;
+	char f_fileName[MAX_NAME_LENGTH] = {0};
+
+	/* Add a flag to allow card to be initialized on startup*/
+	while(f_mount_ok==0){Delay_us(10);}
+
+	if (fileName == NULL || fileExtension == NULL ){
+		return H1BR6_ERR_WrongParams;
+	}
+	sprintf(f_fileName,"%s.%s", fileName, fileExtension);
+
+	/*Check if the file already exists */
+	res = f_stat (f_fileName, &fno);
+
+	while (res == FR_OK){
+
+		/*the file was already existed and create a new file with number extension */
+		memset (f_fileName, 0x00,MAX_NAME_LENGTH);
+		++couFile ;
+           /* check number of file name was existed */
+		if(couFile < MAX_DUPLICATE_FILE){
+
+			sprintf(f_fileName,"%s_%d.%s", fileName, couFile, fileExtension);
+			res = f_stat (f_fileName, &fno);
+		}
+		else{
+			return H1BR6_ERR_LogNameExists;
+		}
+	}
+	/* Create a file and open it */
+	res = f_open(&MyFile, f_fileName, FA_CREATE_ALWAYS|FA_READ|FA_WRITE);
+	if (res != FR_OK){
+		return H1BR6_ERROR;
+	}
+	/* Close file */
+	res = f_close(&MyFile);
+
+	return H1BR6_OK;
 }
 
 /*-----------------------------------------------------------*/
