@@ -236,6 +236,7 @@ extern Module_Status PauseLog(char* logName);
 extern Module_Status ResumeLog(char* logName);
 extern Module_Status DeleteLog(char* logName, options_t options, char* fileExtension);
 extern Module_Status CreateFile (char *fileName, char *fileExtension );
+extern Module_Status WriteDatatoFile (char *fileName, char *fileExtension, char *data);
 //extern WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID);
 //extern WAVE_STATE ScanWaveFile(char* Wave_Full_Name, uint8_t H07R3x_ID);
 

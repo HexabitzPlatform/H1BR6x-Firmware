@@ -1693,7 +1693,56 @@ Module_Status CreateFile (char *fileName, char *fileExtension )
 
 	return H1BR6_OK;
 }
+/***********************************************************************************/
+/*
+* brief: Write data to an existing file with a specified name and extension.
+* param1: fileName - The name of the file to write data to.
+* param2: fileExtension - The extension of the file to write data to.
+* param3: data - The data to be written to the file.
+* retval: Module_Status
+*/
+Module_Status WriteDatatoFile (char *fileName, char *fileExtension, char *data)
+{
+	FRESULT res;
+	FILINFO fno;
+	char f_fileName[MAX_NAME_LENGTH] = {0};
 
+	if (fileName == NULL || fileExtension == NULL || data == NULL){
+		return H1BR6_ERR_WrongParams;
+	}
+	/*the file name already existed and print it with number extension*/
+	if(couFile != 0 ){
+		sprintf(f_fileName,"%s_%d.%s", fileName, couFile, fileExtension);
+	}
+	else{
+	    sprintf(f_fileName ,"%s.%s", fileName ,fileExtension);
+	}
+
+	/*check whether the file exists or not */
+	res = f_stat (f_fileName, &fno);
+	if (res != FR_OK){
+		return H1BR6_ERR_FileDoesNotExist;
+	}
+	else
+	{
+		/* Create a file with read write access and open it */
+		res = f_open(&MyFile, f_fileName, FA_OPEN_APPEND | FA_WRITE);
+		if (res != FR_OK) {
+			return H1BR6_ERROR;
+		}
+		else
+		{       /*Write the entered data to the file*/
+			res = f_write(&MyFile, data, strlen(data),(void *) &byteswritten);
+			if (res != FR_OK){
+				return H1BR6_ERROR;
+			}
+			/* Close file */
+			res = f_close(&MyFile);
+		}
+		return H1BR6_OK;
+	}
+}
+/***********************************************************************************/
 /*-----------------------------------------------------------*/
 
 /**
