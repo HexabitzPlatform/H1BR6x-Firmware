@@ -1433,7 +1433,7 @@ Module_Status LogVar(char* logName, logVarType_t type, uint32_t *source, char* C
 				{
 					logVars[i].type = type;
 					if(type > 3) {
-					if (!(source < FLASH_BASE || source > (FLASH_BASE+FLASH_SIZE)) && (source < SRAM_BASE || source > (SRAM_BASE+SRAM_SIZE)) && (source < PERIPH_BASE || source > (PERIPH_BASE+PERIPH_SIZE)))
+					if (!((uint32_t)source < FLASH_BASE || (uint32_t)source > (FLASH_BASE+FLASH_SIZE)) && ((uint32_t)source < SRAM_BASE ||(uint32_t)source > (SRAM_BASE+SRAM_SIZE)) && ((uint32_t)source < PERIPH_BASE || (uint32_t)source > (PERIPH_BASE+PERIPH_SIZE)))
 								return H1BR6_ERR_WrongAddress;}
 					if(type > 3){
 						logVars[i].tempVar = source;
