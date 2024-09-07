@@ -2108,7 +2108,7 @@ portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 
 	/* Add the variable to the log */
 	if (result == H1BR6_OK) {
-		result = LogVar((char *)pcParameterString1, type, source, label);
+		result = LogVar((char *)pcParameterString1, type,(uint32_t*)&source, label);
 	} else {
 		free(label);
 	}
