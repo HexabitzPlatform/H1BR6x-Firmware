@@ -224,6 +224,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>Thirdparty/EEPROM_Emul</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H1DR5x-Firmware/Thirdparty/EEPROM_Emul</locationURI>
+		</link>
+		<link>
 			<name>Thirdparty/FatFs</name>
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Thirdparty/FatFs</locationURI>
