@@ -17,12 +17,12 @@
 #include "stm32g0xx_hal.h"
 #include "BOS.h"
 
-/* External variables -----------------------------------------------*/
-#ifndef __N
-extern uint16_t arrayPortsDir[MaxNumOfModules]; /* Array ports directions */
-#else
-extern uint16_t arrayPortsDir[__N ];
-#endif
+///* External variables -----------------------------------------------*/
+//#ifndef __N
+//extern uint16_t arrayPortsDir[MaxNumOfModules]; /* Array ports directions */
+//#else
+//extern uint16_t arrayPortsDir[__N ];
+//#endif
 
 // Blocking (polling-based) read
 #define readPx(port, buffer, n, timeout) while(HAL_UART_Receive(GetUart(port), (uint8_t *)buffer, n, timeout) != HAL_OK) {}
