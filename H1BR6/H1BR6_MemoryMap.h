@@ -14,9 +14,9 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-#ifdef FLASH_SIZE
-#undef FLASH_SIZE
-#endif
+//#ifdef FLASH_SIZE
+//#undef FLASH_SIZE
+//#endif
 /* Memory map: - STM32G0B0 : 0x08000000 - 0x0807FFFF >> 512 KB
    512 KB divided into :
  - Application: 0x08000000 - 0x0807A7FF >> 500 KB
@@ -30,6 +30,8 @@
 #define EEPROM_START_ADDRESS  	((uint32_t)0x0807B800)      /* EE_Variables are stored here */
 #define TOPOLOGY_PAGE_NUM		373
 #define SNIPPETS_PAGE_NUM		374
+#define SRAM_SIZE				((uint32_t)0x00009000U)
+#define PERIPH_SIZE			    ((uint32_t)0x80017FF)
 
 #ifdef __cplusplus
 }
