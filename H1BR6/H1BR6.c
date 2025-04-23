@@ -34,10 +34,6 @@ UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart6;
 
 
-/* Exported variables */
-extern FLASH_ProcessTypeDef pFlash;
-extern uint8_t numOfRecordedSnippets;
-
 /* Module Parameters */
 ModuleParam_t ModuleParam[NUM_MODULE_PARAMS] ={0};
 
@@ -151,7 +147,6 @@ void LogTask(void * argument);
 uint8_t CheckLogVarEvent(uint16_t varIndex);
 Module_Status OpenThisLog(uint16_t logindex, FIL *objFile);
 Module_Status MicroSD_Init(void);
-void ExecuteMonitor(void);
 
 /* Create CLI commands --------------------------------------------------------*/
 portBASE_TYPE demoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
@@ -188,7 +183,7 @@ const CLI_Command_Definition_t logVarCommandDefinition =
 {
 	( const int8_t * ) "logvar", /* The command string to type. */
 	( const int8_t * ) "logvar:\r\n Add a new log variable to an existing log (1st par.). Specify variable type (2nd and 3rd par.): \
-'port digital', 'port data', 'port button', 'memory uint8', 'memory int8', 'memory uint16', 'memory int16', 'memory uint32', \
+'port digital', 'port data', 'port Button', 'memory uint8', 'memory int8', 'memory uint16', 'memory int16', 'memory uint32', \
 'memory int32', 'memory float' ; source (4th par.): ports 'p1'..'px', buttons 'b1'..'bx' or memory location (Flash or RAM); \
 and column label text (5th par.)\r\n\r\n",
 	logVarCommand, /* The function to run. */
@@ -652,8 +647,8 @@ void Module_Peripheral_Init(void) {
 	MX_USART4_UART_Init();
 	MX_USART5_UART_Init();
 
-	SPI_GPIO_Init();
-	MX_SPI2_Init();
+	SDCardGPIOInit();
+	MX_SPI_Init();
 	MX_FATFS_Init();
 
 	/* Circulating DMA Channels ON All Module */
@@ -903,7 +898,7 @@ void LogTask(void * argument)
 										if (logs[j].indexColumnFormat == FMT_TIME)
 										{
 											GetTimeDate();
-											sprintf(lineBuffer, "\n%02d:%02d:%02d-%03d", BOS.time.hours, BOS.time.minutes, BOS.time.seconds, BOS.time.msec);
+											sprintf(lineBuffer, "\n%02d:%02d:%02d-%03d", BOS.Time.Hours, BOS.Time.Minutes, BOS.Time.Seconds, BOS.Time.mSec);
 										}
 										else if (logs[j].indexColumnFormat == FMT_SAMPLE)
 										{
@@ -936,7 +931,7 @@ void LogTask(void * argument)
 											break;
 
 										case PORT_BUTTON:
-											switch (button[logVars[i].source].state)
+											switch (Button[logVars[i].source].State)
 											{
 												case OFF:	strcat(lineBuffer, "OFF"); break;
 												case ON:	strcat(lineBuffer, "ON"); break;
@@ -947,28 +942,28 @@ void LogTask(void * argument)
 //												case PRESSED:	strcat(lineBuffer, "PRESSED"); break;
 //												case RELEASED:	strcat(lineBuffer, "RELEASED"); break;
 //												case PRESSED_FOR_X1_SEC:
-//													if (button[logVars[i].source].pressedX1Sec)
-//														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX1Sec);
+//													if (Button[logVars[i].source].pressedX1Sec)
+//														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, Button[logVars[i].source].pressedX1Sec);
 //													break;
 //												case PRESSED_FOR_X2_SEC:
-//													if (button[logVars[i].source].pressedX2Sec)
-//														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX2Sec);
+//													if (Button[logVars[i].source].pressedX2Sec)
+//														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, Button[logVars[i].source].pressedX2Sec);
 //													break;
 //												case PRESSED_FOR_X3_SEC:
-//													if (button[logVars[i].source].pressedX3Sec)
-//														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX3Sec);
+//													if (Button[logVars[i].source].pressedX3Sec)
+//														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, Button[logVars[i].source].pressedX3Sec);
 //													break;
 //												case RELEASED_FOR_Y1_SEC:
-//													if (button[logVars[i].source].releasedY1Sec)
-//														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY1Sec);
+//													if (Button[logVars[i].source].releasedY1Sec)
+//														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, Button[logVars[i].source].releasedY1Sec);
 //													break;
 //												case RELEASED_FOR_Y2_SEC:
-//													if (button[logVars[i].source].releasedY2Sec)
-//														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY2Sec);
+//													if (Button[logVars[i].source].releasedY2Sec)
+//														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, Button[logVars[i].source].releasedY2Sec);
 //													break;
 //												case RELEASED_FOR_Y3_SEC:
-//													if (button[logVars[i].source].releasedY3Sec)
-//														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY3Sec);
+//													if (Button[logVars[i].source].releasedY3Sec)
+//														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, Button[logVars[i].source].releasedY3Sec);
 //													break;
 												case NONE:
 													if (logs[j].type == RATE)
@@ -979,8 +974,8 @@ void LogTask(void * argument)
 												default:
 													break;
 											}
-											/* Reset button state */
-											if (NONE != button[logVars[i].source].state)
+											/* Reset Button state */
+											if (NONE != Button[logVars[i].source].State)
 											{
 												resetButtonState = 1;
 											}
@@ -1045,10 +1040,10 @@ void LogTask(void * argument)
 				break;
 		}
 
-    /* Reset button state */
+    /* Reset Button state */
     if (resetButtonState)
     {
-      delayButtonStateReset = false;
+    	DelayButtonStateReset = false;
       resetButtonState = 0;
     }
 	  taskYIELD();
@@ -1070,11 +1065,11 @@ uint8_t CheckLogVarEvent(uint16_t varIndex)
 			break;
 
 		case PORT_BUTTON:
-			if ((button[logVars[varIndex].source].state != temp_uint8) && (button[logVars[varIndex].source].state != 0)) {
-				temp_uint8 = button[logVars[varIndex].source].state;
+			if ((Button[logVars[varIndex].source].State != temp_uint8) && (Button[logVars[varIndex].source].State != 0)) {
+				temp_uint8 = Button[logVars[varIndex].source].State;
 				return 1;
-			} else if ((button[logVars[varIndex].source].state != temp_uint8) && (button[logVars[varIndex].source].state == 0)) {
-				temp_uint8 = button[logVars[varIndex].source].state;
+			} else if ((Button[logVars[varIndex].source].State != temp_uint8) && (Button[logVars[varIndex].source].State == 0)) {
+				temp_uint8 = Button[logVars[varIndex].source].State;
 				return 0;
 			}
 			break;
@@ -1535,7 +1530,7 @@ Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterForm
 			/* Write log header */
 			char *buffer = malloc(100);
 			memset (buffer, 0x00, 100);
-			sprintf(buffer, logHeaderText1, _firmMajor, _firmMinor, _firmPatch, modulePNstring[myPN]);
+			sprintf(buffer, logHeaderText1, _firmMajor, _firmMinor, _firmPatch, ModulePNstring[myPN]);
 			res = f_write(&MyFile, buffer, strlen(buffer), (void *)&byteswritten);
 			if (enableTimeDateHeader)
 			{

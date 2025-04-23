@@ -189,6 +189,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/H1BR6/H1BR6_spi.c</locationURI>
 		</link>
 		<link>
+			<name>H1BR6/H1BR6_spi.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/Desktop/H1BR6/H1BR6_spi.h</locationURI>
+		</link>
+		<link>
 			<name>H1BR6/H1BR6_timers.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/H1BR6/H1BR6_timers.c</locationURI>
@@ -1079,4 +1084,10 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Thirdparty/STM32G0xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-2-PROJECT_LOC%7D/H16R6x-Firmware</value>
+		</variable>
+	</variableList>
 </projectDescription>

@@ -70,7 +70,7 @@ void buttonClickedCallback(uint8_t port)
 		IND_blink(200);
 	}
 
-	needToDelayButtonStateReset = false;		// Reset button state now
+	NeedToDelayButtonStateReset = false;		// Reset button state now
 }
 
 void buttonPressedForXCallback(uint8_t port, uint8_t eventType)
@@ -83,7 +83,7 @@ void buttonPressedForXCallback(uint8_t port, uint8_t eventType)
 //		IND_blink(400); Delay_ms(400); IND_blink(400);
 //	}
 
-	needToDelayButtonStateReset = false;// Reset button state now
+	NeedToDelayButtonStateReset = false;// Reset button state now
 	counter00=0;
 }
 /*-----------------------------------------------------------*/

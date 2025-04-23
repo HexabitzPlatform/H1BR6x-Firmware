@@ -21,6 +21,7 @@
 #include "BOS.h"
 #include "H1BR6_MemoryMap.h"
 #include "H1BR6_uart.h"
+#include "H1BR6_spi.h"
 #include "H1BR6_gpio.h"
 #include "H1BR6_dma.h"
 #include "H1BR6_inputs.h"
@@ -208,11 +209,10 @@ extern void MX_USART2_UART_Init(void);
 extern void MX_USART3_UART_Init(void);
 extern void MX_USART4_UART_Init(void);
 extern void MX_USART5_UART_Init(void);
-//extern void MX_USART6_UART_Init(void);
-extern void SPI_GPIO_Init(void);
-extern void MX_SPI2_Init(void);
+extern void MX_USART6_UART_Init(void);
+
 extern void SystemClock_Config(void);
-extern void ExecuteMonitor(void);
+
 
 /* -----------------------------------------------------------------------
  |								  APIs							          |  																 	|

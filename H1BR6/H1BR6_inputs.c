@@ -101,7 +101,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *adcHandle) {
 	 PB10    ------> ADC_IN11
 	 PB11    ------> ADC_IN15
 	 */
-	if (flag_ADC_Select[0] == 1) {
+	if (adcSelectFlag[0] == 1) {
 		GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3;
 		GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;

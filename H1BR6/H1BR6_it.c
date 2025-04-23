@@ -25,15 +25,22 @@ extern TaskHandle_t xCommandConsoleTaskHandle; /* CLI Task handler */
 uint16_t PacketLength =0;
 uint8_t Count =0;
 
+/* Local Function Prototypes ***********************************************/
+void SDTimer_Handler(void);
+
 /***************************************************************************/
 /******** Cortex-M0+ Processor Interruption and Exception Handlers *********/
 /***************************************************************************/
 /* This function handles System tick timer */
-void SysTick_Handler(void){
+void SysTick_Handler(void) {
+	FatFsCnt++;
 
+	if (FatFsCnt >= 10) {
+		FatFsCnt = 0;
+		SDTimer_Handler();
+	}
 	HAL_IncTick();
 	osSystickHandler();
-	
 }
 
 /***************************************************************************/
@@ -71,20 +78,6 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart,uint16_t Size){
 		vTaskNotifyGiveFromISR(BackEndTaskHandle,&xHigherPriorityTaskWoken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 	}
-}
-
-/***************************************************************************/
-/* This function handles System tick timer */
-void SysTick_Handler(void) {
-	FatFsCnt++;
-
-	if (FatFsCnt >= 10) {
-		FatFsCnt = 0;
-		SDTimer_Handler();
-	}
-
-	HAL_IncTick();
-	osSystickHandler();
 }
 
 /***************************************************************************/
