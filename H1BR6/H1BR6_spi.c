@@ -63,19 +63,19 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi) {
 		 PB7     ------> SPI2_MOSI
 		 PB8     ------> SPI2_SCK
 		 */
-		GPIO_InitStruct.Pin = GPIO_PIN_6;
+		GPIO_InitStruct.Pin = SD_SPI_MISO_PIN;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 		GPIO_InitStruct.Alternate = GPIO_AF4_SPI2;
-		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		HAL_GPIO_Init(SD_SPI_PORT, &GPIO_InitStruct);
 
-		GPIO_InitStruct.Pin = GPIO_PIN_7 | GPIO_PIN_8;
+		GPIO_InitStruct.Pin = SD_SPI_MOSI_PIN | SD_SPI_SCK_PIN;
 		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 		GPIO_InitStruct.Pull = GPIO_NOPULL;
 		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 		GPIO_InitStruct.Alternate = GPIO_AF1_SPI2;
-		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		HAL_GPIO_Init(SD_SPI_PORT, &GPIO_InitStruct);
 	}
 }
 
@@ -90,7 +90,7 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef *hspi) {
 		 PB7     ------> SPI2_MOSI
 		 PB8     ------> SPI2_SCK
 		 */
-		HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8);
+		HAL_GPIO_DeInit(SD_SPI_PORT, SD_SPI_MISO_PIN | SD_SPI_MOSI_PIN | SD_SPI_SCK_PIN);
 	}
 }
 
