@@ -30,41 +30,32 @@
 #include "fatfs_sd.h"
 
 /* Exported definitions -------------------------------------------------------*/
+#define	MODULE_PN		_H1BR6
 
-#define	modulePN		_H1BR6
+/* Port-related Definitions */
+#define	NUM_OF_PORTS	5
+#define P_PROG 			P2		/* ST factory bootloader UART */
 
+/* Define Available Ports */
+#define _P1
+#define _P2
+#define _P3
+#define _P4
+#define _P5
 
-/* Port-related definitions */
-#define	NumOfPorts			5
+/* Define Available USARTs */
+#define _USART1
+#define _USART2
+#define _USART3
+#define _USART4
+#define _USART5
 
-#define P_PROG 				P2						/* ST factory bootloader UART */
-
-/* Define available ports */
-#define _P1 
-#define _P2 
-#define _P3 
-#define _P4 
-#define _P5 
-//#define _P6
-
-/* Define available USARTs */
-#define _Usart1 1
-#define _Usart2 1
-#define _Usart3 1
-#define _Usart4 1
-#define _Usart5 1
-//#define _Usart6	0
-
-
-/* Port-UART mapping */
-
-#define P1uart &huart4
-#define P2uart &huart2
-#define P3uart &huart3
-#define P4uart &huart1
-#define P5uart &huart5
-//#define P6uart &huart6
-
+/* Port-UART Mapping */
+#define UART_P1 &huart4
+#define UART_P2 &huart2
+#define UART_P3 &huart3
+#define UART_P4 &huart1
+#define UART_P5 &huart5
 
 /* Port Definitions */
 #define	USART1_TX_PIN		GPIO_PIN_9
