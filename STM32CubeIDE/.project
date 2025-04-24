@@ -191,7 +191,7 @@
 		<link>
 			<name>H1BR6/H1BR6_spi.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/Desktop/H1BR6/H1BR6_spi.h</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/H1BR6/H1BR6_spi.h</locationURI>
 		</link>
 		<link>
 			<name>H1BR6/H1BR6_timers.c</name>

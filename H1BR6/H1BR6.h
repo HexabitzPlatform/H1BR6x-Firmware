@@ -125,24 +125,24 @@
 /* H1BR6_Status Type Definition */
 typedef enum {
 	H1BR6_OK = 0,
-	H1BR6_ERR_UnknownMessage = 1,
-	H1BR6_ERR_LogNameExists = 2,
-	H1BR6_ERR_WrongParams,
+	H1BR6_ERR_UNKNOWNMESSAGE = 1,
+	H1BR6_ERR_LOG_NAME_EXISTS = 2,
+	H1BR6_ERR_WRONGPARAMS,
 	H1BR6_ERR_SD,
-	H1BR6_ERR_MaxLogs,
-	H1BR6_ERR_MaxLogVars,
-	H1BR6_ERR_LogDoesNotExist,
-	H1BR6_ERR_LogIsNotActive,
-	H1BR6_ERR_MemoryFull,
-	H1BR6_ERR_WrongAddress,
-	H1BR6_ERR_FileNameExists,
-	H1BR6_ERR_FileDoesNotExist,
+	H1BR6_ERR_MAX_LOGS,
+	H1BR6_ERR_MAX_LOG_VARS,
+	H1BR6_ERR_LOG_DOES_NOT_EXIST,
+	H1BR6_ERR_LOG_IS_NOT_ACTIVE,
+	H1BR6_ERR_MEMORY_FULL,
+	H1BR6_ERR_WRONG_ADDRESS,
+	H1BR6_ERR_FILENAMEEXISTS,
+	H1BR6_ERR_FILE_DOES_NOT_EXIST,
 	H1BR6_ERROR = 255
 } Module_Status;
 
 /* Log type enumeration */
 typedef enum {
-	RATE = 1,      /* Logging at a specific rate */
+	RATE = 1,      /* Logging at a specific Rate */
 	EVENT          /* Event-based logging */
 } logType_t;
 
@@ -182,29 +182,28 @@ typedef enum {
 
 /* Main log structure definition */
 typedef struct {
-	logType_t type;                          /* Type of logging (RATE or EVENT) */
-	delimiterFormat_t delimiterFormat;       /* Format used to separate values */
-	indexColumnFormat_t indexColumnFormat;   /* Format of the index column */
+	logType_t Type;                          /* Type of logging (RATE or EVENT) */
+	delimiterFormat_t DelimiterFormat;       /* Format used to separate values */
+	indexColumnFormat_t IndexColumnFormat;   /* Format of the index column */
 
-	char *name;                              /* Name of the log */
-	char *indexColumnLabel;                  /* Label for the index column */
-	uint8_t file_extension;                  /* File extension used for current log */
-	uint8_t current_extension;               /* Current file extension index or version */
+	char *Name;                              /* Name of the log */
+	char *IndexColumnLabel;                  /* Label for the index column */
+	uint8_t FileExtension;                   /* File extension used for current log */
+	uint8_t CurrentExtension;                /* Current file extension index or version */
 	uint32_t t0;                             /* Start time of the logging session */
-	uint32_t filePtr;                        /* Pointer to current file position */
-	uint32_t sampleCount;                    /* Number of samples logged so far */
-	volatile float rate;                     /* Logging rate in Hz (samples per second) */
+	uint32_t SampleCount;                    /* Number of samples logged so far */
+	volatile float Rate;                     /* Logging Rate in Hz (samples per second) */
 } log_t;
 
 /* Log column structure definition */
 typedef struct {
-	logVarType_t type;                 /* Type of the variable being logged */
+	logVarType_t Type;                 /* Type of the variable being logged */
 
-	char *varLabel;                    /* Label for the variable column */
-	uint8_t logIndex;                  /* Index of this variable in the log */
-	volatile uint32_t source;          /* Address or source of the data */
-	volatile uint32_t *tempVar;        /* Pointer to temporary storage or buffer */
-	volatile float sourceFloat;        /* Floating-point source value, if applicable */
+	char *VarLabel;                    /* Label for the variable column */
+	uint8_t LogIndex;                  /* Index of this variable in the log */
+	volatile uint32_t Source;          /* Address or source of the data */
+	volatile uint32_t *TempVar;        /* Pointer to temporary storage or buffer */
+	volatile float SourceFloat;        /* Floating-point source value, if applicable */
 } logVar_t;
 
 /* Export UART variables */
@@ -235,8 +234,8 @@ Module_Status CreateFile(char *fileName, char *fileExtension);
 Module_Status WriteDatatoFile(char *fileName, char *fileExtension, char *data);
 Module_Status DeleteLog(char *logName, options_t options, char *fileExtension);
 Module_Status LogVar(char *logName, logVarType_t type, uint32_t *source, char *ColumnLabel);
-Module_Status CreateLog(char *logName, logType_t type, float rate, delimiterFormat_t delimiterFormat,
-		indexColumnFormat_t indexColumnFormat, char *indexColumnLabel);
+Module_Status CreateLog(char *logName, logType_t type, float Rate, delimiterFormat_t delimiterFormat,
+		indexColumnFormat_t indexColumnFormat, char *IndexColumnLabel);
 
 #endif /* H1BR6_H */
 
