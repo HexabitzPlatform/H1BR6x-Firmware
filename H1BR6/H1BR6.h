@@ -89,12 +89,6 @@
 #define	USART5_RX_PORT		GPIOD
 #define	USART5_AF			GPIO_AF3_USART5
 
-#define	USART6_TX_PIN		GPIO_PIN_4
-#define	USART6_RX_PIN		GPIO_PIN_5
-#define	USART6_TX_PORT		GPIOA
-#define	USART6_RX_PORT		GPIOA
-#define	USART6_AF			GPIO_AF8_USART6
-
 /* SPI Pin Definitions */
 #define SD_SPI_SCK_PIN      GPIO_PIN_8
 #define SD_SPI_MOSI_PIN     GPIO_PIN_7
