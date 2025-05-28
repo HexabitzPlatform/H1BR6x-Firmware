@@ -993,10 +993,10 @@ Module_Status OpenThisLog(uint16_t logindex, FIL *objFile) {
 /***************************************************************************/
 /* Create a new data log.
  * logName: Log file name. Max 10 char.
- * Type: RATE or EVENT
+ * Type: RATE (log data at a fixed time interval) or EVENT (log data only when a specific event occurs ,for example log data when temperature change)
  * Rate: data Rate in Hz (max 1000 Hz).
- * DelimiterFormat: FMT_SPACE, FMT_TAB, FMT_COMMA
- * indexColumn: FMT_SAMPLE, FMT_TIME
+ * DelimiterFormat: FMT_SPACE, FMT_TAB, FMT_COMMA (between samples)
+ * indexColumn: FMT_SAMPLE (sample number), FMT_TIME(timestamp) as mark for every log
  * IndexColumnLabel: Index Column label text. Max 30 char.
 */
 Module_Status CreateLog(char *logName, logType_t Type, float Rate, delimiterFormat_t DelimiterFormat,
