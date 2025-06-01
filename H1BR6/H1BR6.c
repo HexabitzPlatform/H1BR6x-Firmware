@@ -1,5 +1,5 @@
 /*
- BitzOS (BOS) V0.3.6 - Copyright (C) 2017-2024 Hexabitz
+ BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
 
  File Name     : H0BR4.c
@@ -10,10 +10,9 @@
 >>
 >>
 >>
-
  */
 
-/* Includes ------------------------------------------------------------------*/
+/* Includes ****************************************************************/
 #include "BOS.h"
 #include "H1BR6.h"
 #include "app_fatfs.h"
@@ -21,10 +20,7 @@
 #include "stdio.h"
 #include <stdlib.h>
 
-
-
-TIM_HandleTypeDef htim15;
-
+/* Exported Typedef ********************************************************/
 /* Define UART variables */
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
@@ -33,128 +29,47 @@ UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart6;
 
+FATFS fs;
+FIL MyFile;
+FRESULT FileResult;
+log_t Log[MAX_LOGS] = {0};
+logVar_t LogVariables[MAX_LOG_VARS] = {0};
 
-/* Exported variables */
-extern FLASH_ProcessTypeDef pFlash;
-extern uint8_t numOfRecordedSnippets;
-
-/* Module exported parameters ------------------------------------------------*/
-
-
-
-module_param_t modParam[NUM_MODULE_PARAMS] ={{.paramPtr = NULL, .paramFormat =FMT_FLOAT, .paramName =""}};
-
-/* Private variables ---------------------------------------------------------*/
-const uint8_t numberMap[3] = {1, 10, 100};
-const char logHeaderText1[] = "Datalog created by BOS V%d.%d.%d on %s\n";
-const char logHeaderText2[] = "Log type: Rate @ %.2f Hz\n\n";
-const char logHeaderText3[] = "Log type: Events\n\n";
-const char logHeaderTimeDate[] = "%s %s\n";
-const char Start_Mark = 0xff;
-
-#define MAX_WAVE_NAME_LENTH 30
-#define WAV_SCAN_MODE 			1
-#define WAV_STREAM_MODE		 	2
-#define LOG_MODE		 		0
-#define WAVE_DATA_OFFSET		44
-
-char Const_WAVE_NAME[MAX_WAVE_NAME_LENTH];
-
-/*=================================================================================*/
-/*========================= Private variables  ====================================*/
-/*=================================================================================*/
-uint8_t SD_MODE = 0;
-log_t logs[MAX_LOGS] = {0};
-logVar_t logVars[MAX_LOG_VARS] = {0};
-uint32_t compareValue[MAX_LOG_VARS];
-/* File system object for SD card logical drive */
-//FATFS SDFatFs;
-/* SD card logical drive path */
-char SDPath[4];
-/* File objects */
-FIL MyFile, tempFile;
-/* File write/read counts */
-uint32_t byteswritten, bytesread;
-char lineBuffer[100];
-char tempName[MAX_NAME_LENGTH] = {0};
-uint16_t  activeLogs;
 TaskHandle_t LogTaskHandle = NULL;
-uint8_t temp_uint8 = 0;
+
+/* Private Variables *******************************************************/
 /* Module settings - sequential log naming*/
-bool enableSequential = true;
-bool enableTimeDateHeader = false;
+bool EnableSequential = true;
+bool EnableTimeDateHeader = false;
 
-/* WAVE file parameters */
-//uint8_t wavebuff[44];
-//UINT Number_br;
-//FIL _path_pointer;
+char LineBuffer[100];
+char TempName[MAX_NAME_LENGTH] = {0};
 
-struct /* WAVE FILE Header information struct - 44 bytes */
-{
-/*the "RIFF" chnk descriptor */
-char CHUNKID[4];  						//4 byte
-uint32_t CHUNKSIZE; 					//4 byte
-char FORMAT[4];							 	//4 byte
-/*the "fmt" sub-chunk */
-char SUBCHhUNK1ID[4]; 				//4 byte
-uint32_t SUBCHUNK1SIZE; 			//4 byte
-uint16_t AUDIOFMT; 						//2 byte
-uint16_t NO_CHANNEL; 					//2 byte
-uint32_t SAMPLERATE; 					//4 byte
-uint32_t BYTERATE; 						//4 byte
-uint16_t BLOCKALIGN; 					//2 byte
-uint16_t BITPERSAMPLE;			 	//2 byte
-/*the "data" sub-chunk */
-char SUBCHUNK2ID[4]; 					//4 byte
-uint32_t SUBCHUNK2SIZE; 			//4 byte
+uint8_t f_mount_ok=0;
+volatile uint8_t CountFile = 0;
 
-}WAVEFIL;
-FATFS fs;  // file system
-//FIL fil; // File
-//FILINFO fno;
-FRESULT fresult;  // result
-UINT br, bw;  // File read/write count
-char buffer[1024];
-/**** capacity related *****/
-FATFS *pfs;
-DWORD fre_clust;
-uint32_t total, free_space;
-/* WAVE file parameters */
-uint8_t wavebuff[44];
-UINT Number_br;
-//FIL _path_pointer;
-uint32_t WAVE_bytes;
-uint32_t READ_WAVE_BYTES=WAVE_DATA_OFFSET;		// WAVE header size in bytes
-uint8_t SCALE_FAC=1;
-uint8_t SCALE_SHIFT=0;
-int16_t I;
-uint8_t temp_H07R3_ID;
-uint8_t temp_H07R3_DST;
-//played wave name
-char* WAVE_NAME;
-//get wave file size
-uint32_t WAVE_SIZE;
-//calculate number of Byte in Block Sample align
-uint8_t NO_BYTE_SAMPLE ;
-//calculate wave byte rate time wait in us
-uint16_t SAMPLETIME ;
-//define origrn path pointer for f_close
-//FIL _wave_pointer;
-//define wave BLOCKALIGN buffer
-//uint8_t WaveAlignBuff[500];			// NO_BYTE_SAMPLE
-//define wave sample buffer
-//uint8_t WaveSampleBuff[1000];		// WAVEFIL.BLOCKALIGN
-uint8_t f_mount_ok=0 ;
+uint16_t  ActiveLogs =0;
 
-/* Private function prototypes -----------------------------------------------*/
+uint32_t BytesWritten =0;
+uint32_t CompareValue[MAX_LOG_VARS] = {0};
 
+/* Module Parameters */
+ModuleParam_t ModuleParam[NUM_MODULE_PARAMS] ={0};
+
+/* Private Function Prototypes *********************************************/
+uint8_t ClearROtopology(void);
+void Module_Peripheral_Init(void);
+void SetupPortForRemoteBootloaderUpdate(uint8_t port);
+void RemoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outport);
+Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src, uint8_t dst, uint8_t shift);
+
+/* Local Function Prototypes ***********************************************/
 void LogTask(void * argument);
 uint8_t CheckLogVarEvent(uint16_t varIndex);
 Module_Status OpenThisLog(uint16_t logindex, FIL *objFile);
 Module_Status MicroSD_Init(void);
-void ExecuteMonitor(void);
 
-/* Create CLI commands --------------------------------------------------------*/
+/* Create CLI commands *****************************************************/
 portBASE_TYPE demoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
 portBASE_TYPE addLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
 portBASE_TYPE deleteLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
@@ -164,226 +79,378 @@ portBASE_TYPE stopCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
 portBASE_TYPE pauseCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
 portBASE_TYPE resumeCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString );
 
+/* CLI command structure ***************************************************/
 /* CLI command structure : demo */
-const CLI_Command_Definition_t demoCommandDefinition =
-{
-	( const int8_t * ) "demo", /* The command string to type. */
+const CLI_Command_Definition_t demoCommandDefinition = {
+	( const int8_t * ) "demo", /* The command string to Type. */
 	( const int8_t * ) "demo:\r\n Run a demo program to test module functionality\r\n\r\n",
 	demoCommand, /* The function to run. */
 	0 /* No parameters are expected. */
 };
-/*-----------------------------------------------------------*/
+
+/***************************************************************************/
 /* CLI command structure : addlog */
-const CLI_Command_Definition_t addLogCommandDefinition =
-{
-	( const int8_t * ) "addlog", /* The command string to type. */
-	( const int8_t * ) "addlog:\r\n Add a new log file. Specifiy log name (1st par.); type (2nd par.): 'rate' or 'event'; \
-rate (3rd par.): logging rate in Hz (max 1000), delimiter format (4th par.): 'space', 'tab' or 'comma'; index column format \
+const CLI_Command_Definition_t addLogCommandDefinition ={
+	(const int8_t*) "addlog", /* The command string to Type. */
+	(const int8_t*) "addlog:\r\n Add a new log file. Specifiy log name (1st par.); Type (2nd par.): 'Rate' or 'event'; \
+Rate (3rd par.): logging Rate in Hz (max 1000), delimiter format (4th par.): 'space', 'tab' or 'comma'; index column format \
 (5th par.): 'none', 'sample' or 'time'; and index column label text (6th par.)\r\n\r\n",
 	addLogCommand, /* The function to run. */
 	6 /* Six parameters are expected. */
 };
-/*-----------------------------------------------------------*/
+
+/***************************************************************************/
 /* CLI command structure : logvar */
-const CLI_Command_Definition_t logVarCommandDefinition =
-{
-	( const int8_t * ) "logvar", /* The command string to type. */
-	( const int8_t * ) "logvar:\r\n Add a new log variable to an existing log (1st par.). Specify variable type (2nd and 3rd par.): \
-'port digital', 'port data', 'port button', 'memory uint8', 'memory int8', 'memory uint16', 'memory int16', 'memory uint32', \
-'memory int32', 'memory float' ; source (4th par.): ports 'p1'..'px', buttons 'b1'..'bx' or memory location (Flash or RAM); \
+const CLI_Command_Definition_t logVarCommandDefinition = {
+	( const int8_t * ) "logvar", /* The command string to Type. */
+	( const int8_t * ) "logvar:\r\n Add a new log variable to an existing log (1st par.). Specify variable Type (2nd and 3rd par.): \
+'port digital', 'port data', 'port Button', 'memory uint8', 'memory int8', 'memory uint16', 'memory int16', 'memory uint32', \
+'memory int32', 'memory float' ; Source (4th par.): ports 'p1'..'px', buttons 'b1'..'bx' or memory location (Flash or RAM); \
 and column label text (5th par.)\r\n\r\n",
 	logVarCommand, /* The function to run. */
 	5 /* Five parameters are expected. */
 };
-/*-----------------------------------------------------------*/
+
+/***************************************************************************/
 /* CLI command structure : deletelog */
-const CLI_Command_Definition_t deleteLogCommandDefinition =
-{
-	( const int8_t * ) "deletelog", /* The command string to type. */
+const CLI_Command_Definition_t deleteLogCommandDefinition = {
+	( const int8_t * ) "deletelog", /* The command string to Type. */
 	( const int8_t * ) "deletelog:\r\n Delete a log file. Specifiy log name (1st par.) and delete options (2nd par.): 'all' or \
 'keepdisk' to keep log on the uSD card\r\n\r\n",
 	deleteLogCommand, /* The function to run. */
 	3 /* Two parameters are expected. */
 };
-/*-----------------------------------------------------------*/
+
+/***************************************************************************/
 /* CLI command structure : start */
-const CLI_Command_Definition_t startCommandDefinition =
-{
-	( const int8_t * ) "start", /* The command string to type. */
+const CLI_Command_Definition_t startCommandDefinition = {
+	( const int8_t * ) "start", /* The command string to Type. */
 	( const int8_t * ) "start:\r\n Start the log with log name (1st par.)\r\n\r\n",
 	startCommand, /* The function to run. */
 	1 /* One parameter is expected. */
 };
-/*-----------------------------------------------------------*/
+
+/***************************************************************************/
 /* CLI command structure : stop */
-const CLI_Command_Definition_t stopCommandDefinition =
-{
-	( const int8_t * ) "stop", /* The command string to type. */
+const CLI_Command_Definition_t stopCommandDefinition = {
+	( const int8_t * ) "stop", /* The command string to Type. */
 	( const int8_t * ) "stop:\r\n Stop the log with log name (1st par.)\r\n\r\n",
 	stopCommand, /* The function to run. */
 	1 /* One parameter is expected. */
 };
-/*-----------------------------------------------------------*/
+
+/***************************************************************************/
 /* CLI command structure : pause */
-const CLI_Command_Definition_t pauseCommandDefinition =
-{
-	( const int8_t * ) "pause", /* The command string to type. */
+const CLI_Command_Definition_t pauseCommandDefinition = {
+	( const int8_t * ) "pause", /* The command string to Type. */
 	( const int8_t * ) "pause:\r\n Pause the log with log name (1st par.)\r\n\r\n",
 	pauseCommand, /* The function to run. */
 	1 /* One parameter is expected. */
 };
-/*-----------------------------------------------------------*/
+
+/***************************************************************************/
 /* CLI command structure : resume */
-const CLI_Command_Definition_t resumeCommandDefinition =
-{
-	( const int8_t * ) "resume", /* The command string to type. */
+const CLI_Command_Definition_t resumeCommandDefinition = {
+	( const int8_t * ) "resume", /* The command string to Type. */
 	( const int8_t * ) "resume:\r\n Resume the log with log name (1st par.)\r\n\r\n",
 	resumeCommand, /* The function to run. */
 	1 /* One parameter is expected. */
 };
 
-/*-----------------------------------------------------------*/
-
-/* -----------------------------------------------------------------------
- |												 Private Functions	 														|
- -----------------------------------------------------------------------
- */
-
-/**
- * @brief  System Clock Configuration
- *         The system Clock is configured as follow :
- *            System Clock source            = PLL (HSE)
- *            SYSCLK(Hz)                     = 48000000
- *            HCLK(Hz)                       = 48000000
- *            AHB Prescaler                  = 1
- *            APB1 Prescaler                 = 1
- *            HSE Frequency(Hz)              = 8000000
- *            PREDIV                         = 1
- *            PLLMUL                         = 6
- *            Flash Latency(WS)              = 1
- * @param  None
- * @retval None
+/***************************************************************************/
+/************************ Private function Definitions *********************/
+/***************************************************************************/
+/* @brief  System Clock Configuration
+ *         This function configures the system clock as follows:
+ *            - System Clock Source            = PLL (HSE)
+ *            - SYSCLK(Hz)                     = 64000000
+ *            - HCLK(Hz)                       = 64000000
+ *            - AHB Prescaler                  = 1
+ *            - APB1 Prescaler                 = 1
+ *            - HSE Frequency(Hz)              = 8000000
+ *            - PLLM                           = 1
+ *            - PLLN                           = 16
+ *            - PLLP                           = 2
+ *            - Flash Latency(WS)              = 2
+ *            - Clock Source for UART1,UART2,UART3 = 16MHz (HSI)
  */
 void SystemClock_Config(void){
-	  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-	  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-	  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+	RCC_OscInitTypeDef RCC_OscInitStruct ={0};
+	RCC_ClkInitTypeDef RCC_ClkInitStruct ={0};
 
-	  /** Configure the main internal regulator output voltage
-	  */
-	  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
-	  /** Initializes the RCC Oscillators according to the specified parameters
-	  * in the RCC_OscInitTypeDef structure.
-	  */
-	  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
-	  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-	  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
-	  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-	  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-	  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-	  RCC_OscInitStruct.PLL.PLLN = 16;
-	  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-	  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
-	  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
-      HAL_RCC_OscConfig(&RCC_OscInitStruct);
+	/** Configure the main internal regulator output voltage */
+	HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-	  /** Initializes the CPU, AHB and APB buses clocks
-	  */
-	  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-	                              |RCC_CLOCKTYPE_PCLK1;
-	  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-	  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-	  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+	/* Initializes the RCC Oscillators according to the specified parameters
+	 * in the RCC_OscInitTypeDef structure.
+	 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_HSE; // Enable both HSI and HSE oscillators
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON; // Enable HSE (External High-Speed Oscillator)
+	RCC_OscInitStruct.HSIState = RCC_HSI_ON; // Enable HSI (Internal High-Speed Oscillator)
+	RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1; // No division on HSI
+	RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT; // Default calibration value for HSI
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON; // Enable PLL
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE; // Set PLL Source to HSE
+	RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1; // Prescaler for PLL input
+	RCC_OscInitStruct.PLL.PLLN =16; // Multiplication factor for PLL
+	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2; // PLLP division factor
+	RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2; // PLLQ division factor
+	RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2; // PLLR division factor
+	HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-	  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2);
+	/** Initializes the CPU, AHB and APB buses clocks */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK; // Select PLL as the system clock Source
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1; // AHB Prescaler set to 1
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1; // APB1 Prescaler set to 1
 
-	  /** Initializes the peripherals clocks
-	  */
-	  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USART2;
-	  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-	  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
-	  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
-	  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C2;
-	  PeriphClkInit.I2c2ClockSelection = RCC_I2C2CLKSOURCE_PCLK1;
-
-	  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
-	//  HAL_NVIC_SetPriority(SysTick_IRQn,0,0);
-	
+	HAL_RCC_ClockConfig(&RCC_ClkInitStruct,FLASH_LATENCY_2); // Configure system clocks with flash latency of 2 WS
 }
 
-/*-----------------------------------------------------------*/
+/***************************************************************************/
+/* enable stop mode regarding only UART1 , UART2 , and UART3 */
+BOS_Status EnableStopModebyUARTx(uint8_t port){
 
+	UART_WakeUpTypeDef WakeUpSelection;
+	UART_HandleTypeDef *huart =GetUart(port);
 
-/* --- Save array topology and Command Snippets in Flash RO --- 
- */
-uint8_t SaveToRO(void){
-	BOS_Status result =BOS_OK;
-	HAL_StatusTypeDef FlashStatus =HAL_OK;
-	uint16_t add =8, temp =0;
-	uint8_t snipBuffer[sizeof(snippet_t) + 1] ={0};
-	
+	if((huart->Instance == USART1) || (huart->Instance == USART2) || (huart->Instance == USART3)){
+
+		/* make sure that no UART transfer is on-going */
+		while(__HAL_UART_GET_FLAG(huart, USART_ISR_BUSY) == SET);
+
+		/* make sure that UART is ready to receive */
+		while(__HAL_UART_GET_FLAG(huart, USART_ISR_REACK) == RESET);
+
+		/* set the wake-up event:
+		 * specify wake-up on start-bit detection */
+		WakeUpSelection.WakeUpEvent = UART_WAKEUP_ON_STARTBIT;
+		HAL_UARTEx_StopModeWakeUpSourceConfig(huart,WakeUpSelection);
+
+		/* Enable the UART Wake UP from stop mode Interrupt */
+		__HAL_UART_ENABLE_IT(huart,UART_IT_WUF);
+
+		/* enable MCU wake-up by LPUART */
+		HAL_UARTEx_EnableStopMode(huart);
+
+		/* enter STOP mode */
+		HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON,PWR_STOPENTRY_WFI);
+	}
+	else
+		return BOS_ERROR;
+
+}
+
+/***************************************************************************/
+/* Enable standby mode regarding wake-up pins:
+ * WKUP1: PA0  pin
+ * WKUP4: PA2  pin
+ * WKUP6: PB5  pin
+ * WKUP2: PC13 pin
+ * NRST pin
+ *  */
+BOS_Status EnableStandbyModebyWakeupPinx(WakeupPins_t wakeupPins){
+
+	/* Clear the WUF FLAG */
+	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WUF);
+
+	/* Enable the WAKEUP PIN */
+	switch(wakeupPins){
+
+		case PA0_PIN:
+			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1); /* PA0 */
+			break;
+
+		case PA2_PIN:
+			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4); /* PA2 */
+			break;
+
+		case PB5_PIN:
+			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN6); /* PB5 */
+			break;
+
+		case PC13_PIN:
+			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2); /* PC13 */
+			break;
+
+		case NRST_PIN:
+			/* do no thing*/
+			break;
+	}
+
+	/* Enable SRAM content retention in Standby mode */
+	HAL_PWREx_EnableSRAMRetention();
+
+	/* Finally enter the standby mode */
+	HAL_PWR_EnterSTANDBYMode();
+
+	return BOS_OK;
+}
+
+/***************************************************************************/
+/* Disable standby mode regarding wake-up pins:
+ * WKUP1: PA0  pin
+ * WKUP4: PA2  pin
+ * WKUP6: PB5  pin
+ * WKUP2: PC13 pin
+ * NRST pin
+ *  */
+BOS_Status DisableStandbyModeWakeupPinx(WakeupPins_t wakeupPins){
+
+	/* The standby wake-up is same as a system RESET:
+	 * The entire code runs from the beginning just as if it was a RESET.
+	 * The only difference between a reset and a STANDBY wake-up is that, when the MCU wakes-up,
+	 * The SBF status flag in the PWR power control/status register (PWR_CSR) is set */
+	if(__HAL_PWR_GET_FLAG(PWR_FLAG_SB) != RESET){
+		/* clear the flag */
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+
+		/* Disable  Wake-up Pinx */
+		switch(wakeupPins){
+
+			case PA0_PIN:
+				HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1); /* PA0 */
+				break;
+
+			case PA2_PIN:
+				HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); /* PA2 */
+				break;
+
+			case PB5_PIN:
+				HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN6); /* PB5 */
+				break;
+
+			case PC13_PIN:
+				HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2); /* PC13 */
+				break;
+
+			case NRST_PIN:
+				/* do no thing*/
+				break;
+		}
+
+		IND_blink(1000);
+
+	}
+	else
+		return BOS_OK;
+
+}
+
+/***************************************************************************/
+/* Save Command Topology in Flash RO */
+uint8_t SaveTopologyToRO(void){
+
+	HAL_StatusTypeDef flashStatus =HAL_OK;
+
+	/* flashAdd is initialized with 8 because the first memory room in topology page
+	 * is reserved for module's ID */
+	uint16_t flashAdd =8;
+	uint16_t temp =0;
+
+	/* Unlock the FLASH control register access */
 	HAL_FLASH_Unlock();
 
-	/* Erase RO area */
-	FLASH_PageErase(FLASH_BANK_1,RO_START_ADDRESS);
-		FlashStatus =FLASH_WaitForLastOperation((uint32_t ) HAL_FLASH_TIMEOUT_VALUE);
-	FLASH_PageErase(FLASH_BANK_1,RO_MID_ADDRESS);
-	//TOBECHECKED
+	/* Erase Topology page */
+	FLASH_PageErase(FLASH_BANK_2,TOPOLOGY_PAGE_NUM);
+
+	/* Wait for an Erase operation to complete */
+	flashStatus =FLASH_WaitForLastOperation((uint32_t ) HAL_FLASH_TIMEOUT_VALUE);
+
+	if(flashStatus != HAL_OK){
+		/* return FLASH error code */
+		return pFlash.ErrorCode;
+	}
+
+	else{
+		/* Operation is completed, disable the PER Bit */
+		CLEAR_BIT(FLASH->CR,FLASH_CR_PER);
+	}
+
+	/* Save module's ID and topology */
+	if(myID){
+
+		/* Save module's ID */
+		temp =(uint16_t )(N << 8) + myID;
+
+		/* Save module's ID in Flash memory */
+		HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,TOPOLOGY_START_ADDRESS,temp);
+
+		/* Wait for a Write operation to complete */
+		flashStatus =FLASH_WaitForLastOperation((uint32_t ) HAL_FLASH_TIMEOUT_VALUE);
+
+		if(flashStatus != HAL_OK){
+			/* return FLASH error code */
+			return pFlash.ErrorCode;
+		}
+
+		else{
+			/* If the program operation is completed, disable the PG Bit */
+			CLEAR_BIT(FLASH->CR,FLASH_CR_PG);
+		}
+
+		/* Save topology */
+		for(uint8_t row =1; row <= N; row++){
+			for(uint8_t column =0; column <= MAX_NUM_OF_PORTS; column++){
+				/* Check the module serial number
+				 * Note: there isn't a module has serial number 0
+				 */
+				if(Array[row - 1][0]){
+					/* Save each element in topology Array in Flash memory */
+					HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,TOPOLOGY_START_ADDRESS + flashAdd,Array[row - 1][column]);
+					/* Wait for a Write operation to complete */
+					flashStatus =FLASH_WaitForLastOperation((uint32_t ) HAL_FLASH_TIMEOUT_VALUE);
+					if(flashStatus != HAL_OK){
+						/* return FLASH error code */
+						return pFlash.ErrorCode;
+					}
+					else{
+						/* If the program operation is completed, disable the PG Bit */
+						CLEAR_BIT(FLASH->CR,FLASH_CR_PG);
+						/* update new flash memory address */
+						flashAdd +=8;
+					}
+				}
+			}
+		}
+	}
+	/* Lock the FLASH control register access */
+	HAL_FLASH_Lock();
+}
+
+/***************************************************************************/
+/* Save Command Snippets in Flash RO */
+uint8_t SaveSnippetsToRO(void){
+	HAL_StatusTypeDef FlashStatus =HAL_OK;
+	uint8_t snipBuffer[sizeof(Snippet_t) + 1] ={0};
+
+	/* Unlock the FLASH control register access */
+	HAL_FLASH_Unlock();
+	/* Erase Snippets page */
+	FLASH_PageErase(FLASH_BANK_2,SNIPPETS_PAGE_NUM);
+	/* Wait for an Erase operation to complete */
 	FlashStatus =FLASH_WaitForLastOperation((uint32_t ) HAL_FLASH_TIMEOUT_VALUE);
+
 	if(FlashStatus != HAL_OK){
+		/* return FLASH error code */
 		return pFlash.ErrorCode;
 	}
 	else{
 		/* Operation is completed, disable the PER Bit */
 		CLEAR_BIT(FLASH->CR,FLASH_CR_PER);
 	}
-	
-	/* Save number of modules and myID */
-	if(myID){
-		temp =(uint16_t )(N << 8) + myID;
-		//HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD,RO_START_ADDRESS,temp);
-		HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,RO_START_ADDRESS,temp);
-		//TOBECHECKED
-		FlashStatus =FLASH_WaitForLastOperation((uint32_t ) HAL_FLASH_TIMEOUT_VALUE);
-		if(FlashStatus != HAL_OK){
-			return pFlash.ErrorCode;
-		}
-		else{
-			/* If the program operation is completed, disable the PG Bit */
-			CLEAR_BIT(FLASH->CR,FLASH_CR_PG);
-		}
-		
-		/* Save topology */
-		for(uint8_t i =1; i <= N; i++){
-			for(uint8_t j =0; j <= MaxNumOfPorts; j++){
-				if(array[i - 1][0]){
-		       	HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,RO_START_ADDRESS + add,array[i - 1][j]);
-				 //HALFWORD 	//TOBECHECKED
-					FlashStatus =FLASH_WaitForLastOperation((uint32_t ) HAL_FLASH_TIMEOUT_VALUE);
-					if(FlashStatus != HAL_OK){
-						return pFlash.ErrorCode;
-					}
-					else{
-						/* If the program operation is completed, disable the PG Bit */
-						CLEAR_BIT(FLASH->CR,FLASH_CR_PG);
-						add +=8;
-					}
-				}
-			}
-		}
-	}
-	
-	// Save Command Snippets
-	int currentAdd = RO_MID_ADDRESS;
-	for(uint8_t s =0; s < numOfRecordedSnippets; s++){
-		if(snippets[s].cond.conditionType){
-			snipBuffer[0] =0xFE;		// A marker to separate Snippets
-			memcpy((uint32_t* )&snipBuffer[1],(uint8_t* )&snippets[s],sizeof(snippet_t));
-			// Copy the snippet struct buffer (20 x numOfRecordedSnippets). Note this is assuming sizeof(snippet_t) is even.
-			for(uint8_t j =0; j < (sizeof(snippet_t)/4); j++){
-				HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,currentAdd,*(uint64_t* )&snipBuffer[j*8]);
-				//HALFWORD
-				//TOBECHECKED
+
+	/* Save Command Snippets */
+	int currentAdd = SNIPPETS_START_ADDRESS;
+	for(uint8_t index =0; index < NumOfRecordedSnippets; index++){
+		/* Check if Snippet condition is true or false */
+		if(Snippets[index].Condition.ConditionType){
+			/* A marker to separate Snippets */
+			snipBuffer[0] =0xFE;
+			memcpy((uint32_t* )&snipBuffer[1],(uint8_t* )&Snippets[index],sizeof(Snippet_t));
+			/* Copy the snippet struct buffer (20 x NumOfRecordedSnippets). Note this is assuming sizeof(Snippet_t) is even */
+			for(uint8_t j =0; j < (sizeof(Snippet_t) / 4); j++){
+				HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,currentAdd,*(uint64_t* )&snipBuffer[j * 8]);
 				FlashStatus =FLASH_WaitForLastOperation((uint32_t ) HAL_FLASH_TIMEOUT_VALUE);
 				if(FlashStatus != HAL_OK){
 					return pFlash.ErrorCode;
@@ -394,11 +461,9 @@ uint8_t SaveToRO(void){
 					currentAdd +=8;
 				}
 			}
-			// Copy the snippet commands buffer. Always an even number. Note the string termination char might be skipped
-			for(uint8_t j =0; j < ((strlen(snippets[s].cmd) + 1)/4); j++){
-				HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,currentAdd,*(uint64_t* )(snippets[s].cmd + j*4 ));
-				//HALFWORD
-				//TOBECHECKED
+			/* Copy the snippet commands buffer. Always an even number. Note the string termination char might be skipped */
+			for(uint8_t j =0; j < ((strlen(Snippets[index].CMD) + 1) / 4); j++){
+				HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD,currentAdd,*(uint64_t* )(Snippets[index].CMD + j * 4));
 				FlashStatus =FLASH_WaitForLastOperation((uint32_t ) HAL_FLASH_TIMEOUT_VALUE);
 				if(FlashStatus != HAL_OK){
 					return pFlash.ErrorCode;
@@ -411,32 +476,29 @@ uint8_t SaveToRO(void){
 			}
 		}
 	}
-	
+	/* Lock the FLASH control register access */
 	HAL_FLASH_Lock();
-	
-	return result;
 }
 
-/* --- Clear array topology in SRAM and Flash RO --- 
- */
+/***************************************************************************/
+/* Clear Array topology in SRAM and Flash RO */
 uint8_t ClearROtopology(void){
-	// Clear the array 
-	memset(array,0,sizeof(array));
+	/* Clear the Array */
+	memset(Array,0,sizeof(Array));
 	N =1;
 	myID =0;
 	
-	return SaveToRO();
+	return SaveTopologyToRO();
 }
-/*-----------------------------------------------------------*/
 
-/* --- Trigger ST factory bootloader update for a remote module.
- */
-void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outport){
+/***************************************************************************/
+/* Trigger ST factory bootloader update for a remote module */
+void RemoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outport){
 
 	uint8_t myOutport =0, lastModule =0;
 	int8_t *pcOutputString;
 
-	/* 1. Get route to destination module */
+	/* 1. Get Route to destination module */
 	myOutport =FindRoute(myID,dst);
 	if(outport && dst == myID){ /* This is a 'via port' update and I'm the last module */
 		myOutport =outport;
@@ -446,14 +508,14 @@ void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outpo
 		if(NumberOfHops(dst)== 1)
 		lastModule = myID;
 		else
-		lastModule = route[NumberOfHops(dst)-1]; /* previous module = route[Number of hops - 1] */
+		lastModule = Route[NumberOfHops(dst)-1]; /* previous module = Route[Number of hops - 1] */
 	}
 
-	/* 2. If this is the source of the message, show status on the CLI */
+	/* 2. If this is the Source of the message, show status on the CLI */
 	if(src == myID){
 		/* Obtain the address of the output buffer.  Note there is no mutual
-		 exclusion on this buffer as it is assumed only one command console
-		 interface will be used at any one time. */
+		 * exclusion on this buffer as it is assumed only one command console
+		 * interface will be used at any one time. */
 		pcOutputString =FreeRTOS_CLIGetOutputBuffer();
 
 		if(outport == 0)		// This is a remote module update
@@ -471,33 +533,32 @@ void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outpo
 	SetupPortForRemoteBootloaderUpdate(inport);
 	SetupPortForRemoteBootloaderUpdate(myOutport);
 
-
 	/* 5. Build a DMA stream between my inport and outport */
 	StartScastDMAStream(inport,myID,myOutport,myID,BIDIRECTIONAL,0xFFFFFFFF,0xFFFFFFFF,false);
 }
 
-/*-----------------------------------------------------------*/
-
-/* --- Setup a port for remote ST factory bootloader update:
- - Set baudrate to 57600
- - Enable even parity
- - Set datasize to 9 bits
+/***************************************************************************/
+/* Setup a port for remote ST factory bootloader update:
+ * Set baudrate to 57600
+ * Enable even parity
+ * Set datasize to 9 bits
  */
 void SetupPortForRemoteBootloaderUpdate(uint8_t port){
-	UART_HandleTypeDef *huart =GetUart(port);
 
-	huart->Init.BaudRate =57600;
+	UART_HandleTypeDef *huart =GetUart(port);
+	HAL_UART_DeInit(huart);
 	huart->Init.Parity = UART_PARITY_EVEN;
 	huart->Init.WordLength = UART_WORDLENGTH_9B;
 	HAL_UART_Init(huart);
 
 	/* The CLI port RXNE interrupt might be disabled so enable here again to be sure */
 	__HAL_UART_ENABLE_IT(huart,UART_IT_RXNE);
+
 }
 
-/* --- H0BR4 module initialization.
- */
-void Module_Peripheral_Init(void){
+/***************************************************************************/
+/* H1BR6 module initialization */
+void Module_Peripheral_Init(void) {
 
 	/* Array ports */
 	MX_USART1_UART_Init();
@@ -505,79 +566,71 @@ void Module_Peripheral_Init(void){
 	MX_USART3_UART_Init();
 	MX_USART4_UART_Init();
 	MX_USART5_UART_Init();
-	SPI_GPIO_Init();
-	MX_SPI2_Init();
+
+	SDCardGPIOInit();
+	MX_SPI_Init();
 	MX_FATFS_Init();
 
-	  //Circulating DMA Channels ON All Module
-		  		 for(int i=1;i<=NumOfPorts;i++)
-		  			{
-		  			  if(GetUart(i)==&huart1)
-		  			           { index_dma[i-1]=&(DMA1_Channel1->CNDTR); }
-		  			  else if(GetUart(i)==&huart2)
-		  					   { index_dma[i-1]=&(DMA1_Channel2->CNDTR); }
-		  			  else if(GetUart(i)==&huart3)
-		  					   { index_dma[i-1]=&(DMA1_Channel3->CNDTR); }
-		  			  else if(GetUart(i)==&huart4)
-		  					   { index_dma[i-1]=&(DMA1_Channel4->CNDTR); }
-		  			  else if(GetUart(i)==&huart5)
-		  					   { index_dma[i-1]=&(DMA1_Channel5->CNDTR); }
-		  			  else if(GetUart(i)==&huart6)
-		  					   { index_dma[i-1]=&(DMA1_Channel6->CNDTR); }
-		  			}
-
+	/* Circulating DMA Channels ON All Module */
+	for (int i = 1; i <= NUM_OF_PORTS; i++) {
+		if (GetUart(i) == &huart1) {
+			dmaIndex[i - 1] = &(DMA1_Channel1->CNDTR);
+		} else if (GetUart(i) == &huart2) {
+			dmaIndex[i - 1] = &(DMA1_Channel2->CNDTR);
+		} else if (GetUart(i) == &huart3) {
+			dmaIndex[i - 1] = &(DMA1_Channel3->CNDTR);
+		} else if (GetUart(i) == &huart4) {
+			dmaIndex[i - 1] = &(DMA1_Channel4->CNDTR);
+		} else if (GetUart(i) == &huart5) {
+			dmaIndex[i - 1] = &(DMA1_Channel5->CNDTR);
+		} else if (GetUart(i) == &huart6) {
+			dmaIndex[i - 1] = &(DMA1_Channel6->CNDTR);
+		}
+	}
 
 	/* Create module special task (if needed) */
-	    needToDelayButtonStateReset = true;
+	NeedToDelayButtonStateReset = true;
 
 		/* Create the logging task */
 		xTaskCreate(LogTask, (const char *) "LogTask", (2*configMINIMAL_STACK_SIZE), NULL, osPriorityNormal-osPriorityIdle, &LogTaskHandle);
 }
 
-/*-----------------------------------------------------------*/
-/* --- H0BR4 message processing task.
- */
+/***************************************************************************/
+/* H1BR6 message processing task */
 Module_Status Module_MessagingTask(uint16_t code,uint8_t port,uint8_t src,uint8_t dst,uint8_t shift){
-	Module_Status result =H1BR6_OK;
+	Module_Status result = H1BR6_OK;
 	uint8_t templn;
-	switch (code)
-		{
-			case CODE_H1BR6_READ_WAVE :
-					//1st parameter H07R3x ID, 2nd parameter stream dst Port
-					temp_H07R3_ID = cMessage[port-1][shift];
-					temp_H07R3_DST = cMessage[port-1][shift+1];		// Note this is not used
-					SD_MODE = WAV_STREAM_MODE;
-			break;
 
-			case CODE_H1BR6_SCAN_WAVE :
-			  templn = messageLength[port-1]-shift-1;
-				for (uint8_t i=0 ; i<templn ; i++)
-				{
-					Const_WAVE_NAME[i] = (char) cMessage[port-1][shift+1+i];
-				}
-				Const_WAVE_NAME[templn] = '.';
-				Const_WAVE_NAME[templn+1] = 'w';
-				Const_WAVE_NAME[templn+2] = 'a';
-				Const_WAVE_NAME[templn+3] = 'v';
-				Const_WAVE_NAME[templn+4] = 0;
-				//1st parameter H07R3x ID, and for WAV name for the latest parameters
-				WAVE_NAME = (char *) &Const_WAVE_NAME[0];
-				temp_H07R3_ID = cMessage[port-1][shift];
-				SD_MODE = WAV_SCAN_MODE;
-			break;
+	switch (code) {
 
-			default:
-				result = H1BR6_ERR_UnknownMessage;
-				break;
-		}
+	default:
+		result = H1BR6_ERR_UNKNOWNMESSAGE;
+		break;
+	}
 
-		return result;
+	return result;
 }
 
-/*-----------------------------------------------------------*/
+/***************************************************************************/
+/* Get the port for a given UART */
+uint8_t GetPort(UART_HandleTypeDef *huart) {
 
-/* --- Register this module CLI Commands
- */
+	if (huart->Instance == USART4)
+		return P1;
+	else if (huart->Instance == USART2)
+		return P2;
+	else if (huart->Instance == USART3)
+		return P3;
+	else if (huart->Instance == USART1)
+		return P4;
+	else if (huart->Instance == USART5)
+		return P5;
+
+	return 0;
+}
+
+/***************************************************************************/
+/* Register this module CLI Commands */
 void RegisterModuleCLICommands(void){
 	    FreeRTOS_CLIRegisterCommand(&demoCommandDefinition);
 		FreeRTOS_CLIRegisterCommand(&addLogCommandDefinition);
@@ -589,1072 +642,824 @@ void RegisterModuleCLICommands(void){
 		FreeRTOS_CLIRegisterCommand(&resumeCommandDefinition);
 }
 
-/*-----------------------------------------------------------*/
-/* --- Get the port for a given UART.
+/***************************************************************************/
+/* This functions is useful only for input (sensors) modules.
+ * Samples a module parameter value based on parameter index.
+ * paramIndex: Index of the parameter (1-based index).
+ * value: Pointer to store the sampled float value.
  */
-uint8_t GetPort(UART_HandleTypeDef *huart){
+Module_Status GetModuleParameter(uint8_t paramIndex, float *value) {
+	Module_Status status = BOS_OK;
 
-	if(huart->Instance == USART4)
-		return P1;
-	else if(huart->Instance == USART2)
-		return P2;
-	else if(huart->Instance == USART3)
-		return P3;
-	else if(huart->Instance == USART1)
-		return P4;
-	else if(huart->Instance == USART5)
-		return P5;
-	else if(huart->Instance == USART6)
-		return P6;
-	
-	return 0;
+	switch (paramIndex) {
+
+	/* Invalid parameter index */
+	default:
+		status = BOS_ERR_WrongParam;
+		break;
+	}
+
+	return status;
 }
 
-/*-----------------------------------------------------------*/
+/***************************************************************************/
+/****************************** Local Functions ****************************/
+/***************************************************************************/
+Module_Status MicroSD_Init(void) {
 
+	FileResult = f_mount(&fs, "", 0);
 
+	if (FileResult != FR_OK) {
+		/* Unmount the drive */
+		FileResult = f_mount(NULL, "", 1);
+		/* SD card malfunction. Replace or re-insert the card and reboot */
+		while (1) {
+			RTOS_IND_blink(500);
+			Delay_ms(500);
+		}
+	}
+	f_mount_ok = 1;
 
-/* -----------------------------------------------------------------------
- |								  APIs							          | 																 	|
-/* -----------------------------------------------------------------------
- */
-Module_Status MicroSD_Init(void)
-{
-
-	 fresult=f_mount(&fs,"",0);
-		  if (fresult !=FR_OK)
-		  {
-			  {
-			  	/* Unmount the drive */
-				fresult=f_mount(NULL,"",1);
-			  	/* SD card malfunction. Replace or re-insert the card and reboot */
-			  	while(1) { RTOS_IND_blink(500); Delay_ms(500); }
-			  }
-
-		  }
-		  f_mount_ok=1;
 	return H1BR6_OK;
 }
-/*-----------------------------------------------------------*/
 
-/* --- Logging task.
-*/
-void LogTask(void * argument)
-{
-  //uint8_t eventResult = 0;
-	static uint8_t newLine = 1;
-	static uint8_t resetButtonState = 0;
-  volatile uint8_t i,j;
-  volatile uint32_t u32lTick = 0;
-  volatile uint32_t u32lRate = 0;
+/***************************************************************************/
+/* Logging task */
+void LogTask(void *argument) {
+	static uint8_t newLine = 1; /* Flag indicating if a new line should be started in the log */
+	static uint8_t resetButtonState = 0; /* Flag to track if any button states need to be reset */
+
+	/* Loop counters and timing */
+	volatile uint8_t i, j;
+	volatile uint32_t u32lTick = 0; /* Tick counter for each log */
+	volatile uint32_t u32lRate = 0; /* Sampling period in ticks */
 
 	/* Initialize the micro SD card */
 	MicroSD_Init();
 
 	/* Infinite loop */
-	for(;;)
-	{
+	for (;;) {
 
-		switch (SD_MODE)
-		{
-			case WAV_SCAN_MODE:
-						ScanWaveFile(WAVE_NAME, temp_H07R3_ID);
-						SD_MODE = LOG_MODE;
-						break;
-			case WAV_STREAM_MODE:
-						StreamWaveToModule(WAVE_NAME, temp_H07R3_ID);
-						SD_MODE = LOG_MODE;
-						break;
-			case LOG_MODE:
-				/* Check all active logs */
-				for( j=0 ; j<MAX_LOGS ; j++)
-				{
-					u32lTick = HAL_GetTick()-logs[j].t0;
-					u32lRate = configTICK_RATE_HZ/logs[j].rate;
+		/* Check all active Log */
+		for (j = 0; j < MAX_LOGS; j++) {
+			u32lTick = HAL_GetTick() - Log[j].t0;         /* Time since last log write */
+			u32lRate = configTICK_RATE_HZ / Log[j].Rate;  /* Calculate logging interval */
 
-					if ( u32lTick >= u32lRate )
-						++logs[j].sampleCount;				// Advance one sample
+			if (u32lTick >= u32lRate)
+				++Log[j].SampleCount;			 /* Increment sample counter */
 
-					if ( (activeLogs >> j) & 0x01 )
-					{
-						/* Open this log file if it's closed (and close open one) */
-						OpenThisLog(j, &MyFile);
+			if ((ActiveLogs >> j) & 0x01) {      /* Check if this log is active */
+				OpenThisLog(j, &MyFile);         /* Open corresponding file */
 
-						memset(lineBuffer, 0, sizeof(lineBuffer));
-						/* Check all registered variables for this log */
-						for( i=0 ; i<MAX_LOG_VARS ; i++)
-						{
-							if (logVars[i].type && (logVars[i].logIndex == j))
-							{
-								/* Check for rate or event */
-								if ( ((RATE == logs[j].type) && (u32lTick >= u32lRate)) || CheckLogVarEvent(i) )
-								{
-									if (newLine)
-									{
-										newLine = 0;										// Event index written once per line
+				memset(LineBuffer, 0, sizeof(LineBuffer));
 
-										/* Write index */
-										if (logs[j].indexColumnFormat == FMT_TIME)
-										{
-											GetTimeDate();
-											sprintf(lineBuffer, "\n%02d:%02d:%02d-%03d", BOS.time.hours, BOS.time.minutes, BOS.time.seconds, BOS.time.msec);
-										}
-										else if (logs[j].indexColumnFormat == FMT_SAMPLE)
-										{
-											sprintf(lineBuffer, "\n%d", logs[j].sampleCount);
-										}
-									}
+				/***************************************************************************/
+				/* Loop through log variables **********************************************/
+				/***************************************************************************/
+				for (i = 0; i < MAX_LOG_VARS; i++) {
+					if (LogVariables[i].Type && (LogVariables[i].LogIndex == j)) {
+						/* Read data from Source based on variable Type */
+						switch (LogVariables[i].Type) {
+						case PORT_BUTTON:
+							break;
 
-									/* Write delimiter */
-									switch(logs[j].delimiterFormat)
-									{
-										case FMT_SPACE:
-											strcat(lineBuffer, " ");
-											break;
-										case FMT_TAB:
-											strcat(lineBuffer, "\t");
-											break;
-										case FMT_COMMA:
-											strcat(lineBuffer, ",");
-											break;
-										default:
-											break;
-									}
+						case MEMORY_DATA_UINT8:
+							LogVariables[i].Source = *(__IO uint8_t*) LogVariables[i].TempVar;
+							break;
 
-									/* Write variable value */
-									switch (logVars[i].type)
-									{
-										case PORT_DIGITAL:
-											//sprintf( ( char * ) buffer, "%d", HAL_GPIO_ReadPin());
-											//f_write(&MyFile, buffer, 1, (void *)&byteswritten);
-											break;
+						case MEMORY_DATA_INT8:
+							LogVariables[i].Source = *(__IO int8_t*) LogVariables[i].TempVar;
+							break;
 
-										case PORT_BUTTON:
-											switch (button[logVars[i].source].state)
-											{
-												case OFF:	strcat(lineBuffer, "OFF"); break;
-												case ON:	strcat(lineBuffer, "ON"); break;
-												case OPEN:	strcat(lineBuffer, "OPEN"); break;
-												case CLOSED:	strcat(lineBuffer, "CLOSED"); break;
-												case CLICKED:	strcat(lineBuffer, "CLICKED"); break;
-												case DBL_CLICKED:	strcat(lineBuffer, "DBL_CLICKED"); break;
-												case PRESSED:	strcat(lineBuffer, "PRESSED"); break;
-												case RELEASED:	strcat(lineBuffer, "RELEASED"); break;
-												case PRESSED_FOR_X1_SEC:
-													if (button[logVars[i].source].pressedX1Sec)
-														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX1Sec);
-													break;
-												case PRESSED_FOR_X2_SEC:
-													if (button[logVars[i].source].pressedX2Sec)
-														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX2Sec);
-													break;
-												case PRESSED_FOR_X3_SEC:
-													if (button[logVars[i].source].pressedX3Sec)
-														sprintf((char *)lineBuffer, "%sPRESSED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].pressedX3Sec);
-													break;
-												case RELEASED_FOR_Y1_SEC:
-													if (button[logVars[i].source].releasedY1Sec)
-														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY1Sec);
-													break;
-												case RELEASED_FOR_Y2_SEC:
-													if (button[logVars[i].source].releasedY2Sec)
-														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY2Sec);
-													break;
-												case RELEASED_FOR_Y3_SEC:
-													if (button[logVars[i].source].releasedY3Sec)
-														sprintf((char *)lineBuffer, "%sRELEASED_FOR_%d_SEC", (char *) lineBuffer, button[logVars[i].source].releasedY3Sec);
-													break;
-												case NONE:
-													if (logs[j].type == RATE)
-													{
-														strcat(lineBuffer, "NORMAL");
-													}
-													break;
-												default:
-													break;
-											}
-											/* Reset button state */
-											if (NONE != button[logVars[i].source].state)
-											{
-												resetButtonState = 1;
-											}
-											break;
+						case MEMORY_DATA_UINT16:
+							LogVariables[i].Source = *(__IO uint16_t*) LogVariables[i].TempVar;
+							break;
 
-										case PORT_DATA:
+						case MEMORY_DATA_INT16:
+							LogVariables[i].Source = *(__IO int16_t*) LogVariables[i].TempVar;
+							break;
 
-											break;
+						case MEMORY_DATA_UINT32:
+							LogVariables[i].Source = *(__IO uint32_t*) LogVariables[i].TempVar;
+							break;
 
-										case MEMORY_DATA_UINT8:
-											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint8_t *)logVars[i].source);
-											break;
+						case MEMORY_DATA_INT32:
+							LogVariables[i].Source = *(__IO int32_t*) LogVariables[i].TempVar;
+							break;
 
-										case MEMORY_DATA_INT8:
-											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int8_t *)logVars[i].source);
-											break;
+						case MEMORY_DATA_FLOAT:
+							LogVariables[i].SourceFloat = *(float*) LogVariables[i].TempVar;
+							break;
 
-										case MEMORY_DATA_UINT16:
-											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint16_t *)logVars[i].source);
-											break;
+						default:
+							break;
+						}
 
-										case MEMORY_DATA_INT16:
-											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int16_t *)logVars[i].source);
-											break;
+						/*Check for Rate or event **************************************************/
+						if (((RATE == Log[j].Type) && (u32lTick >= u32lRate)) || CheckLogVarEvent(i)) {
+							if (newLine) {
+								newLine = 0;
 
-										case MEMORY_DATA_UINT32:
-											sprintf((char *)lineBuffer, "%s%u", (char *)lineBuffer, *(__IO uint32_t *)logVars[i].source);
-											break;
+								/* Write index column (time or sample count) */
+								if (Log[j].IndexColumnFormat == FMT_TIME) {
+									GetTimeDate();
+									sprintf(LineBuffer, "\n%02d:%02d:%02d-%03d", BOS.Time.Hours, BOS.Time.Minutes,
+											BOS.Time.Seconds, BOS.Time.mSec);
+								} else if (Log[j].IndexColumnFormat == FMT_SAMPLE)
+									sprintf(LineBuffer, "\n%d", Log[j].SampleCount);
+							}
 
-										case MEMORY_DATA_INT32:
-											sprintf((char *)lineBuffer, "%s%d", (char *)lineBuffer, *(__IO int32_t *)logVars[i].source);
-											break;
+							/* Append delimiter */
+							switch (Log[j].DelimiterFormat) {
+							case FMT_SPACE:
+								strcat(LineBuffer, " ");
+								break;
 
-										case MEMORY_DATA_FLOAT:
-											sprintf((char *)lineBuffer, "%s%f", (char *)lineBuffer, *(__IO float *)logVars[i].source);
-											break;
+							case FMT_TAB:
+								strcat(LineBuffer, "\t");
+								break;
 
-										default:
-											break;
-									}
+							case FMT_COMMA:
+								strcat(LineBuffer, ",");
+								break;
+
+							default:
+								break;
+							}
+
+							/* Append variable value */
+							switch (LogVariables[i].Type) {
+							case PORT_DIGITAL:
+								//sprintf( ( char * ) buffer, "%d", HAL_GPIO_ReadPin());
+								//f_write(&MyFile, buffer, 1, (void *)&BytesWritten);
+								break;
+
+							case PORT_BUTTON:
+								switch (Button[LogVariables[i].Source].State) {
+								case OFF: strcat(LineBuffer, "OFF"); break;
+								case ON: strcat(LineBuffer, "ON"); break;
+								case OPEN: strcat(LineBuffer, "OPEN"); break;
+								case CLOSED: strcat(LineBuffer, "CLOSED"); break;
+								case CLICKED: strcat(LineBuffer, "CLICKED"); break;
+								case DBL_CLICKED: strcat(LineBuffer, "DBL_CLICKED"); break;
+								case RELEASED: strcat(LineBuffer, "RELEASED"); break;
+								case NONE:
+									if (Log[j].Type == RATE)
+										strcat(LineBuffer, "NORMAL");
+									break;
+
+								default:
+									break;
 								}
+
+								/* Mark for reset */
+								if (NONE != Button[LogVariables[i].Source].State)
+									resetButtonState = 1;
+								break;
+
+							case PORT_DATA:
+
+								break;
+
+							case MEMORY_DATA_UINT8:
+								sprintf((char*) LineBuffer, "%s%u", (char*) LineBuffer, LogVariables[i].Source);
+								break;
+
+							case MEMORY_DATA_INT8:
+								sprintf((char*) LineBuffer, "%s%d", (char*) LineBuffer, LogVariables[i].Source);
+								break;
+
+							case MEMORY_DATA_UINT16:
+								sprintf((char*) LineBuffer, "%s%u", (char*) LineBuffer, LogVariables[i].Source);
+								break;
+
+							case MEMORY_DATA_INT16:
+								sprintf((char*) LineBuffer, "%s%d", (char*) LineBuffer, LogVariables[i].Source);
+								break;
+
+							case MEMORY_DATA_UINT32:
+								sprintf((char*) LineBuffer, "%s%u", (char*) LineBuffer, LogVariables[i].Source);
+								break;
+
+							case MEMORY_DATA_INT32:
+								sprintf((char*) LineBuffer, "%s%d", (char*) LineBuffer, LogVariables[i].Source);
+								break;
+
+							case MEMORY_DATA_FLOAT:
+								sprintf((char*) LineBuffer, "%s%f", (char*) LineBuffer, LogVariables[i].SourceFloat);
+								break;
+
+							default:
+								break;
 							}
 						}
-						/* Write the lineBuffer into log file */
-						if (0 == newLine)
-						{
-							f_write(&MyFile, lineBuffer, strlen((const char *)lineBuffer), (void *)&byteswritten);
-							newLine = 1;            /* Start a new line entry */
-						}
-						f_close(&MyFile);
-						/* Reset the rate timer */
-						if (u32lTick >= u32lRate)
-						{
-							logs[j].t0 = HAL_GetTick();
-						}
-					}
-					else
-					{
-						continue;
 					}
 				}
-				break;
+
+				/***************************************************************************/
+				/* Write to file if line is ready ******************************************/
+				/***************************************************************************/
+				if (0 == newLine) {
+					f_write(&MyFile, LineBuffer, strlen((const char*) LineBuffer), (void*) &BytesWritten);
+					newLine = 1; /* Prepare for next line */
+				}
+
+				f_close(&MyFile); /* Close file after writing */
+
+				/* Reset time for next sample */
+				if (u32lTick >= u32lRate)
+					Log[j].t0 = HAL_GetTick();
+			} else
+				continue; /* Skip inactive Log */
 		}
 
-    /* Reset button state */
-    if (resetButtonState)
-    {
-      delayButtonStateReset = false;
-      resetButtonState = 0;
-    }
-	  taskYIELD();
+		/* Reset button state if any were triggered */
+		if (resetButtonState) {
+			DelayButtonStateReset = false;
+			resetButtonState = 0;
+		}
+		taskYIELD();
 	}
-
 }
 
-
-/*-----------------------------------------------------------*/
-
-/* --- Check if a logged variable event has occured.
-				varIndex: Log variable array index.
+/***************************************************************************/
+/* Check if a logged variable event has occurred.
+ * varIndex: Log variable array index.
 */
-uint8_t CheckLogVarEvent(uint16_t varIndex)
-{
-	switch (logVars[varIndex].type)
-	{
-		case PORT_DIGITAL:
-			break;
+uint8_t CheckLogVarEvent(uint16_t varIndex) {
+	uint8_t temp_uint8 = 0;
 
-		case PORT_BUTTON:
-			if ((button[logVars[varIndex].source].state != temp_uint8) && (button[logVars[varIndex].source].state != 0)) {
-				temp_uint8 = button[logVars[varIndex].source].state;
-				return 1;
-			} else if ((button[logVars[varIndex].source].state != temp_uint8) && (button[logVars[varIndex].source].state == 0)) {
-				temp_uint8 = button[logVars[varIndex].source].state;
-				return 0;
-			}
-			break;
+	switch (LogVariables[varIndex].Type) {
+	case PORT_DIGITAL:
+		break;
 
-		case PORT_DATA:
-			break;
+	case PORT_BUTTON:
+		if ((Button[LogVariables[varIndex].Source].State != temp_uint8) && (Button[LogVariables[varIndex].Source].State != 0)) {
+			temp_uint8 = Button[LogVariables[varIndex].Source].State;
+			return 1;
+		} else if ((Button[LogVariables[varIndex].Source].State != temp_uint8) && (Button[LogVariables[varIndex].Source].State == 0)) {
+			temp_uint8 = Button[LogVariables[varIndex].Source].State;
+			return 0;
+		}
+		break;
 
-		case MEMORY_DATA_UINT8:
-			if (*(__IO uint8_t *)logVars[varIndex].source != (uint8_t)compareValue[varIndex]) {
-				*(uint8_t*)&compareValue[varIndex] = *(__IO uint8_t *)logVars[varIndex].source;
-				return 1;
-			}
-			break;
+	case PORT_DATA:
+		break;
 
-		case MEMORY_DATA_INT8:
-			if (*(__IO int8_t *)logVars[varIndex].source != (int8_t)compareValue[varIndex]) {
-				*(int8_t*)&compareValue[varIndex] = (int8_t)*(__IO int8_t *)logVars[varIndex].source;
-				return 1;
-			}
-			break;
+	case MEMORY_DATA_UINT8:
+		if (*(__IO uint8_t*) &LogVariables[varIndex].Source != (uint8_t) CompareValue[varIndex]) {
+			*(uint8_t*) &CompareValue[varIndex] = *(__IO uint8_t*) &LogVariables[varIndex].Source;
+			return 1;
+		}
+		break;
 
-		case MEMORY_DATA_UINT16:
-			if ((uint16_t)*(__IO uint16_t *)logVars[varIndex].source != (uint16_t)compareValue[varIndex]) {
-				*(uint16_t*)&compareValue[varIndex] = (uint16_t)*(__IO uint16_t *)logVars[varIndex].source;
-				return 1;
-			}
-			break;
+	case MEMORY_DATA_INT8:
+		if (*(__IO int8_t*) &LogVariables[varIndex].Source != (int8_t) CompareValue[varIndex]) {
+			*(int8_t*) &CompareValue[varIndex] = (int8_t) *(__IO int8_t*) &LogVariables[varIndex].Source;
+			return 1;
+		}
+		break;
 
-		case MEMORY_DATA_INT16:
-			if ((int16_t)*(__IO uint16_t *)logVars[varIndex].source != (int16_t)compareValue[varIndex]) {
-				*(int16_t*)&compareValue[varIndex] = (int16_t)*(__IO uint16_t *)logVars[varIndex].source;
-				return 1;
-			}
-			break;
+	case MEMORY_DATA_UINT16:
+		if ((uint16_t) *(__IO uint16_t*) &LogVariables[varIndex].Source != (uint16_t) CompareValue[varIndex]) {
+			*(uint16_t*) &CompareValue[varIndex] = (uint16_t) *(__IO uint16_t*) &LogVariables[varIndex].Source;
+			return 1;
+		}
+		break;
 
-		case MEMORY_DATA_UINT32:
-		case MEMORY_DATA_FLOAT:
-			if ((uint32_t)*(__IO uint32_t *)logVars[varIndex].source != (uint32_t)compareValue[varIndex]) {
-				compareValue[varIndex] = *(__IO uint32_t *)logVars[varIndex].source;
-				return 1;
-			}
-			break;
+	case MEMORY_DATA_INT16:
+		if ((int16_t) *(__IO uint16_t*) &LogVariables[varIndex].Source != (int16_t) CompareValue[varIndex]) {
+			*(int16_t*) &CompareValue[varIndex] = (int16_t) *(__IO uint16_t*) &LogVariables[varIndex].Source;
+			return 1;
+		}
+		break;
 
-		case MEMORY_DATA_INT32:
-			if ((int32_t)*(__IO uint32_t *)logVars[varIndex].source != (int32_t)compareValue[varIndex]) {
-				compareValue[varIndex] = *(__IO uint32_t *)logVars[varIndex].source;
-				return 1;
-			}
-			break;
+	case MEMORY_DATA_UINT32:
+		if ((uint32_t) *(__IO uint32_t*) &LogVariables[varIndex].Source != (uint32_t) CompareValue[varIndex]) {
+			CompareValue[varIndex] = *(__IO uint32_t*) &LogVariables[varIndex].Source;
+			return 1;
+		}
+		break;
 
-		/*case MEMORY_DATA_FLOAT:
-			if (*(__IO uint32_t *)logVars[varIndex].source != (uint32_t)compareValue[varIndex]) {
-				compareValue[varIndex] = *(__IO uint32_t *)logVars[varIndex].source;
-				return 1;
-			}
-			break;*/
+	case MEMORY_DATA_INT32:
+		if ((int32_t) *(__IO uint32_t*) &LogVariables[varIndex].Source != (int32_t) CompareValue[varIndex]) {
+			CompareValue[varIndex] = *(__IO uint32_t*) &LogVariables[varIndex].Source;
+			return 1;
+		}
+		break;
 
-		default:
-			break;
+	case MEMORY_DATA_FLOAT:
+		if (*(__IO uint32_t*) &LogVariables[varIndex].SourceFloat != *(__IO uint32_t*) &CompareValue[varIndex]) {
+			*(__IO uint32_t*) &CompareValue[varIndex] = *(__IO uint32_t*) &LogVariables[varIndex].SourceFloat;
+			return 1;
+		}
+		break;
+
+	default:
+		break;
 	}
 
 	return 0;
 }
 
-/*-----------------------------------------------------------*/
-
-/* --- Open log file if it's closed (and close open one).
-				logindex: Log array index.
-*/
-Module_Status OpenThisLog(uint16_t logindex, FIL *objFile)
-{
-  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
+/***************************************************************************/
+/* Open log file if it's closed (and close open one).
+ * logindex: Log array index.
+ */
+Module_Status OpenThisLog(uint16_t logindex, FIL *objFile) {
 	FRESULT res;
+
+	while (f_mount_ok == 0) {
+		Delay_us(10);
+	}
+
 	/* Append log name with extension */
-	if ((0U != logs[logindex].file_extension) && (true == enableSequential))
-	{
-		sprintf((char *)tempName, "%s_%d%s", logs[logindex].name, logs[logindex].file_extension, ".TXT");
-	}
-	else
-	{
-		sprintf((char *)tempName, "%s%s", logs[logindex].name, ".TXT");
-	}
+	if ((0U != Log[logindex].FileExtension) && (true == EnableSequential))
+		sprintf((char*) TempName, "%s_%d%s", Log[logindex].Name, Log[logindex].FileExtension, ".TXT");
+	 else
+		sprintf((char*) TempName, "%s%s", Log[logindex].Name, ".TXT");
+
 	/* Open this log */
-	res = f_open(objFile, tempName, FA_OPEN_APPEND | FA_WRITE | FA_READ);
+	res = f_open(objFile, TempName, FA_OPEN_APPEND | FA_WRITE | FA_READ);
+
 	if (res != FR_OK)
 		return H1BR6_ERROR;
+
 	return H1BR6_OK;
 }
 
-
-WAVE_STATE READ_WAVE_FILE_HEADER(char* Wave_Path)
-{
-// while(f_mount_ok==0){HAL_Delay(1);}		// Add a flag to allow card to be initialized on startup
-
-	//try to open wave file
-//	if (f_open (&_path_pointer,Wave_Path,FA_READ)==FR_OK)
-//	{
-//				//read header from wave file
-//				if(f_read (&_path_pointer,  &wavebuff, 44,  &Number_br)!=FR_OK)
-//				{
-//					//close wave file
-//					f_close (&_path_pointer);
-//					return WAVE_FILE_READ_FAILD;
-//				}
-//				//close wave file
-//				f_close (&_path_pointer);
-//	}
-//	else
-//	{
-//		f_close (&_path_pointer);
-//		//return	WAVE_FILE_OPEN_FAILD;
-//	}
-//
-//
-//	//GET CHUNK descriptor
-//	for(uint8_t _i=0 ; _i<4 ; _i++)
-//	{
-//	WAVEFIL.CHUNKID[_i] = wavebuff[_i];
-//	WAVEFIL.FORMAT[_i] = wavebuff[_i+8];
-//	WAVEFIL.SUBCHhUNK1ID[_i] = wavebuff[_i+12];
-//	WAVEFIL.SUBCHUNK2ID[_i] = wavebuff[_i+36];
-//	}
-//
-//	//GET CHUNK SIZE
-//	WAVEFIL.CHUNKSIZE = (wavebuff[7]<<24)+(wavebuff[6]<<16)+(wavebuff[5]<<8)+wavebuff[4];
-//	WAVEFIL.SUBCHUNK1SIZE = (wavebuff[19]<<24)+(wavebuff[18]<<16)+(wavebuff[17]<<8)+wavebuff[16];
-//	WAVEFIL.SUBCHUNK2SIZE = (wavebuff[43]<<24)+(wavebuff[42]<<16)+(wavebuff[41]<<8)+wavebuff[40];
-//
-//	//GET AUDIO descriptor
-//	WAVEFIL.AUDIOFMT = (wavebuff[21]<<8)+wavebuff[20];
-//	WAVEFIL.NO_CHANNEL = (wavebuff[23]<<8)+wavebuff[22];
-//	WAVEFIL.SAMPLERATE = (wavebuff[27]<<24)+(wavebuff[26]<<16)+(wavebuff[25]<<8)+wavebuff[24];
-//	WAVEFIL.BYTERATE = (wavebuff[31]<<24)+(wavebuff[30]<<16)+(wavebuff[29]<<8)+wavebuff[28];
-//	WAVEFIL.BLOCKALIGN = (wavebuff[33]<<8)+wavebuff[32];
-//	WAVEFIL.BITPERSAMPLE = (wavebuff[35]<<8)+wavebuff[34];
-//
-//	/* Test file header is correct */
-//		if(WAVEFIL.CHUNKID[1] != 'R' && WAVEFIL.CHUNKID[1] != 'I' &&  WAVEFIL.CHUNKID[1] != 'F' &&  WAVEFIL.CHUNKID[1] != 'F')
-//				{return HEADER_CHUNK_FAULT;}
-//		else if (WAVEFIL.FORMAT[1] != 'W' && WAVEFIL.FORMAT[1] != 'A' &&  WAVEFIL.FORMAT[1] != 'V' &&  WAVEFIL.FORMAT[1] != 'E')
-//				{return HEADER_CHUNK_FAULT;}
-//		else if (WAVEFIL.SUBCHhUNK1ID[1] != 'f' && WAVEFIL.SUBCHhUNK1ID[1] != 'm' &&  WAVEFIL.SUBCHhUNK1ID[1] != 't' &&  WAVEFIL.SUBCHhUNK1ID[1] != 0x20)
-//				{return HEADER_CHUNK_FAULT;}
-//		else if (WAVEFIL.SUBCHUNK2ID[1] != 'd' && WAVEFIL.SUBCHUNK2ID[1] != 'a' &&  WAVEFIL.SUBCHUNK2ID[1] != 't' &&  WAVEFIL.SUBCHUNK2ID[1] != 'a')
-//				{return HEADER_CHUNK_FAULT;}
-//		else if (WAVEFIL.AUDIOFMT != 1)  // Audio Format != PCM
-//				{return HEADER_CHUNK_FAULT;}
-//		else if (WAVEFIL.NO_CHANNEL > 2)  // Number of audio channel more than 2 channel
-//				{return HEADER_CHUNK_FAULT;}
-//		else if (WAVEFIL.SUBCHUNK1SIZE != 0x10)  // chunk size 2 error must be 16 byte
-//				{return HEADER_CHUNK_FAULT;}
-//		else if (WAVEFIL.BITPERSAMPLE > 16 ) 		// bit per sample more than 16 bit
-//				{return BITPERSAMPLE_ERR;}
-//		else
-//				{
-//				//get wave file size in samples and bytes
-//				WAVE_SIZE	=	WAVEFIL.SUBCHUNK2SIZE + READ_WAVE_BYTES;
-//				WAVE_bytes	= WAVEFIL.SUBCHUNK2SIZE/((WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL);
-//				//calculate number of Byte in Block Sample align
-//				NO_BYTE_SAMPLE =	WAVEFIL.BLOCKALIGN*(WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL;
-//				//calculate wave byte rate time wait in us
-//				SAMPLETIME = (1000000/WAVEFIL.SAMPLERATE)-20;
-//				return HEADER_CHUNK_OK;
-//
-//				}
-}
-WAVE_STATE StreamWaveToPort(char* Wave_Path, uint8_t _port)
-{
-//	    READ_WAVE_BYTES=44;
-//		SCALE_FAC=1;
-//		SCALE_SHIFT=0;
-//
-////		WAVEFIL.BITPERSAMPLE = 8;
-//		if (WAVEFIL.NO_CHANNEL == 1 && WAVEFIL.BITPERSAMPLE == 8)
-//				{SCALE_FAC=1;SCALE_SHIFT=0;}				//read sample channel
-//		else if (WAVEFIL.NO_CHANNEL == 1 && WAVEFIL.BITPERSAMPLE == 16)
-//				{SCALE_FAC=2;SCALE_SHIFT=0;} 		//read sample MSB from channel
-//		else if (WAVEFIL.NO_CHANNEL == 2 && WAVEFIL.BITPERSAMPLE == 8)
-//				{SCALE_FAC=2;SCALE_SHIFT=1;}			//read sample from right channel
-//		else if (WAVEFIL.NO_CHANNEL == 2 && WAVEFIL.BITPERSAMPLE == 16)
-//				{SCALE_FAC=4;SCALE_SHIFT=2;}			//read sample from MSB right channel
-//		else {return HEADER_CHUNK_FAULT;}
-//
-//
-//		if (f_open (&_path_pointer,Wave_Path,FA_READ)!=FR_OK) {
-//			f_close(&_path_pointer);
-//			return	WAVE_FILE_OPEN_FAILD;
-//		} else {
-//			_wave_pointer=_path_pointer;
-//		}
-//
-//		__TIM16_CLK_ENABLE();
-//
-//		/* Peripheral configuration */
-//		htim15.Instance = TIM15;
-//		htim15.Init.Prescaler = 0;
-//		htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
-//		htim15.Init.Period = (uint16_t)((SystemCoreClock/WAVEFIL.SAMPLERATE)-1);
-//		HAL_TIM_Base_Init(&htim15);
-//		HAL_NVIC_SetPriority(TIM15_IRQn, 1, 0);
-//        HAL_NVIC_EnableIRQ(TIM15_IRQn);
-//		HAL_TIM_Base_Start_IT(&htim15);
-//		portENTER_CRITICAL();
-//
-//		do
-//		{
-//            f_lseek (&_path_pointer,READ_WAVE_BYTES);
-//			f_read (&_path_pointer, &WaveAlignBuff, 500,  &Number_br);
-//
-//			for(uint8_t Align=0 ; Align<WAVEFIL.BLOCKALIGN ;Align++)
-//			{
-//				//stream to port 'send one sample from port'
-//				for( I=0 ; I<500 ;I++)
-//			{
-//				    writePxMutex(_port,(char *) &WaveAlignBuff[I],1,0,0);
-//					Delay_us(SAMPLETIME);
-//			}
-//				while (__HAL_TIM_GET_FLAG(&htim15, TIM_FLAG_UPDATE) == 0){};
-//			}
-//			READ_WAVE_BYTES +=500;
-//
-//		} while(READ_WAVE_BYTES <= WAVE_SIZE);
-//     	portEXIT_CRITICAL();
-//		f_close (&_wave_pointer);
-//		HAL_TIM_Base_Stop(&htim15);
-//		HAL_Delay(20);
-//		// Reset size variables for next transfer
-//		WAVE_bytes = 0;
-//		WAVE_SIZE = 0;
-//
-//		return STREAM_WAVE_OK;
-}
-
-/**
-	ScanWaveFile
-				scan for Wave file sound and send responce to H07R3x
-				this func called by message parser
-* @param Wave_Full_Name : Wave full file name
-* @param H07R3x_ID : H07R3 module ID
+/***************************************************************************/
+/***************************** General Functions ***************************/
+/***************************************************************************/
+/* Create a new data log.
+ * logName: Log file name. Max 10 char.
+ * Type: RATE (log data at a fixed time interval) or EVENT (log data only when a specific event occurs ,for example log data when temperature change)
+ * Rate: data Rate in Hz (max 1000 Hz).
+ * DelimiterFormat: FMT_SPACE, FMT_TAB, FMT_COMMA (between samples)
+ * indexColumn: FMT_SAMPLE (sample number), FMT_TIME(timestamp) as mark for every log
+ * IndexColumnLabel: Index Column label text. Max 30 char.
 */
-WAVE_STATE ScanWaveFile(char* Wave_Full_Name , uint8_t H07R3x_ID)
-{
-//	  while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
-//
-//	WAVE_STATE result;
-//	result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
-//
-//	//send responce to H07R3x
-//	if(result == HEADER_CHUNK_OK)
-//	{
-//		//send wave file Data size in bytes
-//		messageParams[0]=(uint8_t) (WAVE_bytes>>24);
-//		messageParams[1]=(uint8_t) (WAVE_bytes>>16);
-//		messageParams[2]=(uint8_t) (WAVE_bytes>>8);
-//		messageParams[3]=(uint8_t)  WAVE_bytes;
-//		//send wave file sample rate
-//		messageParams[4]=(uint8_t) (WAVEFIL.SAMPLERATE>>24);
-//		messageParams[5]=(uint8_t) (WAVEFIL.SAMPLERATE>>16);
-//		messageParams[6]=(uint8_t) (WAVEFIL.SAMPLERATE>>8);
-//		messageParams[7]=(uint8_t)  WAVEFIL.SAMPLERATE;
-//	}
-//	else
-//	{
-//		//send error param
-//		messageParams[0]=(uint8_t) 0xFF;
-//		messageParams[1]=(uint8_t) 0xFF;
-//		messageParams[2]=(uint8_t) 0xFF;
-//		messageParams[3]=(uint8_t) 0xFF;
-//		//send error param
-//		messageParams[4]=(uint8_t) 0xFF;
-//		messageParams[5]=(uint8_t) 0xFF;
-//		messageParams[6]=(uint8_t) 0xFF;
-//		messageParams[7]=(uint8_t) 0xFF;
-//	}
-//	IND_blink(100);
-//	SendMessageToModule(H07R3x_ID, CODE_H07R3_SCAN_WAVE_RESPONSE,8);
-//
-//	return result;
-}
+Module_Status CreateLog(char *logName, logType_t Type, float Rate, delimiterFormat_t DelimiterFormat,
+		indexColumnFormat_t IndexColumnFormat, char *IndexColumnLabel) {
 
-/*-----------------------------------------------------------*/
+	FRESULT res;
 
-
-/* -----------------------------------------------------------------------
-	|																APIs	 																 	|
-   -----------------------------------------------------------------------
-*/
-
-/* --- Create a new data log.
-				logName: Log file name. Max 10 char.
-				type: RATE or EVENT
-				rate: data rate in Hz (max 1000 Hz).
-				delimiterFormat: FMT_SPACE, FMT_TAB, FMT_COMMA
-				indexColumn: FMT_SAMPLE, FMT_TIME
-				indexColumnLabel: Index Column label text. Max 30 char.
-*/
-Module_Status CreateLog(char* logName, logType_t type, float rate, delimiterFormat_t delimiterFormat, indexColumnFormat_t indexColumnFormat,\
-	char* indexColumnLabel)
-{
-  while(f_mount_ok==0){Delay_us(10);}  // Add a flag to allow card to be initialized on startup
-  FRESULT res;
-	uint8_t i=0;
-	uint8_t countFile = 0;
-	char *pChar = NULL;
-	uint8_t length = 0;
 	bool extensionFile = false;
+	char *pChar = NULL;
+	const char logHeaderTimeDate[] = "%s %s\n";
+	const char logHeaderText3[] = "Log Type: Events\n\n";
+	const char logHeaderText2[] = "Log Type: Rate @ %.2f Hz\n\n";
+	const char logHeaderText1[] = "Datalog created by BOS V%d.%d.%d on %s\n";
+
+	const uint8_t numberMap[3] = { 1, 10, 100 };
+	uint8_t i = 0;
+	uint8_t countFile = 0;
+	uint8_t length = 0;
 	uint8_t position = 0;
+
+	while (f_mount_ok == 0) {
+		Delay_us(10);
+	}
+
 	/* Check if log already exists */
-	for( i=0 ; i<MAX_LOGS ; i++)
-	{
-		if((0U != logs[i].current_extension)  && (true == enableSequential))
-		{
-			sprintf(tempName, "%s_%d", logs[i].name, logs[i].current_extension);
-		}
-		else
-		{
-			sprintf(tempName, "%s", logs[i].name);
-		}
-		if(!strcmp(tempName, logName))
-		{
-			return H1BR6_ERR_LogNameExists;
-		}
+	for (i = 0; i < MAX_LOGS; i++) {
+		if ((0U != Log[i].CurrentExtension) && (true == EnableSequential))
+			sprintf(TempName, "%s_%d", Log[i].Name, Log[i].CurrentExtension);
+		 else
+			sprintf(TempName, "%s", Log[i].Name);
+
+		if (!strcmp(TempName, logName))
+			return H1BR6_ERR_LOG_NAME_EXISTS;
 	}
 
 	/* Check parameters are correct */
-	if ( (type != RATE && type != EVENT)	||
-			 (delimiterFormat != FMT_SPACE && delimiterFormat != FMT_TAB && delimiterFormat != FMT_COMMA)	||
-			 (indexColumnFormat != FMT_NONE && indexColumnFormat != FMT_SAMPLE && indexColumnFormat != FMT_TIME)	||
-			 (rate > 1000) )
-		return H1BR6_ERR_WrongParams;
+	if ((Type != RATE && Type != EVENT) || (DelimiterFormat != FMT_SPACE && DelimiterFormat != FMT_TAB
+			&& DelimiterFormat != FMT_COMMA) || (IndexColumnFormat != FMT_NONE
+			&& IndexColumnFormat != FMT_SAMPLE && IndexColumnFormat != FMT_TIME) || (Rate > 1000))
+		return H1BR6_ERR_WRONGPARAMS;
 
 	/* Name does not exist. Fill first empty location */
-	for( i=0 ; i<MAX_LOGS ; i++)
-	{
-		if(logs[i].name == 0)
-		{
-			if (true == enableSequential)
-			{
-				pChar = strchr(logName , '_');
-				while (pChar != NULL)
-				{
-					position = (uint8_t)((uint32_t)pChar - (uint32_t)logName + 1UL);
-					pChar = strchr(pChar + 1 , '_');
+	for (i = 0; i < MAX_LOGS; i++) {
+		if (Log[i].Name == 0) {
+			if (true == EnableSequential) {
+				pChar = strchr(logName, '_');
+				while (pChar != NULL) {
+					position = (uint8_t) ((uint32_t) pChar - (uint32_t) logName + 1UL);
+					pChar = strchr(pChar + 1, '_');
 				}
 				/* */
-				if(0 != position)
-				{
+				if (0 != position) {
 					pChar = logName + position;
-
 					length = strlen(pChar);
-					while ('\0' != (char)*pChar)
-					{
-						if((0x30 <= *pChar) && (*pChar <= 0x39))
-						{
-							countFile += ((uint8_t)(*pChar - 0x30) * numberMap[length - 1]);
-						}
-						else
-						{
+
+					while ('\0' != (char) *pChar) {
+						if ((0x30 <= *pChar) && (*pChar <= 0x39)) {
+							countFile += ((uint8_t) (*pChar - 0x30) * numberMap[length - 1]);
+						} else {
 							countFile = 0;
 							break;
 						}
 						pChar++;
 						length--;
 					}
-				}
-				else
-				{
+				} else {
 					countFile = 0;
-					logs[i].current_extension = 0;
+					Log[i].CurrentExtension = 0;
 				}
 
-				if (countFile != 0)
-				{
+				if (countFile != 0) {
 					extensionFile = true;
-					logs[i].current_extension = countFile ;
-				}
-				else
-				{
+					Log[i].CurrentExtension = countFile;
+				} else {
 					position = 0;
 					extensionFile = false;
 				}
 			}
+
 			/* Append log name with extension */
-			sprintf((char *)tempName, "%s%s", logName, ".TXT");
+			sprintf((char*) TempName, "%s%s", logName, ".TXT");
+
 			/* Check if file exists on disk */
-			res = f_open(&tempFile, tempName, FA_CREATE_NEW | FA_WRITE | FA_READ);
-			if ((false == enableSequential) && (res == FR_EXIST))
-			{
-				return H1BR6_ERR_LogNameExists;
-			}
-			else if ((res != FR_OK) && (FR_EXIST != res))
-			{
+			res = f_open(&MyFile, TempName, FA_CREATE_NEW | FA_WRITE | FA_READ);
+
+			if ((false == EnableSequential) && (res == FR_EXIST))
+				return H1BR6_ERR_LOG_NAME_EXISTS;
+			 else if ((res != FR_OK) && (FR_EXIST != res))
 				return H1BR6_ERR_SD;
-			}
-			else if ((true == enableSequential) && (res == FR_EXIST))
-			{
+			 else if ((true == EnableSequential) && (res == FR_EXIST)) {
 				countFile = 0;
-				do
-				{
-					memset((char *)tempName, 0, sizeof(tempName));
-					if(false == extensionFile)
-					{
-						countFile++;
-						sprintf(tempName, "%s_%d%s", logName, countFile, ".TXT");
-					}
-					else
-					{
-						strncpy(tempName, logName, (size_t)((uint32_t)position - 1));
-						if(0U == countFile)
-						{
-							strncat((char *)tempName,".TXT", 5);
 
-						}
-						else
-						{
-							sprintf(tempName, "%s_%d%s", tempName, countFile, ".TXT");
+				do {
+					memset((char*) TempName, 0, sizeof(TempName));
+					if (false == extensionFile) {
+						countFile++;
+						sprintf(TempName, "%s_%d%s", logName, countFile, ".TXT");
+					} else {
+						strncpy(TempName, logName, (size_t) ((uint32_t) position - 1));
+						if (0U == countFile) {
+							strncat((char*) TempName, ".TXT", 5);
+						} else {
+							sprintf(TempName, "%s_%d%s", TempName, countFile, ".TXT");
 						}
 						countFile++;
 					}
-					res = f_open(&tempFile, tempName, FA_CREATE_NEW | FA_WRITE | FA_READ);
-				}while ((FR_EXIST == res) && (MAX_DUPLICATE_FILE > countFile));
+					res = f_open(&MyFile, TempName, FA_CREATE_NEW | FA_WRITE | FA_READ);
+				} while ((FR_EXIST == res) && (MAX_DUPLICATE_FILE > countFile));
 
-				if((MAX_DUPLICATE_FILE == countFile) && (FR_EXIST == res))
-				{
-					return H1BR6_ERR_LogNameExists;
-				}
-				else if (FR_OK != res)
-				{
+				if ((MAX_DUPLICATE_FILE == countFile) && (FR_EXIST == res))
+					return H1BR6_ERR_LOG_NAME_EXISTS;
+				 else if (FR_OK != res)
 					return H1BR6_ERR_SD;
-				}
 
-				if(true == extensionFile)
-				{
+				if (true == extensionFile)
 					countFile--;
-				}
 			}
 
 			/* Log created successfuly */
-			if ((true == enableSequential) && (0U != position))
-			{
-				logs[i].name = malloc((size_t)position);
-				memset(logs[i].name, 0x00U, (size_t)position);
-				strncpy(logs[i].name, tempName, (size_t)(position - 1));
-			}
-			else
-			{
+			if ((true == EnableSequential) && (0U != position)) {
+				Log[i].Name = malloc((size_t) position);
+				memset(Log[i].Name, 0x00U, (size_t) position);
+				strncpy(Log[i].Name, TempName, (size_t) (position - 1));
+			} else {
 				length = strlen(logName);
-				logs[i].name = malloc(length + 1);
-				memset(logs[i].name, 0x00U, (size_t)(length + 1));
-				strncpy(logs[i].name, logName, (size_t)length);
+				Log[i].Name = malloc(length + 1);
+				memset(Log[i].Name, 0x00U, (size_t) (length + 1));
+				strncpy(Log[i].Name, logName, (size_t) length);
 			}
-			logs[i].file_extension = countFile;
-			logs[i].type = type;
-			logs[i].rate = rate;
-			logs[i].delimiterFormat = delimiterFormat;
-			logs[i].indexColumnFormat = indexColumnFormat;
-			logs[i].indexColumnLabel = indexColumnLabel;
+
+			Log[i].FileExtension = countFile;
+			Log[i].Type = Type;
+			Log[i].Rate = Rate;
+			Log[i].DelimiterFormat = DelimiterFormat;
+			Log[i].IndexColumnFormat = IndexColumnFormat;
+			Log[i].IndexColumnLabel = IndexColumnLabel;
 
 			/* Write log header */
 			char *buffer = malloc(100);
-			memset (buffer, 0x00, 100);
-			sprintf(buffer, logHeaderText1, _firmMajor, _firmMinor, _firmPatch, modulePNstring[myPN]);
-			res = f_write(&tempFile, buffer, strlen(buffer), (void *)&byteswritten);
-			if (enableTimeDateHeader)
-			{
+			memset(buffer, 0x00, 100);
+			sprintf(buffer, logHeaderText1, _firmMajor, _firmMinor, _firmPatch, ModulePNstring[myPN]);
+			res = f_write(&MyFile, buffer, strlen(buffer), (void*) &BytesWritten);
+
+			if (EnableTimeDateHeader) {
 				GetTimeDate();
 				sprintf(buffer, logHeaderTimeDate, GetDateString(), GetTimeString());
-				res = f_write(&tempFile, buffer, strlen(buffer), (void *)&byteswritten);
+				res = f_write(&MyFile, buffer, strlen(buffer), (void*) &BytesWritten);
 			}
-			if(type == RATE)
-			{
-				sprintf(buffer, logHeaderText2, rate);
-				res = f_write(&tempFile, buffer, strlen(buffer), (void *)&byteswritten);
-			}
-			else if (type == EVENT)
-			{
-				res = f_write(&tempFile, logHeaderText3, strlen(logHeaderText3), (void *)&byteswritten);
+			if (Type == RATE) {
+				sprintf(buffer, logHeaderText2, Rate);
+				res = f_write(&MyFile, buffer, strlen(buffer), (void*) &BytesWritten);
+			} else if (Type == EVENT) {
+				res = f_write(&MyFile, logHeaderText3, strlen(logHeaderText3), (void*) &BytesWritten);
 			}
 
 			/* Write index label */
-			res = f_write(&tempFile, indexColumnLabel, strlen(indexColumnLabel), (void *)&byteswritten);
+			res = f_write(&MyFile, IndexColumnLabel, strlen(IndexColumnLabel), (void*) &BytesWritten);
 
-			f_close(&tempFile);
+			f_close(&MyFile);
 			free(buffer);
 
 			return H1BR6_OK;
 		}
-  }
+	}
 
-	return H1BR6_ERR_MaxLogs;
+	return H1BR6_ERR_MAX_LOGS;
 }
 
-/*-----------------------------------------------------------*/
-
-/* --- Save data from a source to an existing data log.
-				logName: Log file name.
-				type: PORT_DIGITAL, PORT_DATA, PORT_BUTTON, MEMORY_DATA.
-				source: data source. Ports (P1-Px), buttons (B1-Bx) or memory location.
-				columnLabel: Column label text. Max 30 char.
+/***************************************************************************/
+/* Save data from a Source to an existing data log.
+ * logName: Log file name.
+ * Type: PORT_DIGITAL, PORT_DATA, PORT_BUTTON, MEMORY_DATA.
+ * Source: data Source. Ports (P1-Px), buttons (B1-Bx) or memory location.
+ * columnLabel: Column label text. Max 30 char.
 */
-Module_Status LogVar(char* logName, logVarType_t type, uint32_t source, char* ColumnLabel)
-{
+Module_Status LogVar(char *logName, logVarType_t Type, uint32_t *Source, char *ColumnLabel) {
 	uint8_t i = 0, j = 0;
 
 	/* Search for this log to make sure it exists */
-	for( j=0 ; j<MAX_LOGS ; j++)
-	{
-		if((0 != logs[j].current_extension) && (true == enableSequential))
-		{
-			sprintf(tempName, "%s_%d", logs[j].name, logs[j].current_extension);
-		}
-		else
-		{
-			sprintf(tempName, "%s", logs[j].name);
-		}
+	for (j = 0; j < MAX_LOGS; j++) {
+		if ((0 != Log[j].CurrentExtension) && (true == EnableSequential))
+			sprintf(TempName, "%s_%d", Log[j].Name, Log[j].CurrentExtension);
+		 else
+			sprintf(TempName, "%s", Log[j].Name);
 
-		if (!strcmp(tempName, logName))
-		{
+		if (!strcmp(TempName, logName)) {
 			/* Make sure there's enough space for this log variable */
-			for( i=0 ; i<MAX_LOG_VARS ; i++)
-			{
-				if(logVars[i].type == 0)
-				{
-					logVars[i].type = type;
-					if(type > 3) {
-					if (!(source < FLASH_BASE || source > (FLASH_BASE+FLASH_SIZE)) && (source < SRAM_BASE || source > (SRAM_BASE+SRAM_SIZE)) && (source < PERIPH_BASE || source > (PERIPH_BASE+PERIPH_SIZE)))
-								return H1BR6_ERR_WrongAddress;}
+			for (i = 0; i < MAX_LOG_VARS; i++) {
+				if (LogVariables[i].Type == 0) {
+					LogVariables[i].Type = Type;
 
-					logVars[i].source = source;
-					logVars[i].logIndex = j;
-					logVars[i].varLabel = ColumnLabel;
+					if (Type > 3) {
+						if (!((uint32_t) Source < FLASH_BASE || (uint32_t) Source > (FLASH_BASE + FLASH_SIZE))
+								&& ((uint32_t) Source < SRAM_BASE || (uint32_t) Source > (SRAM_BASE + SRAM_SIZE))
+								&& ((uint32_t) Source < PERIPH_BASE || (uint32_t) Source > (PERIPH_BASE + PERIPH_SIZE)))
+							return H1BR6_ERR_WRONG_ADDRESS;
+					}
+
+					if (Type > 3)
+						LogVariables[i].TempVar = Source;
+					 else
+						LogVariables[i].Source = (uint32_t) Source;
+
+					LogVariables[i].LogIndex = j;
+					LogVariables[i].VarLabel = ColumnLabel;
 
 					/* Write delimiter */
-					OpenThisLog(j, &tempFile);
-					if (logs[j].delimiterFormat == FMT_SPACE)
-						f_write(&tempFile, " ", 1, (void *)&byteswritten);
-					else if (logs[j].delimiterFormat == FMT_TAB)
-						f_write(&tempFile, "\t", 1, (void *)&byteswritten);
-					else if (logs[j].delimiterFormat == FMT_COMMA)
-						f_write(&tempFile, ",", 1, (void *)&byteswritten);
+					OpenThisLog(j, &MyFile);
+					if (Log[j].DelimiterFormat == FMT_SPACE)
+						f_write(&MyFile, " ", 1, (void*) &BytesWritten);
+					else if (Log[j].DelimiterFormat == FMT_TAB)
+						f_write(&MyFile, "\t", 1, (void*) &BytesWritten);
+					else if (Log[j].DelimiterFormat == FMT_COMMA)
+						f_write(&MyFile, ",", 1, (void*) &BytesWritten);
 					/* Write variable label */
-					f_write(&tempFile, ColumnLabel, strlen(ColumnLabel), (void *)&byteswritten);
-
-					f_close(&tempFile);
+					f_write(&MyFile, ColumnLabel, strlen(ColumnLabel), (void*) &BytesWritten);
+					f_close(&MyFile);
 
 					return H1BR6_OK;
 				}
 			}
-			return H1BR6_ERR_MaxLogVars;
+			return H1BR6_ERR_MAX_LOG_VARS;
 		}
 	}
 
-	return H1BR6_ERR_LogDoesNotExist;
+	return H1BR6_ERR_LOG_DOES_NOT_EXIST;
 }
 
-/*-----------------------------------------------------------*/
-
-/* --- Start an existing data log.
-				logName: Log file name.
-*/
-Module_Status StartLog(char* logName)
-{
+/***************************************************************************/
+/* Start an existing data log.
+ * logName: Log file name.
+ */
+Module_Status StartLog(char *logName) {
 	uint8_t j = 0;
 
 	/* Search for this log to make sure it exists */
-	for( j=0 ; j<MAX_LOGS ; j++)
-	{
-		if((0U != logs[j].current_extension) && (true == enableSequential))
-		{
-			sprintf(tempName, "%s_%d", logs[j].name, logs[j].current_extension);
-		}
+	for (j = 0; j < MAX_LOGS; j++) {
+		if ((0U != Log[j].CurrentExtension) && (true == EnableSequential))
+			sprintf(TempName, "%s_%d", Log[j].Name, Log[j].CurrentExtension);
 		else
-		{
-			sprintf(tempName, "%s", logs[j].name);
-		}
-		if (!strcmp(tempName, logName))
-		{
-			activeLogs |= (0x01 << j);
-			logs[j].t0 = HAL_GetTick();
-			logs[j].sampleCount = 1;
-			OpenThisLog(j, &tempFile);
+			sprintf(TempName, "%s", Log[j].Name);
+
+		if (!strcmp(TempName, logName)) {
+			ActiveLogs |= (0x01 << j);
+			Log[j].t0 = HAL_GetTick();
+			Log[j].SampleCount = 1;
+
+			OpenThisLog(j, &MyFile);
 			/* Write new line */
-			f_write(&tempFile, "\n\r", 2, (void *)&byteswritten);
-			f_close(&tempFile);
+			f_write(&MyFile, "\n\r", 2, (void*) &BytesWritten);
+			f_close(&MyFile);
 
 			return H1BR6_OK;
 		}
 	}
 
-	return H1BR6_ERR_LogDoesNotExist;
+	return H1BR6_ERR_LOG_DOES_NOT_EXIST;
 }
 
-/*-----------------------------------------------------------*/
-
-/* --- Stop a running data log.
-				logName: Log file name.
-*/
-Module_Status StopLog(char* logName)
-{
+/***************************************************************************/
+/* Stop a running data log.
+ * logName: Log file name.
+ */
+Module_Status StopLog(char *logName) {
 	volatile uint8_t j = 0;
 
 	/* Search for this log to make sure it exists */
-	for( j=0 ; j<MAX_LOGS ; j++)
-	{
-		if((0U != logs[j].current_extension) && (true == enableSequential))
-		{
-			sprintf(tempName, "%s_%d", logs[j].name, logs[j].current_extension);
-		}
+	for (j = 0; j < MAX_LOGS; j++) {
+		if ((0U != Log[j].CurrentExtension) && (true == EnableSequential))
+			sprintf(TempName, "%s_%d", Log[j].Name, Log[j].CurrentExtension);
 		else
-		{
-			sprintf(tempName, "%s", logs[j].name);
-		}
-		if (!strcmp(tempName, logName))
-		{
-			if ( (activeLogs >> j) & 0x01 )
-			{
+			sprintf(TempName, "%s", Log[j].Name);
+
+		if (!strcmp(TempName, logName)) {
+			if ((ActiveLogs >> j) & 0x01) {
 				/* StopLog only inactive log, don't reset variable*/
-				activeLogs &= ~(0x01 << j);
+				ActiveLogs &= ~(0x01 << j);
 				return H1BR6_OK;
-			}
-			else
-			{
-				return H1BR6_ERR_LogIsNotActive;
-			}
+			} else
+				return H1BR6_ERR_LOG_IS_NOT_ACTIVE;
+
 		}
 	}
-	return H1BR6_ERR_LogDoesNotExist;
+	return H1BR6_ERR_LOG_DOES_NOT_EXIST;
 }
 
-/*-----------------------------------------------------------*/
-
-/* --- Pause a running data log.
-				logName: Log file name.
+/***************************************************************************/
+/* Pause a running data log.
+ * logName: Log file name.
 */
-Module_Status PauseLog(char* logName)
-{
+Module_Status PauseLog(char *logName) {
 	uint8_t j = 0;
 
 	/* Search for this log to make sure it exists */
-	for( j=0 ; j<MAX_LOGS ; j++)
-	{
-		if((0U != logs[j].current_extension)  && (true == enableSequential))
-		{
-			sprintf(tempName, "%s_%d", logs[j].name, logs[j].current_extension);
-		}
+	for (j = 0; j < MAX_LOGS; j++) {
+		if ((0U != Log[j].CurrentExtension) && (true == EnableSequential))
+			sprintf(TempName, "%s_%d", Log[j].Name, Log[j].CurrentExtension);
 		else
-		{
-			sprintf(tempName, "%s", logs[j].name);
-		}
-		if (!strcmp(tempName, logName))
-		{
-			if ( (activeLogs >> j) & 0x01 )
-			{
-				activeLogs &= ~(0x01 << j);
+			sprintf(TempName, "%s", Log[j].Name);
+
+		if (!strcmp(TempName, logName)) {
+			if ((ActiveLogs >> j) & 0x01) {
+				ActiveLogs &= ~(0x01 << j);
 				return H1BR6_OK;
-			}
-			else
-				return H1BR6_ERR_LogIsNotActive;
+			} else
+				return H1BR6_ERR_LOG_IS_NOT_ACTIVE;
 		}
 	}
 
-	return H1BR6_ERR_LogDoesNotExist;
+	return H1BR6_ERR_LOG_DOES_NOT_EXIST;
 }
 
-/*-----------------------------------------------------------*/
-
-/* --- Resume a paused data log.
-				logName: Log file name.
-*/
-Module_Status ResumeLog(char* logName)
-{
+/***************************************************************************/
+/* Resume a paused data log.
+ * logName: Log file name.
+ */
+Module_Status ResumeLog(char *logName) {
 	uint8_t j = 0;
 
 	/* Search for this log to make sure it exists */
-	for( j=0 ; j<MAX_LOGS ; j++)
-	{
-		if((0U != logs[j].current_extension)  && (true == enableSequential))
-		{
-			sprintf(tempName, "%s_%d", logs[j].name, logs[j].current_extension);
-		}
+	for (j = 0; j < MAX_LOGS; j++) {
+		if ((0U != Log[j].CurrentExtension) && (true == EnableSequential))
+			sprintf(TempName, "%s_%d", Log[j].Name, Log[j].CurrentExtension);
 		else
-		{
-			sprintf(tempName, "%s", logs[j].name);
-		}
-		if (!strcmp(tempName, logName))
-		{
-			activeLogs |= (0x01 << j);
+			sprintf(TempName, "%s", Log[j].Name);
+
+		if (!strcmp(TempName, logName)) {
+			ActiveLogs |= (0x01 << j);
 			return H1BR6_OK;
 		}
 	}
 
-	return H1BR6_ERR_LogDoesNotExist;
+	return H1BR6_ERR_LOG_DOES_NOT_EXIST;
 }
 
-/*-----------------------------------------------------------*/
-
-/* --- Delete an existing data log.
-				logName: Log file name.
-				options: DELETE_ALL, KEEP_ON_DISK
+/***************************************************************************/
+/* Delete an existing data log.
+ * logName: Log file name.
+ * options: DELETE_ALL, KEEP_ON_DISK
 */
-Module_Status DeleteLog(char* logName, options_t options, char* fileExtension)
-{
+Module_Status DeleteLog(char *logName, options_t options, char *fileExtension) {
 	Module_Status result = H1BR6_ERROR;
 
-		  char copy[20] = {'\0'};
-		  char fileName[30] = {'\0'};
-		  int i;
+	char copy[20] = { '\0' };
+	char fileName[30] = { '\0' };
+	int i;
 
+	FileResult = f_mount(&fs, "", 0);
 
-		      fresult = f_mount(&fs, "", 0);
-		      if (options == DELETE_ALL)
-		      {
-		        sprintf(fileName, "%s.%s", logName, fileExtension);  // Add file extension
-		        fresult = f_unlink(fileName);
-		        if (fresult == FR_OK)
-		          result = H1BR6_OK;
-		      }
-		      else if (options == KEEP_ON_DISK)
-		      {
-		        sprintf(fileName, "%s.%s", logName, fileExtension);  // Add file extension
+	if (options == DELETE_ALL) {
+		sprintf(fileName, "%s.%s", logName, fileExtension); // Add file extension
+		FileResult = f_unlink(fileName);
 
-		        fresult = f_open(&tempFile, fileName, FA_WRITE | FA_OPEN_ALWAYS);
-		        fresult = f_truncate(&tempFile);
-		        f_close(&tempFile);
-		        if (fresult == FR_OK)
-		          result = H1BR6_OK;
-		      }
+		if (FileResult == FR_OK)
+			result = H1BR6_OK;
 
+	} else if (options == KEEP_ON_DISK) {
+		sprintf(fileName, "%s.%s", logName, fileExtension); // Add file extension
+		FileResult = f_open(&MyFile, fileName, FA_WRITE | FA_OPEN_ALWAYS);
+		FileResult = f_truncate(&MyFile);
+		f_close(&MyFile);
 
-
-		  return result;
+		if (FileResult == FR_OK)
+			result = H1BR6_OK;
+	}
+	return result;
 }
 
-/*-----------------------------------------------------------*/
-
-/**
-	StreamWaveToModule
-				Stream Wave file sound samples to specified module
-				this API called by message parser when receiving CODE_H1BR6_READ_WAVE.
-				Make sure destination module is configured in PlayWaveFromPort mode.
-* @param Wave_Path : WAVE file name  with extension
-* @param H07R3x_ID : distant H07R3 module ID
-*/
-
-WAVE_STATE StreamWaveToModule(char* Wave_Full_Name, uint8_t H07R3x_ID)
-{
-//	while(f_mount_ok==0){Delay_us(10);}		// Add a flag to allow card to be initialized on startup
-//
-//	if ( Wave_Full_Name != NULL )
-//	{
-//			uint8_t port;
-//
-//			if (!WAVE_bytes)		// Read file header if it was not scanned before
-//			{
-//				WAVE_STATE result = READ_WAVE_FILE_HEADER(Wave_Full_Name);
-//
-//				if(result != HEADER_CHUNK_OK)	return WAVE_FILE_READ_FAILD;
-//
-//				// calculate number of bytes to be streamed
-//				WAVE_bytes	= WAVEFIL.SUBCHUNK2SIZE/((WAVEFIL.BITPERSAMPLE/8)*WAVEFIL.NO_CHANNEL);
-//			}
-//
-//			// Find best output port for destination module
-//			port = FindRoute(myID, H07R3x_ID);
-//
-//			// Start a single-cast DMA stream across the array.
-//			if ( StartScastDMAStream(0, myID, 0, H07R3x_ID, FORWARD, WAVE_bytes, 0xFFFFFFFF, 0) != BOS_OK )
-//					{return STREAM_WAVE_FAILD;}
-//			//Delay_ms(100);
-//			//IND_blink(100);
-//
-//			return (StreamWaveToPort(Wave_Full_Name, port));
-//	}
-//	return WAVE_FILE_READ_FAILD;
-}
-
-/*-----------------------------------------------------------*/
-
-/*-----------------------------------------------------------*/
-
-
-/* -----------------------------------------------------------------------
- |								Commands							      |
-   -----------------------------------------------------------------------
+/***********************************************************************************/
+/* Creates a new file with the specified name and extension.
+ * fileName: The name of the file to be created.
+ * fileExtension: The extension of the file to be created.
  */
+Module_Status CreateFile(char *fileName, char *fileExtension) {
+	FRESULT res;
+	FILINFO fno;
+	char f_fileName[MAX_NAME_LENGTH] = { 0 };
 
+	/* Add a flag to allow card to be initialized on startup*/
+	while (f_mount_ok == 0) {
+		Delay_us(10);
+	}
+
+	if (fileName == NULL || fileExtension == NULL)
+		return H1BR6_ERR_WRONGPARAMS;
+
+	sprintf(f_fileName, "%s.%s", fileName, fileExtension);
+
+	/*Check if the file already exists */
+	res = f_stat(f_fileName, &fno);
+
+	while (res == FR_OK) {
+		/*the file was already existed and create a new file with number extension */
+		memset(f_fileName, 0x00, MAX_NAME_LENGTH);
+		++CountFile;
+
+		/* check number of file name was existed */
+		if (CountFile < MAX_DUPLICATE_FILE) {
+			sprintf(f_fileName, "%s_%d.%s", fileName, CountFile, fileExtension);
+			res = f_stat(f_fileName, &fno);
+		} else
+			return H1BR6_ERR_LOG_NAME_EXISTS;
+	}
+	/* Create a file and open it */
+	res = f_open(&MyFile, f_fileName, FA_CREATE_ALWAYS | FA_READ | FA_WRITE);
+
+	if (res != FR_OK)
+		return H1BR6_ERROR;
+
+	/* Close file */
+	res = f_close(&MyFile);
+
+	return H1BR6_OK;
+}
+
+/***********************************************************************************/
+/* Write data to an existing file with a specified name and extension.
+* fileName: The name of the file to write data to.
+* fileExtension: The extension of the file to write data to.
+* data: The data to be written to the file.
+*/
+Module_Status WriteDatatoFile(char *fileName, char *fileExtension, char *data) {
+	FRESULT res;
+	FILINFO fno;
+	char f_fileName[MAX_NAME_LENGTH] = { 0 };
+
+	if (fileName == NULL || fileExtension == NULL || data == NULL)
+		return H1BR6_ERR_WRONGPARAMS;
+
+	/*the file name already existed and print it with number extension*/
+	if (CountFile != 0)
+		sprintf(f_fileName, "%s_%d.%s", fileName, CountFile, fileExtension);
+	else
+		sprintf(f_fileName, "%s.%s", fileName, fileExtension);
+
+	/*check whether the file exists or not */
+	res = f_stat(f_fileName, &fno);
+	if (res != FR_OK)
+		return H1BR6_ERR_FILE_DOES_NOT_EXIST;
+
+	else {
+		/* Create a file with read write access and open it */
+		res = f_open(&MyFile, f_fileName, FA_OPEN_APPEND | FA_WRITE);
+
+		if (res != FR_OK)
+			return H1BR6_ERROR;
+
+		else { /*Write the entered data to the file*/
+			res = f_write(&MyFile, data, strlen(data), (void*) &BytesWritten);
+
+			if (res != FR_OK)
+				return H1BR6_ERROR;
+
+			/* Close file */
+			res = f_close(&MyFile);
+		}
+		return H1BR6_OK;
+	}
+}
+
+/***************************************************************************/
+/********************************* Commands ********************************/
+/***************************************************************************/
 portBASE_TYPE demoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
 {
 	static const int8_t *pcOpenMessage = ( int8_t * ) "Test file created\r\n";
@@ -1671,30 +1476,30 @@ portBASE_TYPE demoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
 	configASSERT( pcWriteBuffer );
 
 	/* Create a file */
-	res = f_open(&tempFile, "TestFile", FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
+	res = f_open(&MyFile, "TestFile", FA_CREATE_ALWAYS | FA_WRITE | FA_READ);
 	if (res != FR_OK) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcFileMessage);
 		return pdFALSE;
 	}
-	writePxMutex(PcPort, ( char * ) pcOpenMessage, strlen(( char * ) pcOpenMessage), 10, 10);
+	writePxMutex(pcPort, ( char * ) pcOpenMessage, strlen(( char * ) pcOpenMessage), 10, 10);
 
 	/* Verify read / write */
-	res = f_write(&tempFile, "HEXABITZ", 8, (void *)&byteswritten);
+	res = f_write(&MyFile, "HEXABITZ", 8, (void *)&BytesWritten);
 	if (res != FR_OK) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcFileMessage);
 		return pdFALSE;
 	}
 	char tempStr[10] = {0};
-	res = f_lseek(&tempFile, 0);
-	res = f_read(&tempFile, tempStr, 8, (void *)&byteswritten);
+	res = f_lseek(&MyFile, 0);
+	res = f_read(&MyFile, tempStr, 8, (void *)&BytesWritten);
 	if (res != FR_OK || strncmp(tempStr, "HEXABITZ", 8) != 0) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcFileMessage);
 		return pdFALSE;
 	}
-	writePxMutex(PcPort, ( char * ) pcVerifyMessage, strlen(( char * ) pcVerifyMessage), 10, 10);
+	writePxMutex(pcPort, ( char * ) pcVerifyMessage, strlen(( char * ) pcVerifyMessage), 10, 10);
 
 	/* Close and delete the file */
-	res = f_close(&tempFile);
+	res = f_close(&MyFile);
 	res = f_unlink("TestFile");
 	if (res != FR_OK) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcFileMessage);
@@ -1707,8 +1512,7 @@ portBASE_TYPE demoCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
 	return pdFALSE;
 }
 
-/*-----------------------------------------------------------*/
-
+/***************************************************************************/
 portBASE_TYPE addLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
 {
 	Module_Status result = H1BR6_OK;
@@ -1716,7 +1520,7 @@ portBASE_TYPE addLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	int8_t *pcParameterString1, *pcParameterString2, *pcParameterString3, *pcParameterString4, *pcParameterString5, *pcParameterString6;
 	portBASE_TYPE xParameterStringLength1 = 0, xParameterStringLength2 = 0, xParameterStringLength3 = 0;
 	portBASE_TYPE xParameterStringLength4 = 0, xParameterStringLength5 = 0, xParameterStringLength6 = 0;
-	logType_t type; delimiterFormat_t dformat; indexColumnFormat_t iformat; float rate;
+	logType_t Type; delimiterFormat_t dformat; indexColumnFormat_t iformat; float Rate;
 	char *name, *index;
 	static const int8_t *pcOKMessage = ( int8_t * ) "Log created successfully\r\n";
 	static const int8_t *pcWrongValue = ( int8_t * ) "Log creation failed. Wrong parameters\r\n";
@@ -1733,9 +1537,9 @@ portBASE_TYPE addLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 
 	/* Obtain the 1st parameter string: log name */
 	pcParameterString1 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 1, &xParameterStringLength1);
-	/* Obtain the 2nd parameter string: log type */
+	/* Obtain the 2nd parameter string: log Type */
 	pcParameterString2 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 2, &xParameterStringLength2);
-	/* Obtain the 3rd parameter string: log rate */
+	/* Obtain the 3rd parameter string: log Rate */
 	pcParameterString3 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 3, &xParameterStringLength3);
 	/* Obtain the 4th parameter string: delimiter format */
 	pcParameterString4 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 4, &xParameterStringLength4);
@@ -1749,22 +1553,22 @@ portBASE_TYPE addLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	name = (char *)malloc(strlen((const char *)pcParameterString1) + 1);		// Move string out of the stack
 	memset (name, 0, strlen((const char *)pcParameterString1) + 1);
 	if (name == NULL)
-		result = H1BR6_ERR_MemoryFull;
+		result = H1BR6_ERR_MEMORY_FULL;
 	else
 		strcpy(name, (const char *)pcParameterString1);
 
-	/* type */
-	if (!strncmp((const char *)pcParameterString2, "rate", xParameterStringLength2))
-		type = RATE;
+	/* Type */
+	if (!strncmp((const char *)pcParameterString2, "Rate", xParameterStringLength2))
+		Type = RATE;
 	else if (!strncmp((const char *)pcParameterString2, "event", xParameterStringLength2))
-		type = EVENT;
+		Type = EVENT;
 	else
-		result = H1BR6_ERR_WrongParams;
+		result = H1BR6_ERR_WRONGPARAMS;
 
-	/* rate */
-	rate = atof( ( const char * ) pcParameterString3 );
-	if (rate < 0.0f || rate > 1000.0f)
-		result = H1BR6_ERR_WrongParams;
+	/* Rate */
+	Rate = atof( ( const char * ) pcParameterString3 );
+	if (Rate < 0.0f || Rate > 1000.0f)
+		result = H1BR6_ERR_WRONGPARAMS;
 
 	/* delimiter format */
 	if (!strncmp((const char *)pcParameterString4, "space", xParameterStringLength4))
@@ -1774,7 +1578,7 @@ portBASE_TYPE addLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	else if (!strncmp((const char *)pcParameterString4, "comma", xParameterStringLength4))
 		dformat = FMT_COMMA;
 	else
-		result = H1BR6_ERR_WrongParams;
+		result = H1BR6_ERR_WRONGPARAMS;
 
 	/* index format */
 	if (!strncmp((const char *)pcParameterString5, "sample", xParameterStringLength5))
@@ -1784,20 +1588,20 @@ portBASE_TYPE addLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	else if (!strncmp((const char *)pcParameterString5, "none", xParameterStringLength5))
 		iformat = FMT_NONE;
 	else
-		result = H1BR6_ERR_WrongParams;
+		result = H1BR6_ERR_WRONGPARAMS;
 
 	/* index name */
 	pcParameterString6[xParameterStringLength6] = 0;		// Get rid of the remaining parameters
 	index = (char *)malloc(strlen((const char *)pcParameterString6) + 1);		// Move string out of the stack
 	memset (index, 0, strlen((const char *)pcParameterString6) + 1);
 	if (index == NULL)
-		result = H1BR6_ERR_MemoryFull;
+		result = H1BR6_ERR_MEMORY_FULL;
 	else
 		strcpy(index, (const char *)pcParameterString6);
 
 	/* Create the log */
 	if (result == H1BR6_OK) {
-		result = CreateLog(name, type, rate, dformat, iformat, index);
+		result = CreateLog(name, Type, Rate, dformat, iformat, index);
 	} else {
 		free(index);
 	}
@@ -1805,15 +1609,15 @@ portBASE_TYPE addLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	/* Respond to the command */
 	if (result == H1BR6_OK) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcOKMessage);
-	} else if (result == H1BR6_ERR_WrongParams) {
+	} else if (result == H1BR6_ERR_WRONGPARAMS) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcWrongValue);
-	} else if (result ==  H1BR6_ERR_LogNameExists) {
+	} else if (result ==  H1BR6_ERR_LOG_NAME_EXISTS) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcLogExists);
 	} else if (result ==  H1BR6_ERR_SD) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcSDerror);
-	} else if (result ==  H1BR6_ERR_MaxLogs) {
+	} else if (result ==  H1BR6_ERR_MAX_LOGS) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcMaxLogs);
-	} else if (result ==  H1BR6_ERR_MemoryFull) {
+	} else if (result ==  H1BR6_ERR_MEMORY_FULL) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcMemoryFull);
 	}
 
@@ -1822,8 +1626,7 @@ portBASE_TYPE addLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	return pdFALSE;
 }
 
-/*-----------------------------------------------------------*/
-
+/***************************************************************************/
 portBASE_TYPE deleteLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
 {
 	Module_Status result = H1BR6_OK;
@@ -1852,13 +1655,13 @@ portBASE_TYPE deleteLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, c
 		/* log name */
 		pcParameterString1[xParameterStringLength1] = 0;		// Get rid of the remaining parameters
 
-		/* type */
+		/* Type */
 		if (!strncmp((const char *)pcParameterString2, "all", xParameterStringLength2))
 			options = DELETE_ALL;
 		else if (!strncmp((const char *)pcParameterString2, "keepdisk", xParameterStringLength2))
 			options = KEEP_ON_DISK;
 		else
-			result = H1BR6_ERR_WrongParams;
+			result = H1BR6_ERR_WRONGPARAMS;
 
 		/* Delete the log */
 		if (result == H1BR6_OK) {
@@ -1870,7 +1673,7 @@ portBASE_TYPE deleteLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, c
 			strcpy( ( char * ) pcWriteBuffer, ( char * ) pcOKMessage1);
 		} else if (result == H1BR6_OK && options == KEEP_ON_DISK) {
 			strcpy( ( char * ) pcWriteBuffer, ( char * ) pcOKMessage2);
-		} else if (result == H1BR6_ERR_WrongParams) {
+		} else if (result == H1BR6_ERR_WRONGPARAMS) {
 			strcpy( ( char * ) pcWriteBuffer, ( char * ) pcWrongValue);
 		}
 
@@ -1879,8 +1682,7 @@ portBASE_TYPE deleteLogCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, c
 		return pdFALSE;
 }
 
-/*-----------------------------------------------------------*/
-
+/***************************************************************************/
 portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
 {
 	Module_Status result = H1BR6_OK;
@@ -1888,7 +1690,7 @@ portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	int8_t *pcParameterString1, *pcParameterString2, *pcParameterString3, *pcParameterString4, *pcParameterString5;
 	portBASE_TYPE xParameterStringLength1 = 0, xParameterStringLength2 = 0, xParameterStringLength3 = 0;
 	portBASE_TYPE xParameterStringLength4 = 0, xParameterStringLength5 = 0;
-	logVarType_t type; uint32_t source; char *label;
+	logVarType_t Type; uint32_t Source; char *label;
 	static const int8_t *pcOKMessage = ( int8_t * ) "Variable added to log successfully\r\n";
 	static const int8_t *pcWrongValue = ( int8_t * ) "Variable was not added to log. Wrong parameters\r\n";
 	static const int8_t *pcLogDoesNotExist = ( int8_t * ) "Variable was not added to log. Log does not exist\r\n";
@@ -1904,11 +1706,11 @@ portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 
 	/* Obtain the 1st parameter string: log name */
 	pcParameterString1 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 1, &xParameterStringLength1);
-	/* Obtain the 2nd parameter string: variable type 1 */
+	/* Obtain the 2nd parameter string: variable Type 1 */
 	pcParameterString2 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 2, &xParameterStringLength2);
-	/* Obtain the 3rd parameter string: variable type 2 */
+	/* Obtain the 3rd parameter string: variable Type 2 */
 	pcParameterString3 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 3, &xParameterStringLength3);
-	/* Obtain the 4th parameter string: variable source */
+	/* Obtain the 4th parameter string: variable Source */
 	pcParameterString4 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 4, &xParameterStringLength4);
 	/* Obtain the 5th parameter string: variable column label */
 	pcParameterString5 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 5, &xParameterStringLength5);
@@ -1916,58 +1718,58 @@ portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	/* log name */
 	pcParameterString1[xParameterStringLength1] = 0;		// Get rid of the remaining parameters
 
-	/* variable type */
+	/* variable Type */
 	if (!strncmp((const char *)pcParameterString2, "port", xParameterStringLength2)) {
 		if (!strncmp((const char *)pcParameterString3, "digital", xParameterStringLength3)) {
-			type = PORT_DIGITAL;
+			Type = PORT_DIGITAL;
 		} else if (!strncmp((const char *)pcParameterString3, "data", xParameterStringLength3)) {
-			type = PORT_DATA;
+			Type = PORT_DATA;
 		} else if (!strncmp((const char *)pcParameterString3, "button", xParameterStringLength3)) {
-			type = PORT_BUTTON;
+			Type = PORT_BUTTON;
 		} else
-			result = H1BR6_ERR_WrongParams;
+			result = H1BR6_ERR_WRONGPARAMS;
 	} else if (!strncmp((const char *)pcParameterString2, "memory", xParameterStringLength2)) {
 		if (!strncmp((const char *)pcParameterString3, "uint8", xParameterStringLength3)) {
-			type = MEMORY_DATA_UINT8;
+			Type = MEMORY_DATA_UINT8;
 		} else if (!strncmp((const char *)pcParameterString3, "int8", xParameterStringLength3)) {
-			type = MEMORY_DATA_INT8;
+			Type = MEMORY_DATA_INT8;
 		} else if (!strncmp((const char *)pcParameterString3, "uint16", xParameterStringLength3)) {
-			type = MEMORY_DATA_UINT16;
+			Type = MEMORY_DATA_UINT16;
 		} else if (!strncmp((const char *)pcParameterString3, "int16", xParameterStringLength3)) {
-			type = MEMORY_DATA_INT16;
+			Type = MEMORY_DATA_INT16;
 		} else if (!strncmp((const char *)pcParameterString3, "uint32", xParameterStringLength3)) {
-			type = MEMORY_DATA_UINT32;
+			Type = MEMORY_DATA_UINT32;
 		} else if (!strncmp((const char *)pcParameterString3, "int32", xParameterStringLength3)) {
-			type = MEMORY_DATA_INT32;
+			Type = MEMORY_DATA_INT32;
 		} else if (!strncmp((const char *)pcParameterString3, "float", xParameterStringLength3)) {
-			type = MEMORY_DATA_FLOAT;
+			Type = MEMORY_DATA_FLOAT;
 		} else
-			result = H1BR6_ERR_WrongParams;
+			result = H1BR6_ERR_WRONGPARAMS;
 	} else
-		result = H1BR6_ERR_WrongParams;
+		result = H1BR6_ERR_WRONGPARAMS;
 
-	/* source */
-	if (type == PORT_BUTTON && pcParameterString4[0] == 'b')
-		source = ( uint8_t ) atol( ( char * ) pcParameterString4+1 );
-	else if ((type == PORT_DIGITAL || type == PORT_DATA) && pcParameterString4[0] == 'p')
-		source = ( uint8_t ) atol( ( char * ) pcParameterString4+1 );
+	/* Source */
+	if (Type == PORT_BUTTON && pcParameterString4[0] == 'b')
+		Source = ( uint8_t ) atol( ( char * ) pcParameterString4+1 );
+	else if ((Type == PORT_DIGITAL || Type == PORT_DATA) && pcParameterString4[0] == 'p')
+		Source = ( uint8_t ) atol( ( char * ) pcParameterString4+1 );
 	else if (!strncmp((const char *)pcParameterString4, "0x", 2)) {
-		source = strtoul(( const char * ) pcParameterString4, NULL, 16);
+		Source = strtoul(( const char * ) pcParameterString4, NULL, 16);
 	} else
-		result = H1BR6_ERR_WrongParams;
+		result = H1BR6_ERR_WRONGPARAMS;
 
 	/* variable column label */
 	pcParameterString5[xParameterStringLength5] = 0;		// Get rid of the remaining parameters
 	label = (char *)malloc(strlen((const char *)pcParameterString5) + 1);		// Move string out of the stack
 	memset (label, 0, strlen((const char *)pcParameterString5) + 1);
 	if (label == NULL)
-		result = H1BR6_ERR_MemoryFull;
+		result = H1BR6_ERR_MEMORY_FULL;
 	else
 		strcpy(label, (const char *)pcParameterString5);
 
 	/* Add the variable to the log */
 	if (result == H1BR6_OK) {
-		result = LogVar((char *)pcParameterString1, type, source, label);
+		result = LogVar((char *)pcParameterString1, Type,(uint32_t*)&Source, label);
 	} else {
 		free(label);
 	}
@@ -1975,15 +1777,15 @@ portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	/* Respond to the command */
 	if (result == H1BR6_OK) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcOKMessage);
-	} else if (result == H1BR6_ERR_WrongParams) {
+	} else if (result == H1BR6_ERR_WRONGPARAMS) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcWrongValue);
-	} else if (result ==  H1BR6_ERR_LogDoesNotExist) {
+	} else if (result ==  H1BR6_ERR_LOG_DOES_NOT_EXIST) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcLogDoesNotExist);
-	} else if (result ==  H1BR6_ERR_MemoryFull) {
+	} else if (result ==  H1BR6_ERR_MEMORY_FULL) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcMemoryFull);
-	} else if (result ==  H1BR6_ERR_MaxLogVars) {
+	} else if (result ==  H1BR6_ERR_MAX_LOG_VARS) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcMaxLogVars);
-	} else if (result == H1BR6_ERR_WrongAddress) {
+	} else if (result == H1BR6_ERR_WRONG_ADDRESS) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcWrongAddress);
 	}
 
@@ -1992,8 +1794,7 @@ portBASE_TYPE logVarCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	return pdFALSE;
 }
 
-/*-----------------------------------------------------------*/
-
+/***************************************************************************/
 portBASE_TYPE startCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
 {
 	Module_Status result = H1BR6_OK;
@@ -2020,7 +1821,7 @@ portBASE_TYPE startCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const
 	/* Respond to the command */
 	if (result == H1BR6_OK) {
 		sprintf( ( char * ) pcWriteBuffer, ( char * ) pcOKMessage, pcParameterString1);
-	} else if (result ==  H1BR6_ERR_LogDoesNotExist) {
+	} else if (result ==  H1BR6_ERR_LOG_DOES_NOT_EXIST) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcLogDoesNotExist);
 	}
 
@@ -2029,7 +1830,7 @@ portBASE_TYPE startCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const
 	return pdFALSE;
 }
 
-/*-----------------------------------------------------------*/
+/***************************************************************************/
 portBASE_TYPE stopCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
 {
 	Module_Status result = H1BR6_OK;
@@ -2057,9 +1858,9 @@ portBASE_TYPE stopCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
 	/* Respond to the command */
 	if (result == H1BR6_OK) {
 		sprintf( ( char * ) pcWriteBuffer, ( char * ) pcOKMessage, pcParameterString1);
-	} else if (result ==  H1BR6_ERR_LogIsNotActive) {
+	} else if (result ==  H1BR6_ERR_LOG_IS_NOT_ACTIVE) {
 		sprintf( ( char * ) pcWriteBuffer, ( char * ) pcIsNotActive, pcParameterString1);
-	} else if (result ==  H1BR6_ERR_LogDoesNotExist) {
+	} else if (result ==  H1BR6_ERR_LOG_DOES_NOT_EXIST) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcLogDoesNotExist);
 	}
 
@@ -2068,8 +1869,7 @@ portBASE_TYPE stopCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
 	return pdFALSE;
 }
 
-/*-----------------------------------------------------------*/
-
+/***************************************************************************/
 portBASE_TYPE pauseCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
 {
 	Module_Status result = H1BR6_OK;
@@ -2097,9 +1897,9 @@ portBASE_TYPE pauseCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const
 	/* Respond to the command */
 	if (result == H1BR6_OK) {
 		sprintf( ( char * ) pcWriteBuffer, ( char * ) pcOKMessage, pcParameterString1);
-	} else if (result ==  H1BR6_ERR_LogIsNotActive) {
+	} else if (result ==  H1BR6_ERR_LOG_IS_NOT_ACTIVE) {
 		sprintf( ( char * ) pcWriteBuffer, ( char * ) pcIsNotActive, pcParameterString1);
-	} else if (result ==  H1BR6_ERR_LogDoesNotExist) {
+	} else if (result ==  H1BR6_ERR_LOG_DOES_NOT_EXIST) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcLogDoesNotExist);
 	}
 
@@ -2108,8 +1908,7 @@ portBASE_TYPE pauseCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const
 	return pdFALSE;
 }
 
-/*-----------------------------------------------------------*/
-
+/***************************************************************************/
 portBASE_TYPE resumeCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
 {
 	Module_Status result = H1BR6_OK;
@@ -2136,7 +1935,7 @@ portBASE_TYPE resumeCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	/* Respond to the command */
 	if (result == H1BR6_OK) {
 		sprintf( ( char * ) pcWriteBuffer, ( char * ) pcOKMessage, pcParameterString1);
-	} else if (result ==  H1BR6_ERR_LogDoesNotExist) {
+	} else if (result ==  H1BR6_ERR_LOG_DOES_NOT_EXIST) {
 		strcpy( ( char * ) pcWriteBuffer, ( char * ) pcLogDoesNotExist);
 	}
 
@@ -2145,6 +1944,5 @@ portBASE_TYPE resumeCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, cons
 	return pdFALSE;
 }
 
-/*-----------------------------------------------------------*/
-
-/************************ (C) COPYRIGHT HEXABITZ *****END OF FILE****/
+/***************************************************************************/
+/***************** (C) COPYRIGHT HEXABITZ ***** END OF FILE ****************/

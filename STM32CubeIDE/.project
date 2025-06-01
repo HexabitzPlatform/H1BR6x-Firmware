@@ -189,6 +189,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/H1BR6/H1BR6_spi.c</locationURI>
 		</link>
 		<link>
+			<name>H1BR6/H1BR6_spi.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/H1BR6/H1BR6_spi.h</locationURI>
+		</link>
+		<link>
 			<name>H1BR6/H1BR6_timers.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/H1BR6/H1BR6_timers.c</locationURI>
@@ -222,6 +227,11 @@
 			<name>Thirdparty/CMSIS</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>Thirdparty/EEPROM_Emul</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/H1DR5x-Firmware/Thirdparty/EEPROM_Emul</locationURI>
 		</link>
 		<link>
 			<name>Thirdparty/FatFs</name>
@@ -1074,4 +1084,10 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Thirdparty/STM32G0xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>copy_PARENT</name>
+			<value>$%7BPARENT-2-PROJECT_LOC%7D/H16R6x-Firmware</value>
+		</variable>
+	</variableList>
 </projectDescription>
