@@ -2,15 +2,13 @@
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
 
- File Name     : H0BR4.c
- Description   : Source code for module H0BR4.
- 	 	 	 	 (Description_of_module)
-
-(Description of Special module peripheral configuration):
->>
->>
->>
- */
+ File Name  : H1BR6.c
+ Description: SD card logging module main file.
+ Module_Peripheral_Init: UART1-5, SPI2, GPIO, FATFS.
+ CLI: Log management commands (create/start/stop/log variables).
+ Logging: Handles rate/event logging with multiple data formats.
+ SD Card: FAT filesystem operations via SPI interface.
+*/
 
 /* Includes ****************************************************************/
 #include "BOS.h"

@@ -1,16 +1,14 @@
 /*
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
- 
- File Name     : H0BR4.h
- Description   : Header file for module H0BR4.
- 	 	 	 	 (Description_of_module)
 
-(Description of Special module peripheral configuration):
->>
->>
->>
- */
+ File Name  : H1BR6.h
+ Description: Main header for SD card logging module.
+ UART: 5 ports (P1-P5) on USART1-5 with GPIO mappings.
+ SPI: SD card interface on SPI2 (PB6-8).
+ GPIO: Indicator LED on PB14, SD card CS on PB9.
+ Logging: Supports 10 simultaneous logs with various data formats.
+*/
 
 /* Define to prevent recursive inclusion ***********************************/
 #ifndef H1BR6_H

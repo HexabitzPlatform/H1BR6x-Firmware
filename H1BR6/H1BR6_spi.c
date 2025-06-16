@@ -2,10 +2,11 @@
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
 
- File Name     : H1BR6_spi.c
- Description   : This file provides code for the configuration
- of the SPI instances.
- */
+ File Name  : H1BR6_spi.c
+ Description: Configures and manages SPI2 peripheral.
+ SPI2: Initializes in master mode (8MHz clock), 2-line full duplex.
+ GPIO: Sets up PB6-8 pins with AF4/1 for SPI functionality.
+*/
 
 /* Includes ****************************************************************/
 #include "BOS.h"

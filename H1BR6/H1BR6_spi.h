@@ -2,10 +2,11 @@
  BitzOS (BOS) V0.4.0 - Copyright (C) 2017-2025 Hexabitz
  All rights reserved
 
- File Name     : H1BR6_spi.h
- Description   : This file contains all the function prototypes for
-               the spi.c file
- */
+ File Name  : H1BR6_spi.h
+ Description: Declares SPI2 configuration and functions.
+ SPI2: Master mode, 8-bit data, software NSS management.
+ GPIO: PB6(MISO), PB7(MOSI), PB8(SCK) with alternate functions.
+*/
 
 
 /* Define to prevent recursive inclusion ***********************************/
